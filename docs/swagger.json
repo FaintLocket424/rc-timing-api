@@ -1,0 +1,114 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A web API for live RC timing data.",
+        "title": "RC Timing API",
+        "contact": {
+            "name": "FaintLocket424",
+            "url": "https://github.com/FaintLocket424/rc-timing-api"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/live": {
+            "get": {
+                "description": "Returns the currently active heat for the provided URL",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "racing"
+                ],
+                "summary": "Get live race",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target Timing URL",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.Heat"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_FaintLocket424_rc-timing-api_internal_models.Driver": {
+            "type": "object",
+            "properties": {
+                "car_class": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "transponder": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_FaintLocket424_rc-timing-api_internal_models.Heat": {
+            "type": "object",
+            "properties": {
+                "drivers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.Driver"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.RaceResult"
+                    }
+                },
+                "scheduled_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Practice, Qualifying, Final",
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_FaintLocket424_rc-timing-api_internal_models.RaceResult": {
+            "type": "object",
+            "properties": {
+                "laps": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "pos": {
+                    "type": "integer"
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

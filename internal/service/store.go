@@ -1,79 +1,64 @@
 package service
 
 import (
-	"strings"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
+	"github.com/FaintLocket424/rc-timing-api/internal/scraper"
 	"golang.org/x/sync/singleflight"
 )
 
+type EventCache struct {
+	Results map[string]*models.RawResult
+}
+
 type DataStore struct {
-	mu    sync.RWMutex
-	cache map[string]models.EventReport
-	group singleflight.Group // Prevents duplicate scrapers
+	mu     sync.RWMutex
+	events map[string]*EventCache
+	group  singleflight.Group
 }
 
 func NewStore() *DataStore {
-	return &DataStore{
-		cache: make(map[string]models.EventReport),
-	}
+	return &DataStore{events: make(map[string]*EventCache)}
 }
 
-func (s *DataStore) GetEvent(targetURL string, scraper func(string) (models.EventReport, error)) (models.EventReport, error) {
+func (s *DataStore) getCache(url string) *EventCache {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.events[url] == nil {
+		s.events[url] = &EventCache{
+			Results: make(map[string]*models.RawResult),
+		}
+	}
+	return s.events[url]
+}
+
+func (s *DataStore) GetHeatResult(url string, scrp scraper.Scraper, heat, round int) (models.RawResult, error) {
+	cache := s.getCache(url)
+	key := fmt.Sprintf("h%dr%d", heat, round)
+
 	s.mu.RLock()
-	data, exists := s.cache[targetURL]
+	raw, exists := cache.Results[key]
 	s.mu.RUnlock()
 
-	if exists && !data.IsExpired(1*time.Minute) {
-		return data, nil
+	if exists && time.Since(raw.ScrapedAt) < 30*time.Second {
+		return *raw, nil
 	}
 
-	val, err, _ := s.group.Do(targetURL, func() (interface{}, error) {
-		newData, err := scraper(targetURL)
+	val, err, _ := s.group.Do(url+key, func() (interface{}, error) {
+		fetched, err := scrp.ScrapeResult(url, heat, round)
 		if err != nil {
 			return nil, err
 		}
 
 		s.mu.Lock()
-		s.cache[targetURL] = newData
+		cache.Results[key] = &fetched
 		s.mu.Unlock()
 
-		return newData, nil
+		return fetched, nil
 	})
 
-	if err != nil {
-		return models.EventReport{}, err
-	}
-
-	return val.(models.EventReport), nil
-}
-
-func (s *DataStore) GetSchedule(targetURL string, scraper func(string) (models.EventReport, error)) ([]models.HeatSummary, error) {
-	event, err := s.GetEvent(targetURL, scraper)
-	if err != nil {
-		return nil, err
-	}
-
-	var summary []models.HeatSummary
-	for _, h := range event.Heats {
-		summary = append(summary, h.HeatSummary)
-	}
-	return summary, nil
-}
-
-func (s *DataStore) GetHeatsByType(url, sessionType string, scraper func(string) (models.EventReport, error)) ([]models.Heat, error) {
-	event, err := s.GetEvent(url, scraper)
-	if err != nil {
-		return nil, err
-	}
-
-	var filtered []models.Heat
-	for _, h := range event.Heats {
-		if strings.EqualFold(h.Type, sessionType) {
-			filtered = append(filtered, h)
-		}
-	}
-	return filtered, nil
+	return val.(models.RawResult), err
 }

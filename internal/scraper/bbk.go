@@ -6,6 +6,6 @@ import (
 
 type BBKScraper struct{}
 
-func (s *BBKScraper) ScrapeResult(baseURL string, heat, round int) (models.RawResult, error) {
-	return models.RawResult{}, nil
+func (s *BBKScraper) ScrapeQualifyingResult(baseURL string, heat, round int) (models.CachedHeatResult, error) {
+	return models.CachedHeatResult{}, nil
 }

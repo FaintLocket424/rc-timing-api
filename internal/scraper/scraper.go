@@ -3,10 +3,8 @@ package scraper
 import "github.com/FaintLocket424/rc-timing-api/internal/models"
 
 type Scraper interface {
-	//ScrapeQualifyingMeta(baseURL string) (models.QualifyingMetaDTO, error)
-	//ScrapeQualifyingOveralls(baseURL string, roundID int) ([]models.QualifyingOverallEntryDTO, error)
-	ScrapeResult(baseURL string, heat, round int) (models.RawResult, error)
-	//ScrapeQualifyingList(baseURL string) ([]models.Heat, error)
+	ScrapePracticeResult(baseURL string, heat, round int) (models.CachedHeatResult, error)
+	ScrapeQualifyingResult(baseURL string, heat, round int) (models.CachedHeatResult, error)
 }
 
 func GetScraper(software string) Scraper {

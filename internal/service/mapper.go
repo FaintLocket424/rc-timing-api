@@ -1,21 +1,40 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
 )
 
-func MapRawToDTO(raw models.RawResult) models.HeatResultDTO {
-	// We do logic here, like finding the winner
-	winner := ""
-	if len(raw.RawRows) > 0 {
-		winner = raw.RawRows[0].DriverName
+// MapCachedHeatResultToDTO converts an internal cached result into its DTO equivalent.
+func MapCachedHeatResultToDTO(raw models.CachedHeatResult) models.HeatResultDTO {
+	results := make([]models.DriverResultDTO, len(raw.Results))
+	for i, res := range raw.Results {
+		results[i] = MapCachedDriverResultToDTO(res)
 	}
 
 	return models.HeatResultDTO{
-		HeatName:   fmt.Sprintf("Heat %d", raw.HeatNumber),
-		WinnerName: winner,
-		Laps:       raw.RawRows[0].Laps,
+		HeatNumber:    raw.HeatNumber,
+		RoundNumber:   raw.RoundNumber,
+		Class:         raw.Class,
+		Results:       results,
+		BestLap:       raw.BestLap,
+		ClassBestLap:  raw.ClassBestLap,
+		ClassBestTime: MapCachedRaceTimeToDTO(raw.ClassBestTime),
+	}
+}
+
+func MapCachedDriverResultToDTO(raw models.CachedDriverResult) models.DriverResultDTO {
+	return models.DriverResultDTO{
+		Position:   raw.Position,
+		CarNumber:  raw.CarNumber,
+		DriverName: raw.DriverName,
+		RaceTime:   MapCachedRaceTimeToDTO(raw.RaceTime),
+		BestLap:    raw.BestLap,
+	}
+}
+
+func MapCachedRaceTimeToDTO(raw models.CachedRaceTime) models.RaceTimeDTO {
+	return models.RaceTimeDTO{
+		Laps:     raw.Laps,
+		RaceTime: raw.RaceTime,
 	}
 }

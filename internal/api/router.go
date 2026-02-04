@@ -10,9 +10,11 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// SetupRouter initialises the Gin router with middleware and the handlers
 func SetupRouter(store *service.DataStore) *gin.Engine {
 	r := gin.Default()
 
+	practiceHandler := handlers.NewPracticeHandler(store)
 	qualifyingHandler := handlers.NewQualifyingHandler(store)
 
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -20,7 +22,7 @@ func SetupRouter(store *service.DataStore) *gin.Engine {
 	v1 := r.Group("/api/v1")
 	{
 		v1.Use(gzip.Gzip(gzip.DefaultCompression))
-		v1.Use(middleware.NotModifiedMiddleware())
+		//v1.Use(middleware.NotModifiedMiddleware())
 		v1.Use(middleware.ScrapeParamsMiddleware())
 
 		event := v1.Group("/event")
@@ -67,11 +69,8 @@ func SetupRouter(store *service.DataStore) *gin.Engine {
 				// Routes for a specific practice heat (e.g. Practice 2)
 				heat := practice.Group("/heat/:id")
 				{
-					// Practice heat list
-					heat.GET("/list", nil)
-
 					// Info about a specific round (e.g. Round 2)
-					heat.GET("/round/:round_id", nil)
+					heat.GET("/round/:round_id", practiceHandler.GetHeatRoundResult)
 				}
 			}
 
@@ -95,9 +94,6 @@ func SetupRouter(store *service.DataStore) *gin.Engine {
 				// Routes for a specific Qualifying heat (e.g. Heat 2)
 				heat := qualifying.Group("/heat/:id")
 				{
-					// Qualifying heat list
-					heat.GET("/list", nil)
-
 					// Info about a specific round (e.g. Round 2)
 					heat.GET("/round/:round_id", qualifyingHandler.GetHeatRoundResult)
 				}
@@ -120,9 +116,6 @@ func SetupRouter(store *service.DataStore) *gin.Engine {
 				// Routes for a specific final (e.g. A Final)
 				final := finals.Group("/final/:id")
 				{
-					// Final list
-					final.GET("/list", nil)
-
 					// Overall finishing positions for a final
 					final.GET("/overalls", nil)
 

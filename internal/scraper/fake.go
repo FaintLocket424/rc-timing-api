@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
@@ -9,21 +10,90 @@ import (
 
 type FakeScraper struct{}
 
-func (s *FakeScraper) ScrapeResult(baseURL string, heat, round int) (models.RawResult, error) {
-	filename := fmt.Sprintf("h%dr%dres.htm", heat, round)
-	fmt.Printf("[FakeScraper] Fetching %s/%s...\n", baseURL, filename)
+func (s *FakeScraper) ScrapePracticeResult(baseURL string, heat, round int) (models.CachedHeatResult, error) {
+	filename := fmt.Sprintf("p%dr%dres.htm", heat, round)
+	fmt.Printf("[FakeScraper] Fetching practice %d, round %d at %s/%s...\n", heat, round, baseURL, filename)
 
-	time.Sleep(500 * time.Millisecond)
+	minWait := 150
+	maxWait := 750
+	waitTime := rand.Intn(maxWait-minWait+1) + minWait
+	time.Sleep(time.Duration(waitTime) * time.Millisecond)
 
-	// Mocking some race results
-	return models.RawResult{
+	// Mock heat result
+	return models.CachedHeatResult{
 		HeatNumber:  heat,
 		RoundNumber: round,
-		ScrapedAt:   time.Now(),
-		RawRows: []models.BBKRow{
-			{Position: 1, DriverName: "Matthew Peters", Laps: 20, TotalTime: "05:01.2"},
-			{Position: 2, DriverName: "Maks Nowak", Laps: 19, TotalTime: "05:04.5"},
-			{Position: 3, DriverName: "Oscar Ryley", Laps: 18, TotalTime: "05:03.1"},
+		Class:       "2wd",
+		Results: []models.CachedDriverResult{
+			{
+				Position:   1,
+				CarNumber:  6,
+				DriverName: "Matthew Peters",
+				RaceTime: models.CachedRaceTime{
+					Laps: 16, RaceTime: 5*time.Minute + s.StrToDuration("0.296s"),
+				},
+				BestLap: s.StrToDuration("14.724s"),
+			},
+			{
+				Position:   2,
+				CarNumber:  1,
+				DriverName: "Maks Nowak",
+				RaceTime: models.CachedRaceTime{
+					Laps:     16,
+					RaceTime: 5*time.Minute + s.StrToDuration("2.451s"),
+				},
+				BestLap: s.StrToDuration("14.593s"),
+			},
+			{
+				Position:   3,
+				CarNumber:  4,
+				DriverName: "Oscar Ryley",
+				RaceTime: models.CachedRaceTime{
+					Laps:     15,
+					RaceTime: 5*time.Minute + s.StrToDuration("2.981s"),
+				},
+				BestLap: s.StrToDuration("14.236s"),
+			},
 		},
+		BestLap:       s.StrToDuration("14.236s"),
+		ClassBestLap:  s.StrToDuration("14.236s"),
+		ClassBestTime: models.CachedRaceTime{Laps: 16, RaceTime: 5*time.Minute + s.StrToDuration("0.296s")},
+		ScrapedAt:     time.Now(),
 	}, nil
+}
+
+func (s *FakeScraper) ScrapeQualifyingResult(baseURL string, heat, round int) (models.CachedHeatResult, error) {
+	filename := fmt.Sprintf("h%dr%dres.htm", heat, round)
+	fmt.Printf("[FakeScraper] Fetching qualifying %d, round %d at %s/%s...\n", heat, round, baseURL, filename)
+
+	minWait := 150
+	maxWait := 750
+	waitTime := rand.Intn(maxWait-minWait+1) + minWait
+	time.Sleep(time.Duration(waitTime) * time.Millisecond)
+
+	// Mock heat result
+	return models.CachedHeatResult{
+		HeatNumber:  heat,
+		RoundNumber: round,
+		Class:       "2wd",
+		Results: []models.CachedDriverResult{
+			{Position: 1, CarNumber: 6, DriverName: "Matthew Peters", RaceTime: models.CachedRaceTime{Laps: 16, RaceTime: 5*time.Minute + s.StrToDuration("0.296s")}, BestLap: s.StrToDuration("14.724s")},
+			{Position: 2, CarNumber: 1, DriverName: "Maks Nowak", RaceTime: models.CachedRaceTime{Laps: 16, RaceTime: 5*time.Minute + s.StrToDuration("2.451s")}, BestLap: s.StrToDuration("14.593s")},
+			{Position: 3, CarNumber: 4, DriverName: "Oscar Ryley", RaceTime: models.CachedRaceTime{Laps: 15, RaceTime: 5*time.Minute + s.StrToDuration("2.981s")}, BestLap: s.StrToDuration("14.236s")},
+		},
+		BestLap:       s.StrToDuration("14.236s"),
+		ClassBestLap:  s.StrToDuration("14.236s"),
+		ClassBestTime: models.CachedRaceTime{Laps: 16, RaceTime: 5*time.Minute + s.StrToDuration("0.296s")},
+		ScrapedAt:     time.Now(),
+	}, nil
+}
+
+func (s *FakeScraper) StrToDuration(str string) time.Duration {
+	d, err := time.ParseDuration(str)
+
+	if err != nil {
+		return 0
+	}
+
+	return d
 }

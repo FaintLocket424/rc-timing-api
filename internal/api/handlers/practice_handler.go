@@ -10,16 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type QualifyingHandler struct {
+type PracticeHandler struct {
 	Store *service.DataStore
 }
 
-func NewQualifyingHandler(s *service.DataStore) *QualifyingHandler {
-	return &QualifyingHandler{Store: s}
+func NewPracticeHandler(s *service.DataStore) *PracticeHandler {
+	return &PracticeHandler{Store: s}
 }
 
-// GetHeatRoundResult returns the result of a qualifying heat
-func (h *QualifyingHandler) GetHeatRoundResult(c *gin.Context) {
+// GetHeatRoundResult returns the result of a practice heat
+func (h *PracticeHandler) GetHeatRoundResult(c *gin.Context) {
 	url := middleware.GetURL(c)
 	scraper := middleware.GetScraper(c)
 
@@ -42,7 +42,7 @@ func (h *QualifyingHandler) GetHeatRoundResult(c *gin.Context) {
 	}
 
 	// Retrieve the requested heat from the data store.
-	raw, err := h.Store.GetQualiHeatResult(url, scraper, heatID, roundID)
+	raw, err := h.Store.GetPracticeHeatResult(url, scraper, heatID, roundID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

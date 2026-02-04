@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FaintLocket424/rc_scraper/internal/models"
+	"github.com/FaintLocket424/rc-timing-api/internal/models"
 	"golang.org/x/sync/singleflight"
 )
 

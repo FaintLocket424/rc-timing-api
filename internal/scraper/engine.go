@@ -3,7 +3,7 @@ package scraper
 import (
 	"time"
 
-	"github.com/FaintLocket424/rc_scraper/internal/models"
+	"github.com/FaintLocket424/rc-timing-api/internal/models"
 )
 
 func Scrape(url string) (models.EventReport, error) {

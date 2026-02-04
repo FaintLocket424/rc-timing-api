@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/FaintLocket424/rc_scraper/internal/scraper"
-	"github.com/FaintLocket424/rc_scraper/internal/service"
+	"github.com/FaintLocket424/rc-timing-api/internal/scraper"
+	"github.com/FaintLocket424/rc-timing-api/internal/service"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
@@ -60,5 +60,9 @@ func main() {
 		})
 	}
 
-	r.Run(":8080")
+	err := r.Run(":8080")
+	if err != nil {
+		println(err.Error())
+		return
+	}
 }

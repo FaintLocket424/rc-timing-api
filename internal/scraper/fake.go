@@ -10,6 +10,18 @@ import (
 
 type FakeScraper struct{}
 
+func (s *FakeScraper) ScrapeEventMeta(baseURL string) (models.CachedMeta, error) {
+	minWait := 150
+	maxWait := 750
+	waitTime := rand.Intn(maxWait-minWait+1) + minWait
+	time.Sleep(time.Duration(waitTime) * time.Millisecond)
+
+	return models.CachedMeta{
+		NumCompetitors: 50,
+		ScrapedAt:      time.Now(),
+	}, nil
+}
+
 func (s *FakeScraper) ScrapePracticeResult(baseURL string, heat, round int) (models.CachedHeatResult, error) {
 	filename := fmt.Sprintf("p%dr%dres.htm", heat, round)
 	fmt.Printf("[FakeScraper] Fetching practice %d, round %d at %s/%s...\n", heat, round, baseURL, filename)

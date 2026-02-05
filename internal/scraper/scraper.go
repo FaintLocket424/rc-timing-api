@@ -3,6 +3,7 @@ package scraper
 import "github.com/FaintLocket424/rc-timing-api/internal/models"
 
 type Scraper interface {
+	ScrapeEventMeta(baseURL string) (models.CachedMeta, error)
 	ScrapePracticeResult(baseURL string, heat, round int) (models.CachedHeatResult, error)
 	ScrapeQualifyingResult(baseURL string, heat, round int) (models.CachedHeatResult, error)
 }

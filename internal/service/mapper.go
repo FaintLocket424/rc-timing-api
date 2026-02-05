@@ -38,3 +38,9 @@ func MapCachedRaceTimeToDTO(raw models.CachedRaceTime) models.RaceTimeDTO {
 		RaceTime: raw.RaceTime,
 	}
 }
+
+func MapCachedMetaToDTO(raw models.CachedMeta) models.EventMetaDTO {
+	return models.EventMetaDTO{
+		NumCompetitors: raw.NumCompetitors,
+	}
+}

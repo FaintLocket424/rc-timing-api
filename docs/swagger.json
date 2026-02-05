@@ -12,22 +12,42 @@
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
-        "/live": {
+        "/event/practice/heat/{id}/round/{round_id}": {
             "get": {
-                "description": "Returns the currently active heat for the provided URL",
+                "description": "Retrieves results for a specific practice heat and round using the target timing software.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "racing"
+                    "practice"
                 ],
-                "summary": "Get live race",
+                "summary": "Get practice heat results",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Target Timing URL",
+                        "description": "Target Timing URL (URL-encoded)",
                         "name": "url",
                         "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Timing software type (default: bbk)",
+                        "name": "software",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Heat Number",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Round Number",
+                        "name": "round_id",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -35,7 +55,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.Heat"
+                            "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.HeatResultDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Heat or Round ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Scraper or Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -43,72 +81,89 @@
         }
     },
     "definitions": {
-        "github_com_FaintLocket424_rc-timing-api_internal_models.Driver": {
+        "github_com_FaintLocket424_rc-timing-api_internal_models.DriverResultDTO": {
             "type": "object",
             "properties": {
-                "car_class": {
+                "best_lap": {
+                    "$ref": "#/definitions/time.Duration"
+                },
+                "car_number": {
+                    "type": "integer"
+                },
+                "driver_name": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
+                "position": {
+                    "type": "integer"
                 },
-                "name": {
-                    "type": "string"
-                },
-                "transponder": {
-                    "type": "string"
+                "race_time": {
+                    "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.RaceTimeDTO"
                 }
             }
         },
-        "github_com_FaintLocket424_rc-timing-api_internal_models.Heat": {
+        "github_com_FaintLocket424_rc-timing-api_internal_models.HeatResultDTO": {
             "type": "object",
             "properties": {
-                "drivers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.Driver"
-                    }
+                "best_lap": {
+                    "$ref": "#/definitions/time.Duration"
                 },
-                "id": {
+                "class": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
+                "class_best_lap": {
+                    "$ref": "#/definitions/time.Duration"
+                },
+                "class_best_time": {
+                    "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.RaceTimeDTO"
+                },
+                "heat_number": {
+                    "type": "integer"
                 },
                 "results": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.RaceResult"
+                        "$ref": "#/definitions/github_com_FaintLocket424_rc-timing-api_internal_models.DriverResultDTO"
                     }
                 },
-                "scheduled_at": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "type": {
-                    "description": "Practice, Qualifying, Final",
-                    "type": "string"
+                "round_number": {
+                    "type": "integer"
                 }
             }
         },
-        "github_com_FaintLocket424_rc-timing-api_internal_models.RaceResult": {
+        "github_com_FaintLocket424_rc-timing-api_internal_models.RaceTimeDTO": {
             "type": "object",
             "properties": {
                 "laps": {
                     "type": "integer"
                 },
-                "name": {
-                    "type": "string"
-                },
-                "pos": {
-                    "type": "integer"
-                },
-                "time": {
-                    "type": "string"
+                "race_time": {
+                    "$ref": "#/definitions/time.Duration"
                 }
             }
+        },
+        "time.Duration": {
+            "type": "integer",
+            "format": "int64",
+            "enum": [
+                -9223372036854775808,
+                9223372036854775807,
+                1,
+                1000,
+                1000000,
+                1000000000,
+                60000000000,
+                3600000000000
+            ],
+            "x-enum-varnames": [
+                "minDuration",
+                "maxDuration",
+                "Nanosecond",
+                "Microsecond",
+                "Millisecond",
+                "Second",
+                "Minute",
+                "Hour"
+            ]
         }
     }
 }

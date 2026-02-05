@@ -11,6 +11,7 @@ import (
 )
 
 type EventCache struct {
+	Meta    *models.CachedMeta
 	Results map[string]*models.CachedHeatResult
 }
 
@@ -110,4 +111,31 @@ func (s *DataStore) GetPracticeHeatResult(url string, scraper scraper.Scraper, h
 	})
 
 	return val.(models.CachedHeatResult), err
+}
+
+func (s *DataStore) GetEventMeta(url string, scraper scraper.Scraper) (models.CachedMeta, error) {
+	cache := s.getCache(url)
+
+	s.mu.RLock()
+	raw := cache.Meta
+	s.mu.RUnlock()
+
+	if raw != nil && time.Since(cache.Meta.ScrapedAt) < 10*time.Minute {
+		return *raw, nil
+	}
+
+	val, err, _ := s.group.Do(url+"meta", func() (interface{}, error) {
+		fetched, err := scraper.ScrapeEventMeta(url)
+		if err != nil {
+			return nil, err
+		}
+
+		s.mu.Lock()
+		cache.Meta = &fetched
+		s.mu.Unlock()
+
+		return fetched, nil
+	})
+
+	return val.(models.CachedMeta), err
 }

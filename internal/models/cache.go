@@ -25,3 +25,8 @@ type CachedRaceTime struct {
 	Laps     int
 	RaceTime time.Duration
 }
+
+type CachedMeta struct {
+	NumCompetitors int
+	ScrapedAt      time.Time
+}

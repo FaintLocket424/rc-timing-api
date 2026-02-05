@@ -24,3 +24,7 @@ type RaceTimeDTO struct {
 	Laps     int           `json:"laps"`
 	RaceTime time.Duration `json:"race_time"`
 }
+
+type EventMetaDTO struct {
+	NumCompetitors int `json:"num_competitors"`
+}

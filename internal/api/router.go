@@ -14,6 +14,7 @@ import (
 func SetupRouter(store *service.DataStore) *gin.Engine {
 	r := gin.Default()
 
+	eventHandler := handlers.NewEventHandler(store)
 	practiceHandler := handlers.NewPracticeHandler(store)
 	qualifyingHandler := handlers.NewQualifyingHandler(store)
 
@@ -34,7 +35,7 @@ func SetupRouter(store *service.DataStore) *gin.Engine {
 			// - Number of drivers
 			// - Event structure (practice? qualifying? finals?)
 			// - Classes present (2wd, 4wd, truck etc.)
-			event.GET("/meta", nil)
+			event.GET("/meta", eventHandler.GetMeta)
 
 			// Event schedule
 			event.GET("/schedule", nil)

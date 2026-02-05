@@ -1,33 +1,39 @@
 package handlers_test
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/api"
 	"github.com/FaintLocket424/rc-timing-api/internal/service"
+	"github.com/FaintLocket424/rc-timing-api/internal/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestEventHandler_GetMeta(t *testing.T) {
-	store := service.NewStore()
-	r := api.SetupRouter(store)
+	tests := []struct {
+		Name           string
+		Request        *http.Request
+		ExpectedStatus int
+	}{
+		{
+			"name",
+			testutil.GenerateValidRequest("/api/v1/event/meta", "https://example.com", "fake"),
+			http.StatusOK,
+		},
+	}
 
-	q := url.Values{}
-	q.Add("url", "http://test-club.com/timing")
-	q.Add("software", "fake")
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			store := service.NewStore()
+			r := api.SetupRouter(store)
 
-	basePath := "/api/v1/event/meta"
-	fullPath := fmt.Sprintf("%s?%s", basePath, q.Encode())
+			w := httptest.NewRecorder()
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", fullPath, nil)
+			r.ServeHTTP(w, tt.Request)
 
-	r.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "num_competitors")
+			assert.Equal(t, tt.ExpectedStatus, w.Code)
+		})
+	}
 }

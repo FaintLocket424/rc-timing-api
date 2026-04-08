@@ -8,6 +8,14 @@
       system = "x86_64-linux";
       pkgs = import nixpkgs { system = system; };
 
+      runServer = pkgs.writeShellApplication {
+        name = "run-server";
+        runtimeInputs = [ pkgs.go ];
+        text = ''
+          go run ./cmd/server "$@"
+        '';
+      };
+
       listFunctions = pkgs.writeShellApplication {
         name = "lsfunc";
         runtimeInputs = [ pkgs.coreutils ];
@@ -17,6 +25,7 @@
       };
 
       commandBinaries = [
+        runServer
         listFunctions
       ];
 

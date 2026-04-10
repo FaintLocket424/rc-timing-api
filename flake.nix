@@ -16,6 +16,23 @@
         '';
       };
 
+      downloadRemotes = pkgs.writeScriptBin "download-remotes" ''
+        #!/usr/bin/env fish
+
+        set urls \
+            https://forcc.co.uk/live/ \
+            http://www.rcresults.org/bingham/ \
+            http://www.rcresults.org/dms/ \
+            http://www.rcresults.org/rhr/ \
+            http://www.rcresults.org/smcc/ \
+            http://www.rcresults.org/york/
+
+        for url in $urls
+            echo "Mirroring: $url"
+            go run ./cmd/mirror -url $url -path "./internal/scraper/bbk/testdata/" -remove-non-htm
+        end
+      '';
+
       listFunctions = pkgs.writeShellApplication {
         name = "lsfunc";
         runtimeInputs = [ pkgs.coreutils ];
@@ -26,6 +43,7 @@
 
       commandBinaries = [
         runServer
+        downloadRemotes
         listFunctions
       ];
 

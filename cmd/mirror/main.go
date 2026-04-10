@@ -6,13 +6,17 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
 func main() {
+	// example usage: `go run ./cmd/mirror -url "https://forcc.co.uk/live" -path "./internal/scraper/bbk/testdata/forcc_2026-04-10"
+
 	targetURL := flag.String("url", "", "The base URL to mirror (e.g. https://forcc.co.uk/live)")
 	outputPath := flag.String("path", ".", "The directory to save the mirrored files (defaults to current directory)")
 	software := flag.String("software", "bbk", "The race timing software being scraped (defaults to bbk)")
+	removeNonHTML := flag.Bool("remove-non-htm", false, "Remove files not ending in `.htm` after download")
 	flag.Parse()
 
 	if *targetURL == "" {
@@ -38,5 +42,29 @@ func main() {
 		log.Fatalf("Failed to run wget: %v", err)
 	}
 
+	if *removeNonHTML {
+		if err := cleanupDirectory(*outputPath); err != nil {
+			log.Fatalf("Cleanup failed: %v", err)
+		}
+	}
+
 	log.Println("Mirroring complete.")
+}
+
+func cleanupDirectory(root string) error {
+	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if !strings.HasSuffix(info.Name(), ".htm") {
+			return os.Remove(path)
+		}
+
+		return nil
+	})
 }

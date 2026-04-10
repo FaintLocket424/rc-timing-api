@@ -61,7 +61,9 @@ func cleanupDirectory(root string) error {
 			return nil
 		}
 
-		if !strings.HasSuffix(info.Name(), ".htm") {
+		keep := strings.HasSuffix(info.Name(), ".htm") || strings.HasSuffix(info.Name(), ".html")
+
+		if !keep {
 			return os.Remove(path)
 		}
 

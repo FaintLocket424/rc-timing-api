@@ -1,17 +1,14 @@
 package bbk
 
-import (
-	"testing"
+func (suite *BBKTestSuite) TestGetLiveTiming_Success() {
+	scraper := &BBKScraper{
+		Target: suite.server.URL + "/example",
+		Client: suite.server.Client(),
+	}
 
-	"github.com/FaintLocket424/rc-timing-api/internal/models"
+	data, err := scraper.GetLiveTiming()
 
-	"github.com/stretchr/testify/assert"
-)
-
-func TestParseRaceResult(t *testing.T) {
-	raw := "HTML HERE"
-	result := parseRaceResult(raw)
-	expected := models.LiveTiming{}
-
-	assert.Equal(t, expected, result, "test failed lol")
+	suite.NoError(err)
+	suite.NotNil(data)
+	// suite.Equal("John Doe", data.Drivers[0].Name)
 }

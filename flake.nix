@@ -33,6 +33,14 @@
         end
       '';
 
+      test-bbk-scraper = pkgs.writeShellApplication {
+        name = "test-bbk-scraper";
+        runtimeInputs = [ pkgs.go ];
+        text = ''
+          go test ./internal/scraper/bbk
+        '';
+      };
+
       listFunctions = pkgs.writeShellApplication {
         name = "lsfunc";
         runtimeInputs = [ pkgs.coreutils ];
@@ -44,6 +52,7 @@
       commandBinaries = [
         runServer
         downloadRemotes
+        test-bbk-scraper
         listFunctions
       ];
 

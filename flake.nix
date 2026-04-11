@@ -25,7 +25,8 @@
             http://www.rcresults.org/dms/ \
             http://www.rcresults.org/rhr/ \
             http://www.rcresults.org/smcc/ \
-            http://www.rcresults.org/york/
+            http://www.rcresults.org/york/ \
+            http://www.rcresults.org/worksop/
 
         for url in $urls
             echo "Mirroring: $url"

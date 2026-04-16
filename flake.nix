@@ -38,7 +38,7 @@
         name = "test-bbk-scraper";
         runtimeInputs = [ pkgs.go ];
         text = ''
-          go test ./internal/scraper/bbk
+          go test ./internal/scraper/bbk "$@"
         '';
       };
 

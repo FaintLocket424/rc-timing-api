@@ -1,6 +1,8 @@
 package bbk
 
 import (
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
@@ -13,12 +15,14 @@ func ptr[T any](v T) *T {
 func (suite *BBKTestSuite) TestParseRaceResult() {
 	tests := []struct {
 		name        string
+		dataDate    time.Time
 		url         string
 		expectValue *models.LiveTimingScrape
 	}{
 		{
-			name: "Initial Testing",
-			url:  "forcc.co.uk/live",
+			name:     "Initial Testing",
+			dataDate: time.Date(2026, time.April, 11, 0, 0, 0, 0, time.UTC),
+			url:      "forcc.co.uk/live",
 			expectValue: &models.LiveTimingScrape{
 				HeatNumber:  4,
 				ClassName:   "2 Wheel Drive",
@@ -92,8 +96,9 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 
 	for _, tc := range tests {
 		suite.Run(tc.name, func() {
+			log.Println(suite.server.URL)
 			scraper := &BBKScraper{
-				Target: suite.server.URL + "/" + tc.url,
+				Target: fmt.Sprintf("%s/%s/%s", suite.server.URL, tc.dataDate.Format("2006-01-02"), tc.url),
 				Client: suite.server.Client(),
 			}
 
@@ -103,14 +108,6 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 			suite.Require().NotNil(data)
 
 			suite.Equal(tc.expectValue, data)
-
-			// b, err := json.MarshalIndent(data, "", "  ")
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
-
-			// // 2. Convert bytes to string and print
-			// fmt.Println(string(b))
 		})
 	}
 }

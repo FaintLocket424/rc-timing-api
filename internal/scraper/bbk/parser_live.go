@@ -33,7 +33,7 @@ func NamedCapture(re *regexp.Regexp, input string) map[string]string {
 	return results
 }
 
-func (s BBKScraper) GetLiveTiming() (*models.LiveTimingScrape, error) {
+func (s *BBKScraper) GetLiveTiming() (*models.LiveTimingScrape, error) {
 	res, err := s.Client.Get(s.Target + "/liveraceres.htm")
 	if err != nil {
 		return nil, err
@@ -55,9 +55,9 @@ func parseRaceResult(body io.Reader) (*models.LiveTimingScrape, error) {
 
 	tables := doc.Find("table.NBT")
 
-	expectedTableCount := 3
-	if tables.Length() != expectedTableCount {
-		return nil, fmt.Errorf("expected %d tables, found %s", expectedTableCount, red.Sprint(tables.Length()))
+	minimumTableCount := 3
+	if tables.Length() < minimumTableCount {
+		return nil, fmt.Errorf("expected %d tables, found %s", minimumTableCount, red.Sprint(tables.Length()))
 	}
 
 	lt := &models.LiveTimingScrape{}
@@ -91,10 +91,13 @@ func parseHeader(header *goquery.Selection, lt *models.LiveTimingScrape) error {
 	lt.HeatNumber, lt.ClassName, lt.Round = heat, class, round
 
 	elapsed, err := parseHeaderTimer(tds.Last().Text())
-	if err != nil {
-		return fmt.Errorf("failed to parse header timer: %w", err)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to parse header timer: %w", err)
+	// }
+	// lt.ElapsedTime = elapsed
+	if err == nil {
+		lt.ElapsedTime = elapsed
 	}
-	lt.ElapsedTime = elapsed
 
 	return nil
 }
@@ -271,7 +274,8 @@ func parseMetaBestLap(input string, lt *models.LiveTimingScrape) error {
 	return nil
 }
 
-var classFTRegex = regexp.MustCompile(`Class FT: (?P<name>.*?) (?P<laps>\d+)/(?P<time>[\d\.\']+) Av Lap (?P<avg>[\d\.]+) R:(?P<round>\d+)`)
+// var classFTRegex = regexp.MustCompile(`Class FT: (?P<name>.*?) (?P<laps>\d+)/(?P<time>[\d\.\']+) Av Lap (?P<avg>[\d\.]+) R:(?P<round>\d+)`)
+var classFTRegex = regexp.MustCompile(`Class FT: (?P<name>.*?) (?P<laps>\d+)/(?P<time>[\d\.\']+) Av Lap (?P<avg>[\d\.]+)(?: R:(?P<round>\d+))?`)
 
 func parseMetaClassFT(input string, lt *models.LiveTimingScrape) error {
 	data := NamedCapture(classFTRegex, input)
@@ -300,9 +304,9 @@ func parseMetaClassFT(input string, lt *models.LiveTimingScrape) error {
 		return fmt.Errorf("invalid avg lap in %q: %w", input, err)
 	}
 
-	lt.ClassFT.Round, err = strconv.Atoi(data["round"])
-	if err != nil {
-		return fmt.Errorf("invalid round in %q: %w", input, err)
+	round, err := strconv.Atoi(data["round"])
+	if err == nil {
+		lt.ClassFT.Round = round
 	}
 
 	return nil

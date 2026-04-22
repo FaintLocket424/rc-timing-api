@@ -20,11 +20,13 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 
 	if url == "" {
 		c.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
 	model, err := h.store.GetLiveTiming(url)
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 
 	c.JSON(http.StatusOK, model)

@@ -16,24 +16,6 @@
         '';
       };
 
-      # downloadRemotes = pkgs.writeScriptBin "download-remotes" ''
-      #   #!/usr/bin/env fish
-
-      #   set urls \
-      #       https://forcc.co.uk/live/ \
-      #       http://www.rcresults.org/bingham/ \
-      #       http://www.rcresults.org/dms/ \
-      #       http://www.rcresults.org/rhr/ \
-      #       http://www.rcresults.org/smcc/ \
-      #       http://www.rcresults.org/york/ \
-      #       http://www.rcresults.org/worksop/
-
-      #   for url in $urls
-      #       echo "Mirroring: $url"
-      #       go run ./cmd/mirror -url $url -path "./internal/scraper/bbk/testdata/" -remove-non-htm
-      #   end
-      # '';
-
       downloadRemotes = pkgs.writeShellApplication {
         name = "download-remotes";
 
@@ -67,6 +49,22 @@
         '';
       };
 
+      test-rate-limiting = pkgs.writeShellApplication {
+        name = "test-rate-limiting";
+        runtimeInputs = [ pkgs.vegeta pkgs.jq ];
+        text = ''
+          RATE="''${1:-5}"
+          DURATION="''${2:-10}"
+
+          echo "Attacking at $RATE req/s for $DURATION seconds..."
+
+          echo "GET http://localhost:8080/api/v1/ping" | \
+              vegeta attack -rate="$RATE"/1s -duration="$DURATION"s | \
+              vegeta encode | \
+              jq -r '. | "\(.code) \(.latency / 1000000)ms \(.error)"'
+        '';
+      };
+
       listFunctions = pkgs.writeShellApplication {
         name = "lsfunc";
         runtimeInputs = [ pkgs.coreutils ];
@@ -80,6 +78,7 @@
         downloadRemotes
         test-bbk-scraper
         listFunctions
+        test-rate-limiting
       ];
 
       commandNames = builtins.concatStringsSep ", " (builtins.map (p: p.name) commandBinaries);
@@ -88,7 +87,6 @@
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
           go
-          gopls
           vegeta
         ] ++ commandBinaries;
 

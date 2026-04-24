@@ -3,14 +3,15 @@ package api
 import (
 	"net/http"
 
+	"github.com/FaintLocket424/rc-timing-api/internal/manager"
 	"github.com/FaintLocket424/rc-timing-api/internal/storage"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(store storage.Store) *gin.Engine {
+func SetupRouter(store storage.Store, manager *manager.Manager) *gin.Engine {
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
-	handler := NewHandler(store)
+	handler := NewHandler(store, manager)
 
 	v1 := r.Group("/api/v1")
 	{

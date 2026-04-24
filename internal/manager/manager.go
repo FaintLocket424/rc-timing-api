@@ -48,13 +48,19 @@ func (m *Manager) startWorker(ctx context.Context, url string) {
 	s := scraper.NewScraperForURL(url)
 	ticker := time.NewTicker(10 * time.Second)
 
+	work := func() {
+		model, err := s.GetLiveTiming()
+		if err == nil {
+			m.store.SaveLiveTiming(url, model)
+		}
+	}
+
+	work() // Initial call so it doesn't wait 10 seconds to do anything.
+
 	for {
 		select {
 		case <-ticker.C:
-			model, err := s.GetLiveTiming()
-			if err == nil {
-				m.store.SaveLiveTiming(url, model)
-			}
+			work()
 		case <-ctx.Done():
 			ticker.Stop()
 			return

@@ -57,7 +57,7 @@ func parseRaceResult(body io.Reader) (*models.LiveTimingScrape, error) {
 
 	minimumTableCount := 3
 	if tables.Length() < minimumTableCount {
-		return nil, fmt.Errorf("expected %d tables, found %s", minimumTableCount, red.Sprint(tables.Length()))
+		return nil, fmt.Errorf("expected %d tables, found %d", minimumTableCount, tables.Length())
 	}
 
 	lt := &models.LiveTimingScrape{}
@@ -142,6 +142,7 @@ func parseHeaderTimer(input string) (time.Duration, error) {
 }
 
 var driversResultRegex = regexp.MustCompile(`(?P<laps>-?\d+)/(?P<mins>\d+)'(?P<secs>\d+\.\d+)`)
+var bestLapFormatRegex = regexp.MustCompile(`(?P<time>\d+\.\d+)(?:\[(?P<lap>\d+)\])?`)
 
 func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) error {
 	tableRows := drivers.Find("tbody tr")
@@ -158,10 +159,15 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) error
 			driverNameIdx = i
 		case "Result":
 			resultIdx = i
-		case "B-Lp":
+		case "B-Lp", "B-Lap":
 			bestLapIdx = i
 		}
 	})
+
+	if carNumIdx == -1 || driverNameIdx == -1 || resultIdx == -1 || bestLapIdx == -1 {
+		return fmt.Errorf("failed to find all required table columns (C: %d, Driver: %d, Result: %d, BestLap: %d)",
+			carNumIdx, driverNameIdx, resultIdx, bestLapIdx)
+	}
 
 	var errReturn error
 	tableRows.Slice(1, tableRows.Length()).EachWithBreak(func(i int, s *goquery.Selection) bool {
@@ -214,11 +220,27 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) error
 		dr.Time = time.Duration(mins)*time.Minute + time.Duration(secs*float64(time.Second))
 
 		blStr := strings.TrimSpace(cols.Eq(bestLapIdx).Text())
-		if dur, err := time.ParseDuration(blStr + "s"); err == nil {
-			dr.BestLapDuration = dur
-		} else {
-			errReturn = fmt.Errorf("row %d: invalid best lap %q: %w", i+1, blStr, err)
+		matches := NamedCapture(bestLapFormatRegex, blStr)
+
+		if matches == nil {
+			errReturn = fmt.Errorf("row %d: invalid best lap format %q", i+1, blStr)
 			return false
+		}
+
+		dur, err := time.ParseDuration(matches["time"] + "s")
+		if err != nil {
+			errReturn = fmt.Errorf("row %d: invalid best lap duration %q: %w", i+1, matches["time"], err)
+			return false
+		}
+		dr.BestLapDuration = dur
+
+		if matches["lap"] != "" {
+			lap, err := strconv.Atoi(matches["lap"])
+			if err != nil {
+				errReturn = fmt.Errorf("row %d: invalid lap number %q: %w", i+1, matches["lap"], err)
+				return false
+			}
+			dr.BestLapNumber = lap
 		}
 
 		return true
@@ -230,25 +252,33 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) error
 var bestLapRegex = regexp.MustCompile(`Best Lap: (?P<name>.*?) (?P<time>[\d\.]+) L:(?P<lap>\d+)`)
 
 func parseMeta(meta *goquery.Selection, lt *models.LiveTimingScrape) error {
-	lines := meta.Find("tr td.fastest-lap")
+	lines := meta.Find("tr td")
 
-	if lines.Length() != 3 {
-		return fmt.Errorf("expected 3 metadata cells, found %d", lines.Length())
-	}
+	var errReturn error
 
-	if err := parseMetaBestLap(lines.Eq(0).Text(), lt); err != nil {
-		return fmt.Errorf("failed to parse best lap: %w", err)
-	}
+	lines.EachWithBreak(func(i int, s *goquery.Selection) bool {
+		switch s.Find("font").First().Text() {
+		case "Best Lap:":
+			if err := parseMetaBestLap(s.Text(), lt); err != nil {
+				errReturn = fmt.Errorf("failed to parse best lap: %w", err)
+				return false
+			}
+		case "Class FT:":
+			if err := parseMetaClassFT(s.Text(), lt); err != nil {
+				errReturn = fmt.Errorf("failed to parse class FT: %w", err)
+				return false
+			}
+		case "Class Best Lap:":
+			if err := parseMetaClassBestLap(s.Text(), lt); err != nil {
+				errReturn = fmt.Errorf("failed to parse class best lap: %w", err)
+				return false
+			}
+		}
 
-	if err := parseMetaClassFT(lines.Eq(1).Text(), lt); err != nil {
-		return fmt.Errorf("failed to parse class FT: %w", err)
-	}
+		return true
+	})
 
-	if err := parseMetaClassBestLap(lines.Eq(2).Text(), lt); err != nil {
-		return fmt.Errorf("failed to parse class best lap: %w", err)
-	}
-
-	return nil
+	return errReturn
 }
 
 func parseMetaBestLap(input string, lt *models.LiveTimingScrape) error {

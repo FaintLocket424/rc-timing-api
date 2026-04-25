@@ -2,6 +2,8 @@ package manager
 
 import (
 	"context"
+	"log"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -18,17 +20,57 @@ type Manager struct {
 	store         storage.Store
 	activeWorkers map[string]*workerState // Set of URLs which have an active worker
 	mu            sync.Mutex
+	logger        *slog.Logger
 }
 
 func NewManager(store storage.Store) *Manager {
 	m := &Manager{
 		store:         store,
 		activeWorkers: make(map[string]*workerState),
+		logger:        slog.Default().With("component", "manager"),
 	}
 
 	go m.startReaper()
-
 	return m
+}
+
+func (m *Manager) cleanupWorkerInternal(url string) {
+	if state, ok := m.activeWorkers[url]; ok {
+		state.cancel()
+		delete(m.activeWorkers, url)
+		m.logger.Info("worker stopped", "url", url)
+	}
+}
+
+func (m *Manager) startWorker(ctx context.Context, url string) {
+	s, err := scraper.NewScraperForURL(url)
+	if err != nil {
+		m.logger.Error("failed to init scraper", "url", url, "err", err)
+		m.mu.Lock()
+		m.cleanupWorkerInternal(url)
+		m.mu.Unlock()
+		return
+	}
+
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		model, err := s.GetLiveTiming()
+		if err != nil {
+			m.logger.Warn("scrape failed", "url", url, "err", err)
+		} else if err := m.store.SaveLiveTiming(url, model); err != nil {
+			m.logger.Error("storage failed", "url", url, "err", err)
+		}
+
+		select {
+		case <-ticker.C:
+			continue
+		case <-ctx.Done():
+			log.Printf("worker for %s shutting down", url)
+			return
+		}
+	}
 }
 
 func (m *Manager) EnsureTracking(url string) {
@@ -45,27 +87,6 @@ func (m *Manager) EnsureTracking(url string) {
 	go m.startWorker(ctx, url)
 }
 
-func (m *Manager) startWorker(ctx context.Context, url string) {
-	s := scraper.NewScraperForURL(url)
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
-
-	if model, err := s.GetLiveTiming(); err == nil {
-		m.store.SaveLiveTiming(url, model)
-	}
-
-	for {
-		select {
-		case <-ticker.C:
-			if model, err := s.GetLiveTiming(); err == nil {
-				m.store.SaveLiveTiming(url, model)
-			}
-		case <-ctx.Done():
-			return
-		}
-	}
-}
-
 func (m *Manager) startReaper() {
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
@@ -75,8 +96,8 @@ func (m *Manager) startReaper() {
 
 		for url, state := range m.activeWorkers {
 			if time.Since(state.lastAccessed) > 30*time.Minute {
-				state.cancel()
-				delete(m.activeWorkers, url)
+				m.logger.Info("reaping idle worker", "url", url)
+				m.cleanupWorkerInternal(url)
 			}
 		}
 

@@ -8,6 +8,7 @@ type DriverRaceResult struct {
 	Laps            int
 	Time            time.Duration
 	BestLapDuration time.Duration
+	BestLapNumber   int
 }
 
 type BestLap struct {

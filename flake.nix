@@ -93,6 +93,51 @@
         '';
       };
 
+      coverage-stats = pkgs.writeShellApplication {
+        name = "coverage-stats";
+        runtimeInputs = [ pkgs.go ];
+        text = ''
+          EXCLUDE_DIRS="cmd|examples"
+          COVERAGE_THRESHOLD=100.0
+
+          TARGET_PKG="''${1:-./...}"
+
+          # We redirect standard output of go test to /dev/null,
+          # but let standard error (where error messages go) through.
+          if [ "$TARGET_PKG" == "./..." ]; then
+            mapfile -t PKGS < <(go list ./... | grep -E -v "$EXCLUDE_DIRS")
+            if ! go test -coverprofile=coverage.out "''${PKGS[@]}" > /dev/null; then
+              echo -e "\n[!] Tests failed. Coverage report will not be generated."
+              exit 1
+            fi
+          else
+            if ! go test -coverprofile=coverage.out "$TARGET_PKG" > /dev/null; then
+              echo -e "\n[!] Tests failed. Coverage report will not be generated."
+              exit 1
+            fi
+          fi
+
+          # Now the output starts cleanly here
+          echo -e "=== Analysis for: $TARGET_PKG ==="
+
+          echo -e "\n=== 5 Worst Covered Functions ==="
+          go tool cover -func=coverage.out | grep -v "total:" | sort -k3 -n | head -n 5
+
+          echo -e "\n=== 5 Functions below $COVERAGE_THRESHOLD% ==="
+          go tool cover -func=coverage.out | awk -v limit="$COVERAGE_THRESHOLD" '
+            $1 != "total:" {
+              pct = $NF; sub(/%/, "", pct);
+              if (pct + 0 < limit) { print $0 }
+            }
+          ' | head -n 5
+
+          echo -e "\n=== 5 Functions with 0.0% coverage ==="
+          go tool cover -func=coverage.out | awk '$1 != "total:" && $NF == "0.0%"' | head -n 5
+
+          rm coverage.out
+        '';
+      };
+
       listFunctions = pkgs.writeShellApplication {
         name = "lsfunc";
         runtimeInputs = [ pkgs.coreutils ];
@@ -107,6 +152,7 @@
         test-bbk-scraper
         test-rate-limiting
         count-lines
+        coverage-stats
         listFunctions
       ];
 

@@ -9,21 +9,21 @@ import (
 	"github.com/FaintLocket424/rc-timing-api/internal/storage"
 )
 
-type WorkerState struct {
+type workerState struct {
 	lastAccessed time.Time
 	cancel       context.CancelFunc
 }
 
 type Manager struct {
 	store         storage.Store
-	activeWorkers map[string]*WorkerState // Set of URLs which have an active worker
+	activeWorkers map[string]*workerState // Set of URLs which have an active worker
 	mu            sync.Mutex
 }
 
 func NewManager(store storage.Store) *Manager {
 	m := &Manager{
 		store:         store,
-		activeWorkers: make(map[string]*WorkerState),
+		activeWorkers: make(map[string]*workerState),
 	}
 
 	go m.startReaper()
@@ -33,36 +33,34 @@ func NewManager(store storage.Store) *Manager {
 
 func (m *Manager) EnsureTracking(url string) {
 	m.mu.Lock()
-	_, ok := m.activeWorkers[url]
-	if !ok {
-		ctx, cancel := context.WithCancel(context.Background())
-		m.activeWorkers[url] = &WorkerState{lastAccessed: time.Now(), cancel: cancel}
-		go m.startWorker(ctx, url)
-	} else {
-		m.activeWorkers[url].lastAccessed = time.Now()
+	defer m.mu.Unlock()
+
+	if state, ok := m.activeWorkers[url]; ok {
+		state.lastAccessed = time.Now()
+		return
 	}
-	m.mu.Unlock()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	m.activeWorkers[url] = &workerState{lastAccessed: time.Now(), cancel: cancel}
+	go m.startWorker(ctx, url)
 }
 
 func (m *Manager) startWorker(ctx context.Context, url string) {
 	s := scraper.NewScraperForURL(url)
 	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
 
-	work := func() {
-		model, err := s.GetLiveTiming()
-		if err == nil {
-			m.store.SaveLiveTiming(url, model)
-		}
+	if model, err := s.GetLiveTiming(); err == nil {
+		m.store.SaveLiveTiming(url, model)
 	}
-
-	work() // Initial call so it doesn't wait 10 seconds to do anything.
 
 	for {
 		select {
 		case <-ticker.C:
-			work()
+			if model, err := s.GetLiveTiming(); err == nil {
+				m.store.SaveLiveTiming(url, model)
+			}
 		case <-ctx.Done():
-			ticker.Stop()
 			return
 		}
 	}
@@ -70,8 +68,9 @@ func (m *Manager) startWorker(ctx context.Context, url string) {
 
 func (m *Manager) startReaper() {
 	ticker := time.NewTicker(1 * time.Minute)
+	defer ticker.Stop()
 
-	for {
+	for range ticker.C {
 		m.mu.Lock()
 
 		for url, state := range m.activeWorkers {
@@ -82,7 +81,5 @@ func (m *Manager) startReaper() {
 		}
 
 		m.mu.Unlock()
-
-		<-ticker.C
 	}
 }

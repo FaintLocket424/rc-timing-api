@@ -187,11 +187,43 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) error
 
 		dr.Name = strings.TrimSpace(cols.Eq(driverNameIdx).Text())
 
-		resText := cols.Eq(resultIdx).Text()
-		data := NamedCapture(driversResultRegex, resText)
+		resText := strings.TrimSpace(cols.Eq(resultIdx).Text())
+
+		if strings.Contains(resText, "/") {
+			// Laps format (e.g. "11/5'4.23")
+			data := NamedCapture(driversResultRegex, resText)
+			if data == nil {
+				errReturn = fmt.Errorf("row %d: failed to parse standard result %q", i+1, resText)
+				return false
+			}
+
+			laps, _ := strconv.Atoi(data["laps"])
+			if laps < 0 {
+				laps += lt.Drivers[0].Laps
+			}
+			dr.Laps = laps
+
+			mins, _ := strconv.Atoi(data["mins"])
+			secs, _ := strconv.ParseFloat(data["secs"], 64)
+			dr.Time = time.Duration(mins)*time.Minute + time.Duration(secs*float64(time.Second))
+		} else if after, ok := strings.CutPrefix(resText, "+"); ok {
+			// Gap format (e.g. "+3.13")
+			gapSecs, err := strconv.ParseFloat(after, 64)
+			if err != nil {
+				errReturn = fmt.Errorf("row %d: invalid gap format %q: %w", i+1, resText, err)
+				return false
+			}
+
+			leader := lt.Drivers[0]
+			dr.Laps = leader.Laps
+			dr.Time = leader.Time + time.Duration(gapSecs*float64(time.Second))
+		} else {
+			errReturn = fmt.Errorf("row %d: invalid result format", i+1)
+			return true
+		}
+
+		data := NamedCapture(driversResultRegex, cols.Eq(resultIdx).Text())
 		if data == nil {
-			// errReturn = fmt.Errorf("row %d: failed to parse result format %q", i+1, resText)
-			// return false
 			return true
 		}
 

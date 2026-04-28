@@ -163,6 +163,7 @@
         packages = with pkgs; [
           go
           vegeta
+          wget
         ] ++ commandBinaries;
 
         shellHook = ''

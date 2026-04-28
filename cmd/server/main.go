@@ -1,16 +1,49 @@
 package main
 
 import (
+	"flag"
 	"log"
+	"log/slog"
+	"os"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/api"
 	"github.com/FaintLocket424/rc-timing-api/internal/manager"
 	"github.com/FaintLocket424/rc-timing-api/internal/storage/cache"
 )
 
+var LogLevel = new(slog.LevelVar)
+
+func InitLogger(useJSON bool) {
+	LogLevel.Set(slog.LevelInfo)
+
+	opts := &slog.HandlerOptions{
+		Level: LogLevel,
+	}
+
+	var handler slog.Handler
+	if useJSON {
+		handler = slog.NewJSONHandler(os.Stdout, opts)
+	} else {
+		handler = slog.NewTextHandler(os.Stdout, opts)
+	}
+
+	slog.SetDefault(slog.New(handler))
+}
+
+var version = "0.0.1"
+
 func main() {
-	version := "0.0.1"
-	log.Printf("Starting RC Timing API v%s", version)
+	debugMode := flag.Bool("debug", false, "enable debug logging")
+	jsonMode := flag.Bool("json", false, "output logs in json format")
+	flag.Parse()
+
+	InitLogger(*jsonMode)
+
+	if *debugMode {
+		LogLevel.Set(slog.LevelDebug)
+	}
+
+	slog.Info("Starting RC Timing API", "version", version, "debug", *debugMode)
 
 	cache := cache.NewCache()
 	manager := manager.NewManager(cache)

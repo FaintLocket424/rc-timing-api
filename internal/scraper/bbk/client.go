@@ -41,12 +41,42 @@ func (s *BBKScraper) GetLiveTiming() (*models.LiveTimingScrape, error) {
 	return parseRaceResult(body)
 }
 
-func (s *BBKScraper) GetQualiHeatResult(heat, round int) (*models.LiveTimingScrape, error) {
+func (s *BBKScraper) GetPracticeRaceResult(practice, round int) (*models.LiveTimingScrape, error) {
+	if practice < 1 || round < 1 {
+		return nil, fmt.Errorf("practice and round must be >= 1 (got %d, %d)", practice, round)
+	}
+
+	url := fmt.Sprintf("%s/p%dr%dres.htm", s.Target, practice, round)
+	body, err := s.fetchPage(url)
+	if err != nil {
+		return nil, err
+	}
+	defer body.Close()
+
+	return parseRaceResult(body)
+}
+
+func (s *BBKScraper) GetQualiRaceResult(heat, round int) (*models.LiveTimingScrape, error) {
 	if heat < 1 || round < 1 {
 		return nil, fmt.Errorf("heat and round must be >= 1 (got %d, %d)", heat, round)
 	}
 
 	url := fmt.Sprintf("%s/h%dr%dres.htm", s.Target, heat, round)
+	body, err := s.fetchPage(url)
+	if err != nil {
+		return nil, err
+	}
+	defer body.Close()
+
+	return parseRaceResult(body)
+}
+
+func (s *BBKScraper) GetFinalRaceResult(final, leg int) (*models.LiveTimingScrape, error) {
+	if final < 1 || leg < 1 {
+		return nil, fmt.Errorf("final and leg must be >= 1 (got %d, %d)", final, leg)
+	}
+
+	url := fmt.Sprintf("%s/f%dr%dres.htm", s.Target, final, leg)
 	body, err := s.fetchPage(url)
 	if err != nil {
 		return nil, err

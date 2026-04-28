@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -37,20 +36,6 @@ func NamedCapture(re *regexp.Regexp, input string) map[string]string {
 		}
 	}
 	return results
-}
-
-func (s *BBKScraper) GetLiveTiming() (*models.LiveTimingScrape, error) {
-	res, err := s.Client.Get(s.Target + "/liveraceres.htm")
-	if err != nil {
-		return nil, fmt.Errorf("network error: %w", err)
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("server returned status: %d", res.StatusCode)
-	}
-
-	return parseRaceResult(res.Body)
 }
 
 func parseRaceResult(body io.Reader) (*models.LiveTimingScrape, error) {

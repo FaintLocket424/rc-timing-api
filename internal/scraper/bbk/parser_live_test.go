@@ -2,7 +2,6 @@ package bbk
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
@@ -274,7 +273,6 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 
 	for _, tc := range tests {
 		suite.Run(tc.name, func() {
-			log.Println(suite.server.URL)
 			scraper := &BBKScraper{
 				Target: fmt.Sprintf("%s/%s/%s", suite.server.URL, tc.timestamp.Format("2006-01-02_15-04-05"), tc.url),
 				Client: suite.server.Client(),

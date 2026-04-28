@@ -10,33 +10,17 @@ import (
 	"time"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
+	"github.com/FaintLocket424/rc-timing-api/internal/scraper/bbk/utils"
 	"github.com/PuerkitoBio/goquery"
 )
 
 var (
-	heatRegex          = regexp.MustCompile(`Heat (?P<heat>\d+) \((?P<class>.*?)\)(?: R(?P<round>\d+))?`)
-	finalRegex         = regexp.MustCompile(`(?P<round>[A-Z])\. Final \((?P<class>.*?)\)(?: L(?P<leg>\d+))?`)
-	driversResultRegex = regexp.MustCompile(`(?P<laps>-?\d+)/(?:(?P<mins>\d+)')?(?P<secs>\d+\.\d+)`)
-	lapFormatRegex     = regexp.MustCompile(`(?P<time>\d+\.\d+)(?:\[(?P<lap>\d+)\])?`)
-	bestLapRegex       = regexp.MustCompile(`Best Lap: (?P<name>.*?) (?P<time>[\d\.]+) L:(?P<lap>\d+)`)
-	classFTRegex       = regexp.MustCompile(`Class FT: (?P<name>.*?) (?P<laps>\d+)/(?P<time>[\d\.\']+) Av Lap (?P<avg>[\d\.]+)(?: R:(?P<round>\d+))?`)
-	classBestLapRegex  = regexp.MustCompile(`Class Best Lap: (?P<name>.*?) (?P<time>\d+\.\d+)`)
+	heatRegex         = regexp.MustCompile(`Heat (?P<heat>\d+) \((?P<class>.*?)\)(?: R(?P<round>\d+))?`)
+	finalRegex        = regexp.MustCompile(`(?P<round>[A-Z])\. Final \((?P<class>.*?)\)(?: L(?P<leg>\d+))?`)
+	bestLapRegex      = regexp.MustCompile(`Best Lap: (?P<name>.*?) (?P<time>[\d\.]+) L:(?P<lap>\d+)`)
+	classFTRegex      = regexp.MustCompile(`Class FT: (?P<name>.*?) (?P<res>[\d\/'\.]+) Av Lap (?P<avg>[\d\.]+)(?: R:(?P<round>\d+))?`)
+	classBestLapRegex = regexp.MustCompile(`Class Best Lap: (?P<name>.*?) (?P<time>\d+\.\d+)`)
 )
-
-func NamedCapture(re *regexp.Regexp, input string) map[string]string {
-	matches := re.FindStringSubmatch(input)
-	if matches == nil {
-		return nil
-	}
-	names := re.SubexpNames()
-	results := make(map[string]string)
-	for i, name := range names {
-		if i != 0 && name != "" {
-			results[name] = strings.TrimSpace(matches[i])
-		}
-	}
-	return results
-}
 
 func parseRaceResult(body io.Reader) (*models.LiveTimingScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
@@ -66,11 +50,11 @@ func parseHeader(s *goquery.Selection, lt *models.LiveTimingScrape) {
 
 	text := tds.First().Text()
 
-	if data := NamedCapture(heatRegex, text); data != nil {
+	if data := utils.NamedCapture(heatRegex, text); data != nil {
 		lt.HeatNumber, _ = strconv.Atoi(data["heat"])
 		lt.ClassName = data["class"]
 		lt.Round, _ = strconv.Atoi(data["round"])
-	} else if data := NamedCapture(finalRegex, text); data != nil {
+	} else if data := utils.NamedCapture(finalRegex, text); data != nil {
 		lt.ClassName = data["class"]
 
 		if data["leg"] != "" {
@@ -90,32 +74,6 @@ func parseHeader(s *goquery.Selection, lt *models.LiveTimingScrape) {
 			slog.Warn("could not parse timer", "raw", timerText)
 		}
 	}
-}
-
-func parseMillis(s string) (time.Duration, error) {
-	parts := strings.Split(s, ".")
-
-	// Parse whole seconds
-	secs, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return 0, err
-	}
-
-	// Handle fractional part (milliseconds)
-	millis := 0
-	if len(parts) > 1 {
-		frac := parts[1]
-		// Pad or truncate to 3 digits (e.g., "23" -> 230ms, "2345" -> 234ms)
-		for len(frac) < 3 {
-			frac += "0"
-		}
-		millis, err = strconv.Atoi(frac[:3])
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	return time.Duration(secs)*time.Second + time.Duration(millis)*time.Millisecond, nil
 }
 
 func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) {
@@ -154,31 +112,16 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) {
 		// Result Parsing
 		resText := cols.Eq(idx["res"]).Text()
 
-		if data := NamedCapture(driversResultRegex, resText); data != nil {
-			dr.Laps, _ = strconv.Atoi(data["laps"])
+		if laps, dur, err := utils.ParseRaceResult(resText); err == nil {
+			dr.Laps = laps
 			if dr.Laps < 0 && len(lt.Drivers) > 0 {
 				dr.Laps += lt.Drivers[0].Laps
 			}
-
-			var totalDuration time.Duration
-
-			// 1. Add Minutes
-			if data["mins"] != "" {
-				mins, _ := strconv.Atoi(data["mins"])
-				totalDuration += time.Duration(mins) * time.Minute
-			}
-
-			// 2. Add Seconds + Millis
-			secondsPart, _ := parseMillis(data["secs"])
-			totalDuration += secondsPart
-
-			dr.Time = totalDuration
-		} else if strings.HasPrefix(resText, "+") {
-			gapDuration, err := parseMillis(resText[1:]) // Pass the string after '+'
-			if err == nil && len(lt.Drivers) > 0 {
-				leader := lt.Drivers[0]
-				dr.Laps = leader.Laps
-				dr.Time = leader.Time + gapDuration
+			dr.Time = dur
+		} else if gap, err := utils.ParseGap(resText); err == nil {
+			if len(lt.Drivers) > 0 {
+				dr.Laps = lt.Drivers[0].Laps
+				dr.Time = lt.Drivers[0].Time + gap
 			}
 		} else if resText == "" {
 			// empty string may mean DNS
@@ -188,13 +131,13 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) {
 			slog.Warn("unparseable result", "row", i+1, "result", resText)
 		}
 
-		if bestLapData := NamedCapture(lapFormatRegex, cols.Eq(idx["best"]).Text()); bestLapData != nil {
-			dr.BestLapDuration, _ = time.ParseDuration(bestLapData["time"] + "s")
-			dr.BestLapNumber, _ = strconv.Atoi(bestLapData["lap"])
+		if dur, ln, err := utils.ParseLap(cols.Eq(idx["best"]).Text()); err == nil {
+			dr.BestLapDuration = dur
+			dr.BestLapNumber = ln
 		}
 
-		if lastLapData := NamedCapture(lapFormatRegex, cols.Eq(idx["last"]).Text()); lastLapData != nil {
-			dr.LastLapDuration, _ = time.ParseDuration(lastLapData["time"] + "s")
+		if dur, _, err := utils.ParseLap(cols.Eq(idx["last"]).Text()); err == nil {
+			dr.LastLapDuration = dur
 		}
 
 		lt.Drivers = append(lt.Drivers, dr)
@@ -208,27 +151,27 @@ func parseMeta(meta *goquery.Selection, lt *models.LiveTimingScrape) {
 
 		switch font {
 		case "Best Lap:":
-			if data := NamedCapture(bestLapRegex, text); data != nil {
+			if data := utils.NamedCapture(bestLapRegex, text); data != nil {
 				lt.BestLap.DriverName = data["name"]
-				lt.BestLap.Time, _ = time.ParseDuration(data["time"] + "s")
-				lt.BestLap.LapNumber, _ = strconv.Atoi(data["lap"])
+				lt.BestLap.Time, lt.BestLap.LapNumber, _ = utils.ParseLap(fmt.Sprintf("%s[%s]", data["time"], data["lap"]))
 			} else {
 				slog.Warn("failed to parse Best Lap meta", "raw", text)
 			}
 		case "Class FT:":
-			if data := NamedCapture(classFTRegex, text); data != nil {
+			if data := utils.NamedCapture(classFTRegex, text); data != nil {
 				lt.ClassFT.DriverName = data["name"]
-				lt.ClassFT.Laps, _ = strconv.Atoi(data["laps"])
-				lt.ClassFT.Time, _ = time.ParseDuration(strings.Replace(data["time"], "'", "m", 1) + "s")
+				laps, dur, _ := utils.ParseRaceResult(data["res"])
+				lt.ClassFT.Laps = laps
+				lt.ClassFT.Time = dur
 				lt.ClassFT.AvgLapDuration, _ = time.ParseDuration(data["avg"] + "s")
 				lt.ClassFT.Round, _ = strconv.Atoi(data["round"])
 			} else {
 				slog.Warn("failed to parse Class FT meta", "raw", text)
 			}
 		case "Class Best Lap:":
-			if data := NamedCapture(classBestLapRegex, text); data != nil {
+			if data := utils.NamedCapture(classBestLapRegex, text); data != nil {
 				lt.ClassBestLap.DriverName = data["name"]
-				lt.ClassBestLap.Time, _ = time.ParseDuration(data["time"] + "s")
+				lt.ClassBestLap.Time, _, _ = utils.ParseLap(data["time"])
 			} else {
 				slog.Warn("failed to parse Class Best Lap meta", "raw", text)
 			}

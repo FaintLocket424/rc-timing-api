@@ -15,14 +15,14 @@ func ptr[T any](v T) *T {
 func (suite *BBKTestSuite) TestParseRaceResult() {
 	tests := []struct {
 		name        string
-		dataDate    time.Time
+		timestamp   time.Time
 		url         string
 		expectValue *models.LiveTimingScrape
 	}{
 		{
-			name:     "Initial Testing",
-			dataDate: time.Date(2026, time.April, 11, 0, 0, 0, 0, time.UTC),
-			url:      "forcc.co.uk/live",
+			name:      "Initial Testing",
+			timestamp: time.Date(2026, time.April, 11, 0, 0, 0, 0, time.UTC),
+			url:       "forcc.co.uk/live",
 			expectValue: &models.LiveTimingScrape{
 				HeatNumber:  4,
 				ClassName:   "2 Wheel Drive",
@@ -93,9 +93,9 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 			},
 		},
 		{
-			name:     "Potteries National Race Finished",
-			dataDate: time.Date(2026, time.April, 25, 0, 0, 0, 0, time.UTC),
-			url:      "15_22/www.brca-results.org/sections/10or/LiveResults",
+			name:      "Potteries National 25th April 2026 15:22",
+			timestamp: time.Date(2026, time.April, 25, 15, 22, 0, 0, time.UTC),
+			url:       "www.brca-results.org/sections/10or/LiveResults",
 			expectValue: &models.LiveTimingScrape{
 				HeatNumber:  4,
 				ClassName:   "2 Wheel Drive",
@@ -199,13 +199,84 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 				},
 			},
 		},
+		{
+			name:      "Potteries National 25th April 2026 16:49",
+			timestamp: time.Date(2026, time.April, 25, 16, 49, 0, 0, time.UTC),
+			url:       "www.brca-results.org/sections/10or/LiveResults",
+			expectValue: &models.LiveTimingScrape{
+				ClassName:   "2 Wheel Drive",
+				Round:       1,
+				ElapsedTime: 2*time.Minute + 9*time.Second,
+				Drivers: []models.DriverRaceResult{
+					{
+						CarNumber:       1,
+						Name:            "Colin Mulligan",
+						Laps:            4,
+						Time:            time.Duration(1)*time.Minute + time.Duration(57_170)*time.Millisecond,
+						LastLapDuration: time.Duration(28_230) * time.Millisecond,
+					},
+					{
+						CarNumber:       4,
+						Name:            "Stuart Robinson",
+						Laps:            4,
+						Time:            time.Duration(1)*time.Minute + time.Duration(57_170+700)*time.Millisecond,
+						LastLapDuration: time.Duration(28_580) * time.Millisecond,
+					},
+					{
+						CarNumber:       5,
+						Name:            "Trevor Follington",
+						Laps:            4,
+						Time:            time.Duration(1)*time.Minute + time.Duration(57_170+6_780)*time.Millisecond,
+						LastLapDuration: time.Duration(29_110) * time.Millisecond,
+					},
+					{
+						CarNumber:       7,
+						Name:            "Nathan Stanmore",
+						Laps:            4,
+						Time:            time.Duration(1)*time.Minute + time.Duration(57_170+7_940)*time.Millisecond,
+						LastLapDuration: time.Duration(30_470) * time.Millisecond,
+					},
+					{
+						CarNumber:       3,
+						Name:            "Dominic Mawby",
+						Laps:            4,
+						Time:            time.Duration(1)*time.Minute + time.Duration(57_170+8_270)*time.Millisecond,
+						LastLapDuration: time.Duration(30_360) * time.Millisecond,
+					},
+					{
+						CarNumber:       6,
+						Name:            "Jamie Careless",
+						Laps:            4,
+						Time:            time.Duration(1)*time.Minute + time.Duration(57_170+9_320)*time.Millisecond,
+						LastLapDuration: time.Duration(30_680) * time.Millisecond,
+					},
+					{
+						CarNumber:       8,
+						Name:            "Paul Steadman",
+						Laps:            4,
+						Time:            time.Duration(1)*time.Minute + time.Duration(57_170+10_550)*time.Millisecond,
+						LastLapDuration: time.Duration(29_990) * time.Millisecond,
+					},
+					{
+						CarNumber:       2,
+						Name:            "Miklos Szabados",
+						Laps:            3,
+						Time:            time.Duration(1)*time.Minute + time.Duration(36_290)*time.Millisecond,
+						LastLapDuration: time.Duration(29_250) * time.Millisecond,
+					},
+				},
+				BestLap: models.BestLap{
+					DriverName: "Colin Mulligan", Time: time.Duration(28_130) * time.Millisecond, LapNumber: 2,
+				},
+			},
+		},
 	}
 
 	for _, tc := range tests {
 		suite.Run(tc.name, func() {
 			log.Println(suite.server.URL)
 			scraper := &BBKScraper{
-				Target: fmt.Sprintf("%s/%s/%s", suite.server.URL, tc.dataDate.Format("2006-01-02"), tc.url),
+				Target: fmt.Sprintf("%s/%s/%s", suite.server.URL, tc.timestamp.Format("2006-01-02_15-04-05"), tc.url),
 				Client: suite.server.Client(),
 			}
 

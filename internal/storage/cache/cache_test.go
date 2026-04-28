@@ -24,7 +24,7 @@ func (suite *CacheTestSuite) TestGetLiveTiming_NotFound() {
 }
 
 func (suite *CacheTestSuite) TestSaveAndGetLiveTiming_Success() {
-	data := models.LiveTimingScrape{
+	data := models.ResultScrape{
 		HeatNumber: 1,
 		ClassName:  "2 Wheel Drive",
 	}
@@ -43,7 +43,7 @@ func (suite *CacheTestSuite) TestSaveAndGetLiveTiming_Success() {
 func (suite *CacheTestSuite) TestConcurrentAccess() {
 	var wg sync.WaitGroup
 
-	data := models.LiveTimingScrape{
+	data := models.ResultScrape{
 		HeatNumber: 1,
 		ClassName:  "2 Wheel Drive",
 	}

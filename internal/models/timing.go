@@ -31,7 +31,7 @@ type ClassBestLap struct {
 	Time       time.Duration
 }
 
-type LiveTimingScrape struct {
+type ResultScrape struct {
 	HeatNumber   int
 	ClassName    string
 	Round        int

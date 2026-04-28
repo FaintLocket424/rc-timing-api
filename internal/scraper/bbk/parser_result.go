@@ -22,7 +22,7 @@ var (
 	classBestLapRegex = regexp.MustCompile(`Class Best Lap: (?P<name>.*?) (?P<time>\d+\.\d+)`)
 )
 
-func parseRaceResult(body io.Reader) (*models.LiveTimingScrape, error) {
+func parseRaceResult(body io.Reader) (*models.ResultScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse HTML body: %w", err)
@@ -33,7 +33,7 @@ func parseRaceResult(body io.Reader) (*models.LiveTimingScrape, error) {
 		return nil, fmt.Errorf("critical structure change: expected 3 tables, found %d", tables.Length())
 	}
 
-	lt := &models.LiveTimingScrape{}
+	lt := &models.ResultScrape{}
 	parseHeader(tables.Eq(0), lt)
 	parseDrivers(tables.Eq(1), lt)
 	parseMeta(tables.Eq(2), lt)
@@ -41,7 +41,7 @@ func parseRaceResult(body io.Reader) (*models.LiveTimingScrape, error) {
 	return lt, nil
 }
 
-func parseHeader(s *goquery.Selection, lt *models.LiveTimingScrape) {
+func parseHeader(s *goquery.Selection, lt *models.ResultScrape) {
 	tds := s.Find("td.livehtml-text")
 	if tds.Length() < 2 {
 		slog.Warn("header table malformed, skipping header details")
@@ -76,7 +76,7 @@ func parseHeader(s *goquery.Selection, lt *models.LiveTimingScrape) {
 	}
 }
 
-func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) {
+func parseDrivers(drivers *goquery.Selection, lt *models.ResultScrape) {
 	rows := drivers.Find("tbody tr")
 	if rows.Length() < 2 {
 		slog.Error("drivers table missing data rows")
@@ -144,7 +144,7 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) {
 	})
 }
 
-func parseMeta(meta *goquery.Selection, lt *models.LiveTimingScrape) {
+func parseMeta(meta *goquery.Selection, lt *models.ResultScrape) {
 	meta.Find("tr td").Each(func(i int, s *goquery.Selection) {
 		font := s.Find("font").First().Text()
 		text := s.Text()

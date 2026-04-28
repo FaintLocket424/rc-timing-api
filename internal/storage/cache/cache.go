@@ -8,7 +8,7 @@ import (
 )
 
 type EventData struct {
-	Live *models.LiveTimingScrape
+	Live *models.ResultScrape
 }
 
 type Cache struct {
@@ -22,7 +22,7 @@ func NewCache() *Cache {
 	}
 }
 
-func (c *Cache) SaveLiveTiming(url string, model *models.LiveTimingScrape) error {
+func (c *Cache) SaveLiveTiming(url string, model *models.ResultScrape) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -35,7 +35,7 @@ func (c *Cache) SaveLiveTiming(url string, model *models.LiveTimingScrape) error
 	return nil
 }
 
-func (c *Cache) GetLiveTiming(url string) (*models.LiveTimingScrape, error) {
+func (c *Cache) GetLiveTiming(url string) (*models.ResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 

@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -27,11 +28,14 @@ func main() {
 
 	base := strings.TrimSuffix(*targetURL, "/")
 
+	dir := time.Now().Format("2006-01-02_15-04-05")
+	dateTimePath := filepath.Join(dir, *outputPath)
+
 	var cmd *exec.Cmd
 
 	switch *software {
 	case "bbk":
-		cmd = CreateMirrorCommandBBK(base, *outputPath)
+		cmd = CreateMirrorCommandBBK(base, dateTimePath)
 	default:
 		log.Fatalf("Unable to parse software type: %s", *software)
 	}

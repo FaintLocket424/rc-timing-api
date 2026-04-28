@@ -22,6 +22,10 @@ var (
 	classBestLapRegex = regexp.MustCompile(`Class Best Lap: (?P<name>.*?) (?P<time>\d+\.\d+)`)
 )
 
+func ptr[T any](v T) *T {
+	return &v
+}
+
 func parseRaceResult(body io.Reader) (*models.ResultScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
@@ -34,6 +38,7 @@ func parseRaceResult(body io.Reader) (*models.ResultScrape, error) {
 	}
 
 	lt := &models.ResultScrape{}
+
 	parseHeader(tables.Eq(0), lt)
 	parseDrivers(tables.Eq(1), lt)
 	parseMeta(tables.Eq(2), lt)
@@ -51,25 +56,30 @@ func parseHeader(s *goquery.Selection, lt *models.ResultScrape) {
 	text := tds.First().Text()
 
 	if data := utils.NamedCapture(heatRegex, text); data != nil {
-		lt.HeatNumber, _ = strconv.Atoi(data["heat"])
-		lt.ClassName = data["class"]
-		lt.Round, _ = strconv.Atoi(data["round"])
+		if v, err := strconv.Atoi(data["heat"]); err == nil {
+			lt.HeatNumber = ptr(v)
+		}
+		lt.ClassName = ptr(data["class"])
+		if v, err := strconv.Atoi(data["round"]); err == nil {
+			lt.Round = ptr(v)
+		}
 	} else if data := utils.NamedCapture(finalRegex, text); data != nil {
-		lt.ClassName = data["class"]
+		lt.ClassName = ptr(data["class"])
 
 		if data["leg"] != "" {
-			lt.Round, _ = strconv.Atoi(data["leg"])
+			if v, err := strconv.Atoi(data["leg"]); err == nil {
+				lt.Round = ptr(v)
+			}
 		} else {
-			lt.Round = 1
+			lt.Round = ptr(1)
 		}
 	}
 
-	// Timer
 	timerText := tds.Last().Text()
 	if before, _, ok := strings.Cut(timerText, "("); ok {
 		var m, s int
 		if _, err := fmt.Sscanf(before, "%d'%ds", &m, &s); err == nil {
-			lt.ElapsedTime = time.Duration(m)*time.Minute + time.Duration(s)*time.Second
+			lt.ElapsedTime = ptr(time.Duration(m)*time.Minute + time.Duration(s)*time.Second)
 		} else {
 			slog.Warn("could not parse timer", "raw", timerText)
 		}
@@ -106,22 +116,24 @@ func parseDrivers(drivers *goquery.Selection, lt *models.ResultScrape) {
 		cols := s.Find("td")
 		dr := models.DriverRaceResult{}
 
-		dr.Name = cols.Eq(idx["name"]).Text()
-		dr.CarNumber, _ = strconv.Atoi(cols.Eq(idx["car"]).Text())
+		dr.Name = ptr(cols.Eq(idx["name"]).Text())
+		if v, err := strconv.Atoi(cols.Eq(idx["car"]).Text()); err == nil {
+			dr.CarNumber = ptr(v)
+		}
 
 		// Result Parsing
 		resText := cols.Eq(idx["res"]).Text()
 
 		if laps, dur, err := utils.ParseRaceResult(resText); err == nil {
 			dr.Laps = laps
-			if dr.Laps < 0 && len(lt.Drivers) > 0 {
-				dr.Laps += lt.Drivers[0].Laps
+			if *dr.Laps < 0 && len(lt.Drivers) > 0 && lt.Drivers[0].Laps != nil {
+				*dr.Laps += *lt.Drivers[0].Laps
 			}
 			dr.Time = dur
 		} else if gap, err := utils.ParseGap(resText); err == nil {
-			if len(lt.Drivers) > 0 {
-				dr.Laps = lt.Drivers[0].Laps
-				dr.Time = lt.Drivers[0].Time + gap
+			if len(lt.Drivers) > 0 && lt.Drivers[0].Laps != nil && lt.Drivers[0].Time != nil {
+				dr.Laps = ptr(*lt.Drivers[0].Laps)
+				dr.Time = ptr(*lt.Drivers[0].Time + *gap)
 			}
 		} else if resText == "" {
 			// empty string may mean DNS
@@ -152,26 +164,31 @@ func parseMeta(meta *goquery.Selection, lt *models.ResultScrape) {
 		switch font {
 		case "Best Lap:":
 			if data := utils.NamedCapture(bestLapRegex, text); data != nil {
-				lt.BestLap.DriverName = data["name"]
-				lt.BestLap.Time, lt.BestLap.LapNumber, _ = utils.ParseLap(fmt.Sprintf("%s[%s]", data["time"], data["lap"]))
+				lt.BestLap = &models.BestLap{DriverName: ptr(data["name"])}
+				dur, ln, _ := utils.ParseLap(fmt.Sprintf("%s[%s]", data["time"], data["lap"]))
+				lt.BestLap.Time, lt.BestLap.LapNumber = dur, ln
 			} else {
 				slog.Warn("failed to parse Best Lap meta", "raw", text)
 			}
 		case "Class FT:":
 			if data := utils.NamedCapture(classFTRegex, text); data != nil {
-				lt.ClassFT.DriverName = data["name"]
+				lt.ClassFT = &models.ClassFT{DriverName: ptr(data["name"])}
 				laps, dur, _ := utils.ParseRaceResult(data["res"])
-				lt.ClassFT.Laps = laps
-				lt.ClassFT.Time = dur
-				lt.ClassFT.AvgLapDuration, _ = time.ParseDuration(data["avg"] + "s")
-				lt.ClassFT.Round, _ = strconv.Atoi(data["round"])
+				lt.ClassFT.Laps, lt.ClassFT.Time = laps, dur
+				if d, err := time.ParseDuration(data["avg"] + "s"); err == nil {
+					lt.ClassFT.AvgLapDuration = ptr(d)
+				}
+				if r, err := strconv.Atoi(data["round"]); err == nil {
+					lt.ClassFT.Round = ptr(r)
+				}
 			} else {
 				slog.Warn("failed to parse Class FT meta", "raw", text)
 			}
 		case "Class Best Lap:":
 			if data := utils.NamedCapture(classBestLapRegex, text); data != nil {
-				lt.ClassBestLap.DriverName = data["name"]
-				lt.ClassBestLap.Time, _, _ = utils.ParseLap(data["time"])
+				lt.ClassBestLap = &models.ClassBestLap{DriverName: ptr(data["name"])}
+				dur, _, _ := utils.ParseLap(data["time"])
+				lt.ClassBestLap.Time = dur
 			} else {
 				slog.Warn("failed to parse Class Best Lap meta", "raw", text)
 			}

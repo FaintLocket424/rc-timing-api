@@ -31,13 +31,16 @@ func NamedCapture(re *regexp.Regexp, input string) map[string]string {
 }
 
 // ParseRaceResult parses "11/34.234" or "11/1'34.234"
-func ParseRaceResult(res string) (int, time.Duration, error) {
+func ParseRaceResult(res string) (*int, *time.Duration, error) {
 	data := NamedCapture(resultRegex, res)
 	if data == nil {
-		return 0, 0, fmt.Errorf("invalid result format")
+		return nil, nil, fmt.Errorf("invalid result format")
 	}
 
-	laps, _ := strconv.Atoi(data["laps"])
+	laps, err := strconv.Atoi(data["laps"])
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to parse laps")
+	}
 
 	durStr := data["secs"] + "s"
 	if data["mins"] != "" {
@@ -45,27 +48,45 @@ func ParseRaceResult(res string) (int, time.Duration, error) {
 	}
 
 	duration, err := time.ParseDuration(durStr)
-	return laps, duration, err
+	if err != nil {
+		return &laps, nil, fmt.Errorf("failed to parse duration")
+	}
+	return &laps, &duration, nil
 }
 
 // ParseGap parses "+3.45" formats
-func ParseGap(gap string) (time.Duration, error) {
+func ParseGap(gap string) (*time.Duration, error) {
 	if !strings.HasPrefix(gap, "+") {
-		return 0, fmt.Errorf("invalid gap format")
+		return nil, fmt.Errorf("invalid gap format")
 	}
-	return time.ParseDuration(gap[1:] + "s")
+	dur, err := time.ParseDuration(gap[1:] + "s")
+	if err != nil {
+		return nil, fmt.Errorf("cannot parse gap")
+	}
+
+	return &dur, nil
 }
 
 // ParseLap parses "11.345" or "11.345[9]" into duration and lap number
-func ParseLap(lapStr string) (duration time.Duration, lapNum int, err error) {
+func ParseLap(lapStr string) (*time.Duration, *int, error) {
 	data := NamedCapture(lapRegex, lapStr)
 	if data == nil {
-		return 0, 0, fmt.Errorf("invalid lap format")
+		return nil, nil, fmt.Errorf("invalid lap format")
 	}
 
-	duration, _ = time.ParseDuration(data["time"] + "s")
-	if data["lap"] != "" {
-		lapNum, _ = strconv.Atoi(data["lap"])
+	duration, err := time.ParseDuration(data["time"] + "s")
+	if err != nil {
+		return nil, nil, fmt.Errorf("cannot parse lap duration")
 	}
-	return duration, lapNum, nil
+
+	if data["lap"] != "" {
+		lapNum, err := strconv.Atoi(data["lap"])
+		if err != nil {
+			return &duration, nil, fmt.Errorf("cannot parse lap")
+		} else {
+			return &duration, &lapNum, nil
+		}
+	} else {
+		return &duration, nil, nil
+	}
 }

@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+func ptr[T any](v T) *T {
+	return &v
+}
+
 func mustParseDuration(s string) time.Duration {
 	d, err := time.ParseDuration(s)
 	if err != nil {
@@ -16,16 +20,16 @@ func mustParseDuration(s string) time.Duration {
 func TestParseRaceResult(t *testing.T) {
 	tests := []struct {
 		input    string
-		wantLaps int
-		wantDur  time.Duration
+		wantLaps *int
+		wantDur  *time.Duration
 		wantErr  bool
 	}{
-		{"11/34.234", 11, mustParseDuration("34.234s"), false},
-		{"11/1'34.234", 11, mustParseDuration("1m34.234s"), false},
-		{"110/20'69.1234", 110, mustParseDuration("20m69.1234s"), false},
-		{"-1/30.5", -1, mustParseDuration("30.5s"), false},
-		{"-1/2'56.521", -1, mustParseDuration("2m56.521s"), false},
-		{"invalid", 0, 0, true},
+		{"11/34.234", ptr(11), ptr(mustParseDuration("34.234s")), false},
+		{"11/1'34.234", ptr(11), ptr(mustParseDuration("1m34.234s")), false},
+		{"110/20'69.1234", ptr(110), ptr(mustParseDuration("20m69.1234s")), false},
+		{"-1/30.5", ptr(-1), ptr(mustParseDuration("30.5s")), false},
+		{"-1/2'56.521", ptr(-1), ptr(mustParseDuration("2m56.521s")), false},
+		{"invalid", nil, nil, true},
 	}
 
 	for _, tt := range tests {
@@ -34,8 +38,13 @@ func TestParseRaceResult(t *testing.T) {
 			t.Errorf("ParseRaceResult(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue
 		}
-		if laps != tt.wantLaps || dur != tt.wantDur {
-			t.Errorf("ParseRaceResult(%q) = %d, %v, want %d, %v", tt.input, laps, dur, tt.wantLaps, tt.wantDur)
+
+		// Compare pointers: both nil or both pointing to equal values
+		if (laps == nil) != (tt.wantLaps == nil) || (laps != nil && *laps != *tt.wantLaps) {
+			t.Errorf("ParseRaceResult(%q) laps = %v, want %v", tt.input, laps, tt.wantLaps)
+		}
+		if (dur == nil) != (tt.wantDur == nil) || (dur != nil && *dur != *tt.wantDur) {
+			t.Errorf("ParseRaceResult(%q) dur = %v, want %v", tt.input, dur, tt.wantDur)
 		}
 	}
 }
@@ -43,15 +52,15 @@ func TestParseRaceResult(t *testing.T) {
 func TestParseGap(t *testing.T) {
 	tests := []struct {
 		input   string
-		wantDur time.Duration
+		wantDur *time.Duration
 		wantErr bool
 	}{
-		{"+3.45", mustParseDuration("3.45s"), false},
-		{"+0.45", mustParseDuration("0.45s"), false},
-		{"+110.987", mustParseDuration("110.987s"), false},
-		{"+0.001", mustParseDuration("0.001s"), false},
-		{"3.45", 0, true}, // Missing '+' prefix
-		{"+invalid", 0, true},
+		{"+3.45", ptr(mustParseDuration("3.45s")), false},
+		{"+0.45", ptr(mustParseDuration("0.45s")), false},
+		{"+110.987", ptr(mustParseDuration("110.987s")), false},
+		{"+0.001", ptr(mustParseDuration("0.001s")), false},
+		{"3.45", nil, true},
+		{"+invalid", nil, true},
 	}
 
 	for _, tt := range tests {
@@ -60,7 +69,7 @@ func TestParseGap(t *testing.T) {
 			t.Errorf("ParseGap(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue
 		}
-		if dur != tt.wantDur {
+		if (dur == nil) != (tt.wantDur == nil) || (dur != nil && *dur != *tt.wantDur) {
 			t.Errorf("ParseGap(%q) = %v, want %v", tt.input, dur, tt.wantDur)
 		}
 	}
@@ -69,16 +78,15 @@ func TestParseGap(t *testing.T) {
 func TestParseLap(t *testing.T) {
 	tests := []struct {
 		input   string
-		wantDur time.Duration
-		wantLap int
+		wantDur *time.Duration
+		wantLap *int
 		wantErr bool
 	}{
-		{"9.000", mustParseDuration("9s"), 0, false},
-		{"9.001", mustParseDuration("9.001s"), 0, false},
-		{"11.345", mustParseDuration("11.345s"), 0, false},
-		{"23.543[9]", mustParseDuration("23.543s"), 9, false},
-		{"10.0[100]", mustParseDuration("10s"), 100, false},
-		{"bad", 0, 0, true},
+		{"9.000", ptr(mustParseDuration("9s")), nil, false},
+		{"11.345", ptr(mustParseDuration("11.345s")), nil, false},
+		{"23.543[9]", ptr(mustParseDuration("23.543s")), ptr(9), false},
+		{"10.0[100]", ptr(mustParseDuration("10s")), ptr(100), false},
+		{"bad", nil, nil, true},
 	}
 
 	for _, tt := range tests {
@@ -87,8 +95,11 @@ func TestParseLap(t *testing.T) {
 			t.Errorf("ParseLap(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue
 		}
-		if dur != tt.wantDur || lap != tt.wantLap {
-			t.Errorf("ParseLap(%q) = %v, %d, want %v, %d", tt.input, dur, lap, tt.wantDur, tt.wantLap)
+		if (dur == nil) != (tt.wantDur == nil) || (dur != nil && *dur != *tt.wantDur) {
+			t.Errorf("ParseLap(%q) dur = %v, want %v", tt.input, dur, tt.wantDur)
+		}
+		if (lap == nil) != (tt.wantLap == nil) || (lap != nil && *lap != *tt.wantLap) {
+			t.Errorf("ParseLap(%q) lap = %v, want %v", tt.input, lap, tt.wantLap)
 		}
 	}
 }

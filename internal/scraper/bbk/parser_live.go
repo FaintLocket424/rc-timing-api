@@ -107,6 +107,32 @@ func parseHeader(s *goquery.Selection, lt *models.LiveTimingScrape) {
 	}
 }
 
+func parseMillis(s string) (time.Duration, error) {
+	parts := strings.Split(s, ".")
+
+	// Parse whole seconds
+	secs, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, err
+	}
+
+	// Handle fractional part (milliseconds)
+	millis := 0
+	if len(parts) > 1 {
+		frac := parts[1]
+		// Pad or truncate to 3 digits (e.g., "23" -> 230ms, "2345" -> 234ms)
+		for len(frac) < 3 {
+			frac += "0"
+		}
+		millis, err = strconv.Atoi(frac[:3])
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return time.Duration(secs)*time.Second + time.Duration(millis)*time.Millisecond, nil
+}
+
 func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) {
 	rows := drivers.Find("tbody tr")
 	if rows.Length() < 2 {
@@ -148,22 +174,26 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) {
 			if dr.Laps < 0 && len(lt.Drivers) > 0 {
 				dr.Laps += lt.Drivers[0].Laps
 			}
-			var totalSecs float64
+
+			var totalDuration time.Duration
+
+			// 1. Add Minutes
 			if data["mins"] != "" {
 				mins, _ := strconv.Atoi(data["mins"])
-				totalSecs += float64(mins) * 60
+				totalDuration += time.Duration(mins) * time.Minute
 			}
 
-			secs, _ := strconv.ParseFloat(data["secs"], 64)
-			totalSecs += secs
+			// 2. Add Seconds + Millis
+			secondsPart, _ := parseMillis(data["secs"])
+			totalDuration += secondsPart
 
-			dr.Time = time.Duration(totalSecs * float64(time.Second))
+			dr.Time = totalDuration
 		} else if strings.HasPrefix(resText, "+") {
-			gapSecs, err := strconv.ParseFloat(resText[1:], 64)
+			gapDuration, err := parseMillis(resText[1:]) // Pass the string after '+'
 			if err == nil && len(lt.Drivers) > 0 {
 				leader := lt.Drivers[0]
 				dr.Laps = leader.Laps
-				dr.Time = leader.Time + time.Duration(gapSecs*float64(time.Second))
+				dr.Time = leader.Time + gapDuration
 			}
 		} else if resText == "" {
 			// empty string may mean DNS
@@ -173,7 +203,6 @@ func parseDrivers(drivers *goquery.Selection, lt *models.LiveTimingScrape) {
 			slog.Warn("unparseable result", "row", i+1, "result", resText)
 		}
 
-		// Best Lap Parsing
 		if bestLapData := NamedCapture(lapFormatRegex, cols.Eq(idx["best"]).Text()); bestLapData != nil {
 			dr.BestLapDuration, _ = time.ParseDuration(bestLapData["time"] + "s")
 			dr.BestLapNumber, _ = strconv.Atoi(bestLapData["lap"])

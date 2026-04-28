@@ -28,7 +28,7 @@ func main() {
 
 	base := strings.TrimSuffix(*targetURL, "/")
 
-	dir := time.Now().Format("2006-01-02_15-04-05")
+	dir := time.Now().UTC().Format("2006-01-02_15-04-05")
 	dateTimePath := filepath.Join(dir, *outputPath)
 
 	var cmd *exec.Cmd

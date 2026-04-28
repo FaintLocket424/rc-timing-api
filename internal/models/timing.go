@@ -32,12 +32,14 @@ type ClassBestLap struct {
 }
 
 type ResultScrape struct {
-	HeatNumber   *int
-	ClassName    *string
-	Round        *int
-	ElapsedTime  *time.Duration
-	Drivers      []DriverRaceResult
-	BestLap      *BestLap
-	ClassFT      *ClassFT
-	ClassBestLap *ClassBestLap
+	PracticeNumber *int
+	HeatNumber     *int
+	FinalNumber    *int
+	ClassName      *string
+	Round          *int
+	ElapsedTime    *time.Duration
+	Drivers        []DriverRaceResult
+	BestLap        *BestLap
+	ClassFT        *ClassFT
+	ClassBestLap   *ClassBestLap
 }

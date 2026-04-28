@@ -15,8 +15,9 @@ import (
 )
 
 var (
+	practiceRegex     = regexp.MustCompile(`Practice (?P<practice>\d+) \((?P<class>.*?)\)(?: R(?P<round>\d+))?`)
 	heatRegex         = regexp.MustCompile(`Heat (?P<heat>\d+) \((?P<class>.*?)\)(?: R(?P<round>\d+))?`)
-	finalRegex        = regexp.MustCompile(`(?P<round>[A-Z])\. Final \((?P<class>.*?)\)(?: L(?P<leg>\d+))?`)
+	finalRegex        = regexp.MustCompile(`(?P<final>[A-Z])\. Final \((?P<class>.*?)\)(?: L(?P<leg>\d+))?`)
 	bestLapRegex      = regexp.MustCompile(`Best Lap: (?P<name>.*?) (?P<time>[\d\.]+) L:(?P<lap>\d+)`)
 	classFTRegex      = regexp.MustCompile(`Class FT: (?P<name>.*?) (?P<res>[\d\/'\.]+) Av Lap (?P<avg>[\d\.]+)(?: R:(?P<round>\d+))?`)
 	classBestLapRegex = regexp.MustCompile(`Class Best Lap: (?P<name>.*?) (?P<time>\d+\.\d+)`)
@@ -55,7 +56,15 @@ func parseHeader(s *goquery.Selection, lt *models.ResultScrape) {
 
 	text := tds.First().Text()
 
-	if data := utils.NamedCapture(heatRegex, text); data != nil {
+	if data := utils.NamedCapture(practiceRegex, text); data != nil {
+		if v, err := strconv.Atoi(data["practice"]); err == nil {
+			lt.PracticeNumber = ptr(v)
+		}
+		lt.ClassName = ptr(data["class"])
+		if v, err := strconv.Atoi(data["round"]); err == nil {
+			lt.Round = ptr(v)
+		}
+	} else if data := utils.NamedCapture(heatRegex, text); data != nil {
 		if v, err := strconv.Atoi(data["heat"]); err == nil {
 			lt.HeatNumber = ptr(v)
 		}
@@ -64,6 +73,14 @@ func parseHeader(s *goquery.Selection, lt *models.ResultScrape) {
 			lt.Round = ptr(v)
 		}
 	} else if data := utils.NamedCapture(finalRegex, text); data != nil {
+		final := data["final"]
+
+		if len(final) == 1 {
+			r := strings.ToUpper(final)[0]
+			v := int(r - 'A' + 1)
+			lt.FinalNumber = ptr(v)
+		}
+
 		lt.ClassName = ptr(data["class"])
 
 		if data["leg"] != "" {

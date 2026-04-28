@@ -202,6 +202,7 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 			timestamp: time.Date(2026, time.April, 25, 16, 49, 0, 0, time.UTC),
 			url:       "www.brca-results.org/sections/10or/LiveResults",
 			expectValue: &models.ResultScrape{
+				FinalNumber: ptr(12),
 				ClassName:   ptr("2 Wheel Drive"),
 				Round:       ptr(1),
 				ElapsedTime: ptr(2*time.Minute + 9*time.Second),

@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"log/slog"
 	"os"
 
@@ -50,6 +49,7 @@ func main() {
 	router := api.SetupRouter(cache, manager)
 
 	if err := router.Run(":8080"); err != nil {
-		log.Fatal(err)
+		slog.Error("An error occurred", "err", err)
+		return
 	}
 }

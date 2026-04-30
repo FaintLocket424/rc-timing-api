@@ -2,7 +2,6 @@ package manager
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"sync"
 	"time"
@@ -67,7 +66,7 @@ func (m *Manager) startWorker(ctx context.Context, url string) {
 		case <-ticker.C:
 			continue
 		case <-ctx.Done():
-			log.Printf("worker for %s shutting down", url)
+			m.logger.Info("worker shutting down", "url", url)
 			return
 		}
 	}

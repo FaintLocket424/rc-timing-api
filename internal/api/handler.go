@@ -1,7 +1,9 @@
 package api
 
 import (
+	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/manager"
 	"github.com/FaintLocket424/rc-timing-api/internal/storage"
@@ -33,6 +35,32 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 			c.AbortWithStatusJSON(http.StatusAccepted, gin.H{"message": "Starting tracking event, please poll again in a few seconds"})
 		} else {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, model)
+}
+
+func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
+	url := c.Query("target_url")
+	heat, _ := strconv.Atoi(c.Param("heat"))
+	round, _ := strconv.Atoi(c.Param("round"))
+
+	if url == "" {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	newWorkerSpawned := h.manager.EnsureTracking(url)
+
+	model, err := h.store.GetPracticeRaceResult(url, heat, round)
+	if err != nil {
+		slog.Error("error getting practice race result", "error", err)
+		if newWorkerSpawned {
+			c.AbortWithStatusJSON(http.StatusAccepted, gin.H{"message": "Starting tracking event, please poll again in a few seconds"})
+		} else {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		return
 	}

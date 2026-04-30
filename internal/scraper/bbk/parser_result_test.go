@@ -12,13 +12,13 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 		name        string
 		timestamp   time.Time
 		url         string
-		expectValue *models.ResultScrape
+		expectValue *models.RaceResultScrape
 	}{
 		{
 			name:      "Initial Testing",
 			timestamp: time.Date(2026, time.April, 11, 0, 0, 0, 0, time.UTC),
 			url:       "forcc.co.uk/live",
-			expectValue: &models.ResultScrape{
+			expectValue: &models.RaceResultScrape{
 				HeatNumber:  ptr(4),
 				ClassName:   ptr("2 Wheel Drive"),
 				Round:       ptr(2),
@@ -93,7 +93,7 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 			name:      "Potteries National 25th April 2026 15:22",
 			timestamp: time.Date(2026, time.April, 25, 15, 22, 0, 0, time.UTC),
 			url:       "www.brca-results.org/sections/10or/LiveResults",
-			expectValue: &models.ResultScrape{
+			expectValue: &models.RaceResultScrape{
 				HeatNumber:  ptr(4),
 				ClassName:   ptr("2 Wheel Drive"),
 				Round:       ptr(4),
@@ -201,7 +201,7 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 			name:      "Potteries National 25th April 2026 16:49",
 			timestamp: time.Date(2026, time.April, 25, 16, 49, 0, 0, time.UTC),
 			url:       "www.brca-results.org/sections/10or/LiveResults",
-			expectValue: &models.ResultScrape{
+			expectValue: &models.RaceResultScrape{
 				FinalNumber: ptr(12),
 				ClassName:   ptr("2 Wheel Drive"),
 				Round:       ptr(1),

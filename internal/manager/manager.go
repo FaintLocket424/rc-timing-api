@@ -30,6 +30,7 @@ func NewManager(store storage.Store) *Manager {
 	}
 
 	go m.startReaper()
+	m.logger.Info("Reaper process started")
 	return m
 }
 
@@ -72,18 +73,20 @@ func (m *Manager) startWorker(ctx context.Context, url string) {
 	}
 }
 
-func (m *Manager) EnsureTracking(url string) {
+func (m *Manager) EnsureTracking(url string) (workerStarted bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	if state, ok := m.activeWorkers[url]; ok {
 		state.lastAccessed = time.Now()
-		return
+		return false
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	m.activeWorkers[url] = &workerState{lastAccessed: time.Now(), cancel: cancel}
 	go m.startWorker(ctx, url)
+	m.logger.Info("Worker started", "url", url)
+	return true
 }
 
 func (m *Manager) startReaper() {

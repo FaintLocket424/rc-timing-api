@@ -31,7 +31,7 @@ type ClassBestLap struct {
 	Time       *time.Duration
 }
 
-type ResultScrape struct {
+type RaceResultScrape struct {
 	PracticeNumber *int
 	HeatNumber     *int
 	FinalNumber    *int

@@ -16,10 +16,10 @@ type HeatRound struct {
 }
 
 type EventData struct {
-	Live            *models.ResultScrape
-	PracticeResults map[HeatRound]*models.ResultScrape
-	QualiResults    map[HeatRound]*models.ResultScrape
-	FinalResults    map[HeatRound]*models.ResultScrape
+	Live            *models.RaceResultScrape
+	PracticeResults map[HeatRound]*models.RaceResultScrape
+	QualiResults    map[HeatRound]*models.RaceResultScrape
+	FinalResults    map[HeatRound]*models.RaceResultScrape
 }
 
 type Cache struct {
@@ -36,16 +36,16 @@ func NewCache() *Cache {
 func (c *Cache) getOrCreateEvent(url string) *EventData {
 	if _, ok := c.data[url]; !ok {
 		c.data[url] = &EventData{
-			PracticeResults: make(map[HeatRound]*models.ResultScrape),
-			QualiResults:    make(map[HeatRound]*models.ResultScrape),
-			FinalResults:    make(map[HeatRound]*models.ResultScrape),
+			PracticeResults: make(map[HeatRound]*models.RaceResultScrape),
+			QualiResults:    make(map[HeatRound]*models.RaceResultScrape),
+			FinalResults:    make(map[HeatRound]*models.RaceResultScrape),
 		}
 	}
 
 	return c.data[url]
 }
 
-func (c *Cache) SaveLiveTiming(url string, model *models.ResultScrape) error {
+func (c *Cache) SaveLiveTiming(url string, model *models.RaceResultScrape) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -55,7 +55,7 @@ func (c *Cache) SaveLiveTiming(url string, model *models.ResultScrape) error {
 	return nil
 }
 
-func (c *Cache) GetLiveTiming(url string) (*models.ResultScrape, error) {
+func (c *Cache) GetLiveTiming(url string) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -67,7 +67,7 @@ func (c *Cache) GetLiveTiming(url string) (*models.ResultScrape, error) {
 	return ed.Live, nil
 }
 
-func (c *Cache) SavePracticeRaceResult(url string, model *models.ResultScrape) error {
+func (c *Cache) SavePracticeRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.HeatNumber == nil || model.Round == nil {
 		return fmt.Errorf("Cannot store race result, heat=%v; round=%v", model.HeatNumber, model.Round)
 	}
@@ -81,7 +81,7 @@ func (c *Cache) SavePracticeRaceResult(url string, model *models.ResultScrape) e
 	return nil
 }
 
-func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.ResultScrape, error) {
+func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -95,7 +95,7 @@ func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.Resu
 	return ed.PracticeResults[key], nil
 }
 
-func (c *Cache) SaveQualiRaceResult(url string, model *models.ResultScrape) error {
+func (c *Cache) SaveQualiRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.HeatNumber == nil || model.Round == nil {
 		return fmt.Errorf("Cannot store race result, heat=%v; round=%v", model.HeatNumber, model.Round)
 	}
@@ -109,7 +109,7 @@ func (c *Cache) SaveQualiRaceResult(url string, model *models.ResultScrape) erro
 	return nil
 }
 
-func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.ResultScrape, error) {
+func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -123,7 +123,7 @@ func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.ResultS
 	return ed.QualiResults[key], nil
 }
 
-func (c *Cache) SaveFinalRaceResult(url string, model *models.ResultScrape) error {
+func (c *Cache) SaveFinalRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.HeatNumber == nil || model.Round == nil {
 		return fmt.Errorf("Cannot store race result, heat=%v; round=%v", model.HeatNumber, model.Round)
 	}
@@ -137,7 +137,7 @@ func (c *Cache) SaveFinalRaceResult(url string, model *models.ResultScrape) erro
 	return nil
 }
 
-func (c *Cache) GetFinalRaceResult(url string, final, round int) (*models.ResultScrape, error) {
+func (c *Cache) GetFinalRaceResult(url string, final, round int) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 

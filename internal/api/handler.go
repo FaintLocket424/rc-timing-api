@@ -25,11 +25,15 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 		return
 	}
 
-	h.manager.EnsureTracking(url)
+	newWorkerSpawned := h.manager.EnsureTracking(url)
 
 	model, err := h.store.GetLiveTiming(url)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusAccepted, gin.H{"message": "Starting tracking event, please poll again in a few seconds"})
+		if newWorkerSpawned {
+			c.AbortWithStatusJSON(http.StatusAccepted, gin.H{"message": "Starting tracking event, please poll again in a few seconds"})
+		} else {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		}
 		return
 	}
 

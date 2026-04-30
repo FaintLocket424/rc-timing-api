@@ -27,7 +27,7 @@ func ptr[T any](v T) *T {
 	return &v
 }
 
-func parseRaceResult(body io.Reader) (*models.ResultScrape, error) {
+func parseRaceResult(body io.Reader) (*models.RaceResultScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse HTML body: %w", err)
@@ -38,7 +38,7 @@ func parseRaceResult(body io.Reader) (*models.ResultScrape, error) {
 		return nil, fmt.Errorf("critical structure change: expected 3 tables, found %d", tables.Length())
 	}
 
-	lt := &models.ResultScrape{}
+	lt := &models.RaceResultScrape{}
 
 	parseHeader(tables.Eq(0), lt)
 	parseDrivers(tables.Eq(1), lt)
@@ -47,7 +47,7 @@ func parseRaceResult(body io.Reader) (*models.ResultScrape, error) {
 	return lt, nil
 }
 
-func parseHeader(s *goquery.Selection, lt *models.ResultScrape) {
+func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 	tds := s.Find("td.livehtml-text")
 	if tds.Length() < 2 {
 		slog.Warn("header table malformed, skipping header details")
@@ -103,7 +103,7 @@ func parseHeader(s *goquery.Selection, lt *models.ResultScrape) {
 	}
 }
 
-func parseDrivers(drivers *goquery.Selection, lt *models.ResultScrape) {
+func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 	rows := drivers.Find("tbody tr")
 	if rows.Length() < 2 {
 		slog.Error("drivers table missing data rows")
@@ -173,7 +173,7 @@ func parseDrivers(drivers *goquery.Selection, lt *models.ResultScrape) {
 	})
 }
 
-func parseMeta(meta *goquery.Selection, lt *models.ResultScrape) {
+func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 	meta.Find("tr td").Each(func(i int, s *goquery.Selection) {
 		font := s.Find("font").First().Text()
 		text := s.Text()

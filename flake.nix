@@ -137,6 +137,22 @@
             '';
           };
 
+          testRateLimitingScript = pkgs.writeShellApplication {
+            name = "test-rate-limiting";
+            runtimeInputs = [ pkgs.vegeta pkgs.jq ];
+            text = ''
+              RATE="''${1:-5}"
+              DURATION="''${2:-10}"
+
+              echo "Attacking at $RATE req/s for $DURATION seconds..."
+
+              echo "GET http://localhost:8080/api/v1/ping" | \
+                  vegeta attack -rate="$RATE"/1s -duration="$DURATION"s | \
+                  vegeta encode | \
+                  jq -r '. | "\(.code) \(.latency / 1000000)ms \(.error)"'
+            '';
+          };
+
           listFunctions = pkgs.writeShellApplication {
             name = "lsfunc";
             runtimeInputs = [ pkgs.coreutils ];
@@ -148,6 +164,7 @@
           commandBinaries = [
             runServerScript
             mirrorBBKScript
+            testRateLimitingScript
             listFunctions
           ];
 
@@ -157,7 +174,6 @@
           default = pkgs.mkShell {
             packages = with pkgs; [
               go
-              vegeta
               gopls
               delve
             ] ++ commandBinaries;

@@ -13,7 +13,7 @@ import (
 
 var (
 	Version     = "dev"
-	DefaultPort = "8080"
+	DefaultPort = ""
 	LogLevel    = new(slog.LevelVar)
 )
 
@@ -42,6 +42,10 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = DefaultPort
+	}
+
+	if port == "" {
+		panic("Port not set")
 	}
 
 	debugMode := Version == "dev" || strings.HasSuffix(Version, "debug")

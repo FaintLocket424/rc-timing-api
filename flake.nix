@@ -10,6 +10,18 @@
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+
+      commonArgs = {
+        pname = "rc-timing-api";
+        version = "0.1.0";
+        src = ./.;
+        subPackages = [ "cmd/server" ];
+        vendorHash = "sha256-IUww4dVh6MWv7SQITZY+LKgOT1ReVgmEHY3bl2f/tM4=";
+
+        postInstall = ''
+          mv $out/bin/server $out/bin/$pname
+        '';
+      };
     in
     {
       packages = forAllSystems (system:
@@ -17,18 +29,6 @@
           pkgs = nixpkgsFor.${system};
 
           gitRev = self.shortRev or self.dirtyShortRev or "unknown";
-
-          commonArgs = rec {
-            pname = "rc-timing-api";
-            version = "0.1.0";
-            src = ./.;
-            subPackages = [ "cmd/server" ];
-            vendorHash = "sha256-IUww4dVh6MWv7SQITZY+LKgOT1ReVgmEHY3bl2f/tM4=";
-
-            postInstall = ''
-              mv $out/bin/server $out/bin/$pname
-            '';
-          };
         in
         rec {
           release = pkgs.buildGoModule (commonArgs // {
@@ -60,6 +60,19 @@
           default = release;
         });
 
+      checks = forAllSystems
+        (system:
+          let pkgs = nixpkgsFor.${system};
+          in {
+            go-test = pkgs.buildGoModule
+              (commonArgs // {
+                pname = "rc-timing-api-tests";
+
+                buildPhase = "";
+                installPhase = "mkdir -p $out";
+              });
+          });
+
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
@@ -81,10 +94,15 @@
               go
               wget
               vegeta
+              gopls
+              delve
+              golangci-lint
 
               runServerScript
             ];
           };
         });
+
+      formatter = forAllSystems (system: nixpkgsFor.${system}.nixpkgs-fmt);
     };
 }

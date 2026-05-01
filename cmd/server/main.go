@@ -39,17 +39,17 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	debugMode := flag.Bool("debug", false, "enable debug logging")
+	debugMode := version == "dev"
 	jsonMode := flag.Bool("json", false, "output logs in json format")
 	flag.Parse()
 
 	InitLogger(*jsonMode)
 
-	if *debugMode {
+	if debugMode {
 		LogLevel.Set(slog.LevelDebug)
 	}
 
-	slog.Info("Starting RC Timing API", "version", version, "debug", *debugMode)
+	slog.Info("Starting RC Timing API", "version", version)
 
 	cache := cache.NewCache()
 	manager := manager.NewManager(cache)

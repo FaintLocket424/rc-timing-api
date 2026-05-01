@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/api"
 	"github.com/FaintLocket424/rc-timing-api/internal/manager"
@@ -39,7 +40,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	debugMode := version == "dev"
+	debugMode := version == "dev" || strings.HasSuffix(version, "debug")
 	jsonMode := flag.Bool("json", false, "output logs in json format")
 	flag.Parse()
 

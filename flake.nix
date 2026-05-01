@@ -1,9 +1,16 @@
 {
   description = "RC Timing API";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
-  outputs = { self, nixpkgs }:
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = { self, nixpkgs, treefmt-nix }:
     let
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
 
@@ -103,6 +110,17 @@
           };
         });
 
-      formatter = forAllSystems (system: nixpkgsFor.${system}.nixpkgs-fmt);
+      formatter = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor.${system};
+
+          treefmtEval = treefmt-nix.lib.evalModule pkgs {
+            projectRootFile = "flake.nix";
+            programs.nixpkgs-fmt.enable = true;
+            programs.gofmt.enable = true;
+          };
+        in
+        treefmtEval.config.build.wrapper
+      );
     };
 }

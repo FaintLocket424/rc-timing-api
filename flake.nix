@@ -12,6 +12,8 @@
 
   outputs = { self, nixpkgs, treefmt-nix }:
     let
+      serverPort = "8080";
+
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
 
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
@@ -45,6 +47,7 @@
 
               "-X main.GinMode=release"
               "-X main.Version=${commonArgs.version}-${gitRev}"
+              "-X main.Port=${serverPort}"
             ];
 
             tags = [ "release" ];
@@ -59,6 +62,7 @@
 
             ldflags = [
               "-X main.Version=${commonArgs.version}-${gitRev}-debug"
+              "-X main.Port=${serverPort}"
             ];
 
             tags = [ "debug" ];
@@ -101,8 +105,8 @@
             runtimeInputs = [ pkgs.go ];
 
             text = ''
-              echo "Starting the server in development mode..."
-              go run ./cmd/server/main.go "$@"
+              echo "Starting the server on port ${serverPort} in development mode..."
+              PORT="${serverPort}" go run ./cmd/server/main.go "$@"
             '';
           };
 
@@ -146,7 +150,7 @@
 
               echo "Attacking at $RATE req/s for $DURATION seconds..."
 
-              echo "GET http://localhost:8080/api/v1/ping" | \
+              echo "GET http://localhost:${serverPort}/api/v1/ping" | \
                   vegeta attack -rate="$RATE"/1s -duration="$DURATION"s | \
                   vegeta encode | \
                   jq -r '. | "\(.code) \(.latency / 1000000)ms \(.error)"'
@@ -208,8 +212,10 @@
             ] ++ commandBinaries;
 
             shellHook = ''
+              export PORT="${serverPort}"
               echo "---"
               echo "Go development environment loaded."
+              echo "Target Port: $PORT"
               echo "Available custom commands: $(lsfunc)"
               echo "---"
             '';

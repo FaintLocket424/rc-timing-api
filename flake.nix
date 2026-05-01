@@ -55,6 +55,9 @@
                 "-X main.DefaultPort=${toString debugPort}"
               ];
               tags = [ "debug" ];
+              postInstall = ''
+                mv $out/bin/rc-timing-api $out/bin/$pname
+              '';
             });
 
             default = release;

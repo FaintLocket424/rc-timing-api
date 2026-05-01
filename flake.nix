@@ -3,7 +3,7 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
-  outputs = { self, nixpkgs }:
+  outputs = { nixpkgs, ... }:
     let
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
 
@@ -32,6 +32,17 @@
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+
+          runServerScript = pkgs.writeShellApplication {
+            name = "run-server";
+
+            runtimeInputs = [ pkgs.go ];
+
+            text = ''
+              echo "Starting the server in development mode..."
+              go run ./cmd/server/main.go "$@"
+            '';
+          };
         in
         {
           default = pkgs.mkShell {
@@ -39,6 +50,8 @@
               go
               wget
               vegeta
+
+              runServerScript
             ];
           };
         });

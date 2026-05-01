@@ -41,14 +41,6 @@
         '';
       };
 
-      test-bbk-scraper = pkgs.writeShellApplication {
-        name = "test-bbk-scraper";
-        runtimeInputs = [ pkgs.go ];
-        text = ''
-          go test ./internal/scraper/bbk "$@"
-        '';
-      };
-
       test-rate-limiting = pkgs.writeShellApplication {
         name = "test-rate-limiting";
         runtimeInputs = [ pkgs.vegeta pkgs.jq ];
@@ -149,7 +141,6 @@
       commandBinaries = [
         runServer
         downloadRemotes
-        test-bbk-scraper
         test-rate-limiting
         count-lines
         coverage-stats

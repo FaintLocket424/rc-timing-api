@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -37,22 +37,22 @@ func main() {
 	case "bbk":
 		cmd = CreateMirrorCommandBBK(base, dateTimePath)
 	default:
-		log.Fatalf("Unable to parse software type: %s", *software)
+		slog.Error("Unable to parse software", "software", *software)
 	}
 
-	log.Printf("Mirroring %s to %s...\n", base, *outputPath)
+	slog.Info("Mirroring", "base", base, "outputPath", *outputPath)
 
 	if err := cmd.Run(); err != nil {
-		log.Fatalf("Failed to run wget: %v", err)
+		slog.Error("Failed to run wget", "err", err)
 	}
 
 	if *removeNonHTML {
 		if err := cleanupDirectory(*outputPath); err != nil {
-			log.Fatalf("Cleanup failed: %v", err)
+			slog.Error("Cleanup failed", "err", err)
 		}
 	}
 
-	log.Println("Mirroring complete.")
+	slog.Info("Mirroring complete")
 }
 
 func cleanupDirectory(root string) error {

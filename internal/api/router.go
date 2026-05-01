@@ -23,6 +23,35 @@ func SetupRouter(store storage.Store, manager *manager.Manager) *gin.Engine {
 		})
 
 		v1.GET("/live", handler.GetLiveTiming)
+
+		results := v1.Group("/results")
+		{
+			practice := results.Group("/practice")
+			{
+				round := practice.Group("/round/:round")
+				{
+					round.GET("/heat/:heat", handler.GetPracticeRaceResult)
+				}
+			}
+
+			quali := results.Group("/qualifying")
+			{
+				round := quali.Group("/round/:round")
+				{
+					round.GET("/heat/:heat", handler.GetQualiRaceResult)
+				}
+			}
+
+			finals := results.Group("/finals")
+			{
+				round := finals.Group("/round/:round")
+				{
+					round.GET("/final/:final", handler.GetFinalRaceResult)
+				}
+			}
+		}
+
+		// localhost:8080/results/practice/round/1/heat/1
 	}
 
 	return r

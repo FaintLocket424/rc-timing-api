@@ -8,6 +8,10 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+func ptr[T any](v T) *T {
+	return &v
+}
+
 type CacheTestSuite struct {
 	suite.Suite
 	cache *Cache
@@ -24,9 +28,9 @@ func (suite *CacheTestSuite) TestGetLiveTiming_NotFound() {
 }
 
 func (suite *CacheTestSuite) TestSaveAndGetLiveTiming_Success() {
-	data := models.LiveTimingScrape{
-		HeatNumber: 1,
-		ClassName:  "2 Wheel Drive",
+	data := models.RaceResultScrape{
+		HeatNumber: ptr(1),
+		ClassName:  ptr("2 Wheel Drive"),
 	}
 
 	url := "http://fake.url"
@@ -43,9 +47,9 @@ func (suite *CacheTestSuite) TestSaveAndGetLiveTiming_Success() {
 func (suite *CacheTestSuite) TestConcurrentAccess() {
 	var wg sync.WaitGroup
 
-	data := models.LiveTimingScrape{
-		HeatNumber: 1,
-		ClassName:  "2 Wheel Drive",
+	data := models.RaceResultScrape{
+		HeatNumber: ptr(1),
+		ClassName:  ptr("2 Wheel Drive"),
 	}
 
 	url := "http://fake.url"

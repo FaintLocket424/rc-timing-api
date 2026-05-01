@@ -8,6 +8,10 @@ import (
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
 )
 
+func ptr[T any](v T) *T {
+	return &v
+}
+
 type HTTPClient interface {
 	Get(url string) (*http.Response, error)
 }
@@ -84,4 +88,14 @@ func (s *BBKScraper) GetFinalRaceResult(final, leg int) (*models.RaceResultScrap
 	defer body.Close()
 
 	return parseRaceResult(body)
+}
+
+func (s *BBKScraper) GetRaceResultsIndex() (*models.RaceResultsIndexScrape, error) {
+	body, err := s.fetchPage(s.Target + "/liveresults.htm")
+	if err != nil {
+		return nil, err
+	}
+	defer body.Close()
+
+	return parseRaceResultsIndex(body)
 }

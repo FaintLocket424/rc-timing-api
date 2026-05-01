@@ -3,6 +3,7 @@ package cache
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
@@ -10,16 +11,11 @@ import (
 
 var ErrNotFound = errors.New("event data not found")
 
-type HeatRound struct {
-	Heat  int
-	Round int
-}
-
 type EventData struct {
 	Live            *models.RaceResultScrape
-	PracticeResults map[HeatRound]*models.RaceResultScrape
-	QualiResults    map[HeatRound]*models.RaceResultScrape
-	FinalResults    map[HeatRound]*models.RaceResultScrape
+	PracticeResults map[models.HeatRound]*models.RaceResultScrape
+	QualiResults    map[models.HeatRound]*models.RaceResultScrape
+	FinalResults    map[models.HeatRound]*models.RaceResultScrape
 }
 
 type Cache struct {
@@ -36,9 +32,9 @@ func NewCache() *Cache {
 func (c *Cache) getOrCreateEvent(url string) *EventData {
 	if _, ok := c.data[url]; !ok {
 		c.data[url] = &EventData{
-			PracticeResults: make(map[HeatRound]*models.RaceResultScrape),
-			QualiResults:    make(map[HeatRound]*models.RaceResultScrape),
-			FinalResults:    make(map[HeatRound]*models.RaceResultScrape),
+			PracticeResults: make(map[models.HeatRound]*models.RaceResultScrape),
+			QualiResults:    make(map[models.HeatRound]*models.RaceResultScrape),
+			FinalResults:    make(map[models.HeatRound]*models.RaceResultScrape),
 		}
 	}
 
@@ -51,6 +47,8 @@ func (c *Cache) SaveLiveTiming(url string, model *models.RaceResultScrape) error
 
 	ed := c.getOrCreateEvent(url)
 	ed.Live = model
+
+	slog.Debug("Saved live timing to cache", "url", url)
 
 	return nil
 }
@@ -68,15 +66,17 @@ func (c *Cache) GetLiveTiming(url string) (*models.RaceResultScrape, error) {
 }
 
 func (c *Cache) SavePracticeRaceResult(url string, model *models.RaceResultScrape) error {
-	if model.HeatNumber == nil || model.Round == nil {
-		return fmt.Errorf("Cannot store race result, heat=%v; round=%v", model.HeatNumber, model.Round)
+	if model.PracticeNumber == nil || model.Round == nil {
+		return fmt.Errorf("Cannot store race result, practice=%v; round=%v", model.PracticeNumber, model.Round)
 	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	ed := c.getOrCreateEvent(url)
-	ed.PracticeResults[HeatRound{*model.HeatNumber, *model.Round}] = model
+	ed.PracticeResults[models.HeatRound{Heat: *model.PracticeNumber, Round: *model.Round}] = model
+
+	slog.Debug("Saved practice race result to cache", "url", url, "heat", *model.PracticeNumber, "round", *model.Round)
 
 	return nil
 }
@@ -85,7 +85,7 @@ func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.Race
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	key := HeatRound{heat, round}
+	key := models.HeatRound{Heat: heat, Round: round}
 
 	ed, ok := c.data[url]
 	if !ok || ed.PracticeResults[key] == nil {
@@ -104,7 +104,9 @@ func (c *Cache) SaveQualiRaceResult(url string, model *models.RaceResultScrape) 
 	defer c.mu.Unlock()
 
 	ed := c.getOrCreateEvent(url)
-	ed.QualiResults[HeatRound{*model.HeatNumber, *model.Round}] = model
+	ed.QualiResults[models.HeatRound{Heat: *model.HeatNumber, Round: *model.Round}] = model
+
+	slog.Debug("Saved quali race result to cache", "url", url, "heat", *model.HeatNumber, "round", *model.Round)
 
 	return nil
 }
@@ -113,7 +115,7 @@ func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.RaceRes
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	key := HeatRound{heat, round}
+	key := models.HeatRound{Heat: heat, Round: round}
 
 	ed, ok := c.data[url]
 	if !ok || ed.QualiResults[key] == nil {
@@ -124,15 +126,17 @@ func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.RaceRes
 }
 
 func (c *Cache) SaveFinalRaceResult(url string, model *models.RaceResultScrape) error {
-	if model.HeatNumber == nil || model.Round == nil {
-		return fmt.Errorf("Cannot store race result, heat=%v; round=%v", model.HeatNumber, model.Round)
+	if model.FinalNumber == nil || model.Round == nil {
+		return fmt.Errorf("Cannot store race result, final=%v; round=%v", model.FinalNumber, model.Round)
 	}
 
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	ed := c.getOrCreateEvent(url)
-	ed.FinalResults[HeatRound{*model.HeatNumber, *model.Round}] = model
+	ed.FinalResults[models.HeatRound{Heat: *model.FinalNumber, Round: *model.Round}] = model
+
+	slog.Debug("Saved final race result to cache", "url", url, "heat", *model.FinalNumber, "round", *model.Round)
 
 	return nil
 }
@@ -141,7 +145,7 @@ func (c *Cache) GetFinalRaceResult(url string, final, round int) (*models.RaceRe
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	key := HeatRound{final, round}
+	key := models.HeatRound{Heat: final, Round: round}
 
 	ed, ok := c.data[url]
 	if !ok || ed.FinalResults[key] == nil {

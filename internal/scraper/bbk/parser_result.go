@@ -23,10 +23,6 @@ var (
 	classBestLapRegex = regexp.MustCompile(`Class Best Lap: (?P<name>.*?) (?P<time>\d+\.\d+)`)
 )
 
-func ptr[T any](v T) *T {
-	return &v
-}
-
 func parseRaceResult(body io.Reader) (*models.RaceResultScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
@@ -38,13 +34,13 @@ func parseRaceResult(body io.Reader) (*models.RaceResultScrape, error) {
 		return nil, fmt.Errorf("critical structure change: expected 3 tables, found %d", tables.Length())
 	}
 
-	lt := &models.RaceResultScrape{}
+	scrape := &models.RaceResultScrape{}
 
-	parseHeader(tables.Eq(0), lt)
-	parseDrivers(tables.Eq(1), lt)
-	parseMeta(tables.Eq(2), lt)
+	parseHeader(tables.Eq(0), scrape)
+	parseDrivers(tables.Eq(1), scrape)
+	parseMeta(tables.Eq(2), scrape)
 
-	return lt, nil
+	return scrape, nil
 }
 
 func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
@@ -156,6 +152,8 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 			// empty string may mean DNS
 		} else if strings.HasPrefix(resText, "W-") {
 			// warm up laps
+		} else if resText == "DNS" {
+			// Did not start
 		} else {
 			slog.Warn("unparseable result", "row", i+1, "result", resText)
 		}

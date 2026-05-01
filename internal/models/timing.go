@@ -43,3 +43,16 @@ type RaceResultScrape struct {
 	ClassFT        *ClassFT
 	ClassBestLap   *ClassBestLap
 }
+
+type HeatRound struct {
+	Heat  int
+	Round int
+}
+
+type RaceResultsIndexScrape struct {
+	Title     string
+	Timestamp time.Time
+	Practice  map[HeatRound]struct{}
+	Quali     map[HeatRound]struct{}
+	Finals    map[HeatRound]struct{}
+}

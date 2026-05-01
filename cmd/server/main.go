@@ -48,7 +48,7 @@ func main() {
 	manager := manager.NewManager(cache)
 	router := api.SetupRouter(cache, manager)
 
-	if err := router.Run(":8080"); err != nil {
+	if err := router.Run("0.0.0.0:8080"); err != nil {
 		slog.Error("An error occurred", "err", err)
 		return
 	}

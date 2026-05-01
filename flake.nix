@@ -28,7 +28,7 @@
 
         pkgs = import nixpkgs { inherit system; };
       in
-      {
+      rec {
         packages =
           let
             gitRev = self.shortRev or self.dirtyShortRev or "unknown";
@@ -40,7 +40,6 @@
                 "-w"
 
                 "-X main.Version=${commonArgs.version}-${gitRev}"
-                "-X main.DefaultPort=${toString defaultPort}"
               ];
 
               tags = [ "release" ];
@@ -52,16 +51,35 @@
               buildFlags = [ "-gcflags=all=-N -l" ];
               ldflags = [
                 "-X main.Version=${commonArgs.version}-${gitRev}-debug"
-                "-X main.DefaultPort=${toString debugPort}"
               ];
               tags = [ "debug" ];
-              postInstall = ''
-                mv $out/bin/rc-timing-api $out/bin/$pname
-              '';
             });
 
             default = release;
           };
+
+        apps = {
+          debug = {
+            type = "app";
+            program =
+              let
+                runner = pkgs.writeShellApplication {
+                  name = "rc-timing-api-debug-runner";
+                  text = ''
+                    echo "Running Debug Build on Port ${toString debugPort}..."
+                    export PORT=${toString debugPort}
+                    exec ${packages.debug}/bin/${commonArgs.pname} "$@"
+                  '';
+                };
+              in
+              "${runner}/bin/rc-timing-api-debug-runner";
+          };
+
+          default = {
+            type = "app";
+            program = "${packages.default}/bin/${commonArgs.pname}";
+          };
+        };
 
         checks = {
           go-test = pkgs.buildGoModule (commonArgs // {
@@ -106,8 +124,8 @@
               runtimeInputs = [ pkgs.go ];
 
               text = ''
-                echo "Starting the server on port ${toString defaultPort} in development mode..."
-                PORT="8080" go run ./cmd/rc-timing-api/main.go "$@"
+                echo "Starting the server on port ${toString debugPort} in development mode..."
+                PORT="${toString debugPort}" go run ./cmd/rc-timing-api/main.go "$@"
               '';
             };
 
@@ -151,7 +169,7 @@
 
                 echo "Attacking at $RATE req/s for $DURATION seconds..."
 
-                echo "GET http://localhost:${toString defaultPort}/api/v1/ping" | \
+                echo "GET http://localhost:${toString debugPort}/api/v1/ping" | \
                     vegeta attack -rate="$RATE"/1s -duration="$DURATION"s | \
                     vegeta encode | \
                     jq -r '. | "\(.code) \(.latency / 1000000)ms \(.error)"'
@@ -213,10 +231,9 @@
               ] ++ commandBinaries;
 
               shellHook = ''
-                export PORT="${toString defaultPort}"
                 echo "---"
                 echo "Go development environment loaded."
-                echo "Default Port: $PORT"
+                echo "Default Dev Port: ${toString debugPort}"
                 echo "Available custom commands: $(lsfunc)"
                 echo "---"
               '';
@@ -256,13 +273,12 @@
                   ExecStart = "${cfg.package}/bin/rc-timing-api";
                   Restart = "always";
                   RestartSec = "3";
-
                   DynamicUser = true;
                 };
 
                 environment = {
-                  PORT = toString cfg.port;
                   GIN_MODE = "release";
+                  PORT = toString cfg.port;
                 };
               };
 

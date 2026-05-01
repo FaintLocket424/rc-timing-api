@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/api"
@@ -12,9 +14,8 @@ import (
 )
 
 var (
-	Version     = "dev"
-	DefaultPort = ""
-	LogLevel    = new(slog.LevelVar)
+	Version  = "dev"
+	LogLevel = new(slog.LevelVar)
 )
 
 func InitLogger(useJSON bool) {
@@ -35,33 +36,37 @@ func InitLogger(useJSON bool) {
 }
 
 func main() {
-	jsonMode := flag.Bool("json", false, "output logs in json format")
+	defaultPort := 4998
+
+	if envPort := os.Getenv("PORT"); envPort != "" {
+		if p, err := strconv.Atoi(envPort); err == nil {
+			defaultPort = p
+		} else {
+			slog.Warn("Invalid PORT environment variable, falling back to default", "envPort", envPort, "default", defaultPort)
+		}
+	}
+
+	port := flag.Int("port", defaultPort, "Port to listen on (overrides PORT env var)")
+	host := flag.String("host", "0.0.0.0", "Host interface to bind to (e.g., 127.0.0.1 for localhost only)")
+	jsonMode := flag.Bool("json", false, "Output logs in json format")
 	flag.Parse()
+
 	InitLogger(*jsonMode)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = DefaultPort
-	}
-
-	if port == "" {
-		panic("Port not set")
-	}
-
-	debugMode := Version == "dev" || strings.HasSuffix(Version, "debug")
-
-	if debugMode {
+	if debugMode := Version == "dev" || strings.HasSuffix(Version, "debug"); debugMode {
 		LogLevel.Set(slog.LevelDebug)
 	}
 
-	slog.Info("Starting RC Timing API", "version", Version, "port", port)
+	listenAddr := fmt.Sprintf("%s:%d", *host, *port)
+
+	slog.Info("Starting RC Timing API", "version", Version, "address", listenAddr)
 
 	cache := cache.NewCache()
 	manager := manager.NewManager(cache)
 	router := api.SetupRouter(cache, manager)
 
-	if err := router.Run("0.0.0.0:" + port); err != nil {
+	if err := router.Run(listenAddr); err != nil {
 		slog.Error("An error occurred", "err", err)
-		return
+		os.Exit(1)
 	}
 }

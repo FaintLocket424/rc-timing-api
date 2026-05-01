@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	Version         = "dev"
-	GinMode  string = "debug"
-	LogLevel        = new(slog.LevelVar)
+	Version  = "dev"
+	GinMode  = "debug"
+	LogLevel = new(slog.LevelVar)
 )
 
 func InitLogger(useJSON bool) {

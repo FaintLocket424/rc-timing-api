@@ -12,12 +12,10 @@
 
   outputs = { self, nixpkgs, treefmt-nix }:
     let
-      serverPort = "8080";
+      defaultPort = "4998";
 
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
 
       commonArgs = {
@@ -36,7 +34,6 @@
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
-
           gitRev = self.shortRev or self.dirtyShortRev or "unknown";
         in
         rec {
@@ -45,9 +42,8 @@
               "-s"
               "-w"
 
-              "-X main.GinMode=release"
               "-X main.Version=${commonArgs.version}-${gitRev}"
-              "-X main.Port=${serverPort}"
+              "-X main.DefaultPort=${toString defaultPort}"
             ];
 
             tags = [ "release" ];
@@ -55,16 +51,12 @@
 
           debug = pkgs.buildGoModule (commonArgs // {
             pname = "${commonArgs.pname}-debug";
-
             dontStrip = true;
-
             buildFlags = [ "-gcflags=all=-N -l" ];
-
             ldflags = [
               "-X main.Version=${commonArgs.version}-${gitRev}-debug"
-              "-X main.Port=${serverPort}"
+              "-X main.DefaultPort=${toString defaultPort}"
             ];
-
             tags = [ "debug" ];
           });
 
@@ -95,6 +87,21 @@
             });
           });
 
+      formatter = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor.${system};
+
+          treefmtEval = treefmt-nix.lib.evalModule pkgs {
+            projectRootFile = "flake.nix";
+            programs.nixpkgs-fmt.enable = true;
+            programs.gofmt.enable = true;
+
+            settings.global.excludes = [ "**/testdata/**" ];
+          };
+        in
+        treefmtEval.config.build.wrapper
+      );
+
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
@@ -105,8 +112,8 @@
             runtimeInputs = [ pkgs.go ];
 
             text = ''
-              echo "Starting the server on port ${serverPort} in development mode..."
-              PORT="${serverPort}" go run ./cmd/server/main.go "$@"
+              echo "Starting the server on port ${toString defaultPort} in development mode..."
+              PORT="${toString defaultPort}" go run ./cmd/server/main.go "$@"
             '';
           };
 
@@ -150,7 +157,7 @@
 
               echo "Attacking at $RATE req/s for $DURATION seconds..."
 
-              echo "GET http://localhost:${serverPort}/api/v1/ping" | \
+              echo "GET http://localhost:${toString defaultPort}/api/v1/ping" | \
                   vegeta attack -rate="$RATE"/1s -duration="$DURATION"s | \
                   vegeta encode | \
                   jq -r '. | "\(.code) \(.latency / 1000000)ms \(.error)"'
@@ -212,29 +219,106 @@
             ] ++ commandBinaries;
 
             shellHook = ''
-              export PORT="${serverPort}"
+              export PORT="${toString defaultPort}"
               echo "---"
               echo "Go development environment loaded."
-              echo "Target Port: $PORT"
+              echo "Default Port: $PORT"
               echo "Available custom commands: $(lsfunc)"
               echo "---"
             '';
           };
         });
 
-      formatter = forAllSystems (system:
-        let
-          pkgs = nixpkgsFor.${system};
+      homeModules.rc-timing-api = { config, lib, pkgs, ... }:
+        let cfg = config.services.rc-timing-api; in {
+          options.services.rc-timing-api = {
+            enable = lib.mkEnableOption "RC Timing API Service";
 
-          treefmtEval = treefmt-nix.lib.evalModule pkgs {
-            projectRootFile = "flake.nix";
-            programs.nixpkgs-fmt.enable = true;
-            programs.gofmt.enable = true;
+            port = lib.mkOption {
+              type = lib.types.port;
+              default = defaultPort;
+              description = "The port the API should listen on.";
+            };
 
-            settings.global.excludes = [ "**/testdata/**" ];
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = self.packages.${pkgs.system}.default;
+              description = "The rc-timing-api package to use.";
+            };
           };
-        in
-        treefmtEval.config.build.wrapper
-      );
+
+          config = lib.mkIf cfg.enable {
+            home.packages = [ cfg.package ];
+
+            systemd.user.services.rc-timing-api = {
+              Unit = {
+                Description = "RC Timing API Server";
+                After = [ "network.target" ];
+              };
+
+              Install = {
+                WantedBy = [ "default.target" ];
+              };
+
+              Service = {
+                ExecStart = "${cfg.package}/bin/rc-timing-api";
+                Restart = "always";
+                RestartSec = "3";
+
+                Environment = [
+                  "PORT=${toString cfg.port}"
+                  "GIN_MODE=release"
+                ];
+              };
+            };
+          };
+        };
+
+      nixosModules.rc-timing-api = { config, lib, pkgs, ... }:
+        let cfg = config.services.rc-timing-api; in {
+          options.services.rc-timing-api = {
+            enable = lib.mkEnableOption "RC Timing API Service";
+            port = lib.mkOption {
+              type = lib.types.port;
+              default = defaultPort;
+              description = "The port the API should listen on.";
+            };
+            openFirewall = lib.mkOption {
+              type = lib.types.bool;
+              default = false;
+              description = "Whether to automatically open the firewall for the API port.";
+            };
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = self.packages.${pkgs.system}.default;
+              description = "The rc-timing-api package to use.";
+            };
+          };
+
+          config = lib.mkIf cfg.enable {
+            environment.systemPackages = [ cfg.package ];
+
+            systemd.services.rc-timing-api = {
+              description = "RC Timing API Server";
+              after = [ "network.target" ];
+              wantedBy = [ "multi-user.target" ];
+
+              serviceConfig = {
+                ExecStart = "${cfg.package}/bin/rc-timing-api";
+                Restart = "always";
+                RestartSec = "3";
+
+                DynamicUser = true;
+              };
+
+              environment = {
+                PORT = toString cfg.port;
+                GIN_MODE = "release";
+              };
+            };
+
+            networing.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.port ];
+          };
+        };
     };
 }

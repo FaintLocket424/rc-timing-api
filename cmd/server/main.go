@@ -9,14 +9,12 @@ import (
 	"github.com/FaintLocket424/rc-timing-api/internal/api"
 	"github.com/FaintLocket424/rc-timing-api/internal/manager"
 	"github.com/FaintLocket424/rc-timing-api/internal/storage/cache"
-	"github.com/gin-gonic/gin"
 )
 
 var (
-	Version  = "dev"
-	GinMode  = "debug"
-	Port     string
-	LogLevel = new(slog.LevelVar)
+	Version     = "dev"
+	DefaultPort = "8080"
+	LogLevel    = new(slog.LevelVar)
 )
 
 func InitLogger(useJSON bool) {
@@ -41,16 +39,9 @@ func main() {
 	flag.Parse()
 	InitLogger(*jsonMode)
 
-	if GinMode == "release" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	if Port == "" {
-		Port = os.Getenv("PORT")
-	}
-
-	if Port == "" {
-		Port = "8080"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = DefaultPort
 	}
 
 	debugMode := Version == "dev" || strings.HasSuffix(Version, "debug")
@@ -59,13 +50,13 @@ func main() {
 		LogLevel.Set(slog.LevelDebug)
 	}
 
-	slog.Info("Starting RC Timing API", "version", Version, "port", Port)
+	slog.Info("Starting RC Timing API", "version", Version, "port", port)
 
 	cache := cache.NewCache()
 	manager := manager.NewManager(cache)
 	router := api.SetupRouter(cache, manager)
 
-	if err := router.Run("0.0.0.0:" + Port); err != nil {
+	if err := router.Run("0.0.0.0:" + port); err != nil {
 		slog.Error("An error occurred", "err", err)
 		return
 	}

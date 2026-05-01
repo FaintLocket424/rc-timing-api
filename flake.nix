@@ -230,51 +230,6 @@
           };
         });
 
-      homeModules.rc-timing-api = { config, lib, pkgs, ... }:
-        let cfg = config.services.rc-timing-api; in {
-          options.services.rc-timing-api = {
-            enable = lib.mkEnableOption "RC Timing API Service";
-
-            port = lib.mkOption {
-              type = lib.types.port;
-              default = defaultPort;
-              description = "The port the API should listen on.";
-            };
-
-            package = lib.mkOption {
-              type = lib.types.package;
-              default = self.packages.${pkgs.system}.default;
-              description = "The rc-timing-api package to use.";
-            };
-          };
-
-          config = lib.mkIf cfg.enable {
-            home.packages = [ cfg.package ];
-
-            systemd.user.services.rc-timing-api = {
-              Unit = {
-                Description = "RC Timing API Server";
-                After = [ "network.target" ];
-              };
-
-              Install = {
-                WantedBy = [ "default.target" ];
-              };
-
-              Service = {
-                ExecStart = "${cfg.package}/bin/rc-timing-api";
-                Restart = "always";
-                RestartSec = "3";
-
-                Environment = [
-                  "PORT=${toString cfg.port}"
-                  "GIN_MODE=release"
-                ];
-              };
-            };
-          };
-        };
-
       nixosModules.rc-timing-api = { config, lib, pkgs, ... }:
         let cfg = config.services.rc-timing-api; in {
           options.services.rc-timing-api = {

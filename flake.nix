@@ -3,7 +3,7 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
-  outputs = { nixpkgs, ... }:
+  outputs = { self, nixpkgs }:
     let
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
 
@@ -15,18 +15,45 @@
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
-        in
-        {
-          default = pkgs.buildGoModule {
+
+          gitRev = self.shortRev or self.dirtyShortRev or "unknown";
+
+          commonArgs = {
             pname = "rc-timing-api";
-            version = "0.0.1";
-
+            version = "0.1.0";
             src = ./.;
-
             subPackages = [ "cmd/server" ];
-
             vendorHash = "sha256-IUww4dVh6MWv7SQITZY+LKgOT1ReVgmEHY3bl2f/tM4=";
           };
+        in
+        rec {
+          release = pkgs.buildGoModule (commonArgs // {
+            ldflags = [
+              "-s"
+              "-w"
+
+              "-X main.GinMode=release"
+              "-X main.Version=${commonArgs.version}-${gitRev}"
+            ];
+
+            tags = [ "release" ];
+          });
+
+          debug = pkgs.buildGoModule (commonArgs // {
+            pname = "${commonArgs.pname}-debug";
+
+            dontStrip = true;
+
+            buildFlags = [ "-gcflags=all=-N -l" ];
+
+            ldflags = [
+              "-X main.Version=${commonArgs.version}-${gitRev}-debug"
+            ];
+
+            tags = [ "debug" ];
+          });
+
+          default = release;
         });
 
       devShells = forAllSystems (system:

@@ -8,9 +8,14 @@ import (
 	"github.com/FaintLocket424/rc-timing-api/internal/api"
 	"github.com/FaintLocket424/rc-timing-api/internal/manager"
 	"github.com/FaintLocket424/rc-timing-api/internal/storage/cache"
+	"github.com/gin-gonic/gin"
 )
 
-var LogLevel = new(slog.LevelVar)
+var (
+	version         = "dev"
+	GinMode  string = "debug"
+	LogLevel        = new(slog.LevelVar)
+)
 
 func InitLogger(useJSON bool) {
 	LogLevel.Set(slog.LevelInfo)
@@ -29,9 +34,11 @@ func InitLogger(useJSON bool) {
 	slog.SetDefault(slog.New(handler))
 }
 
-var version = "0.0.1"
-
 func main() {
+	if GinMode == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	debugMode := flag.Bool("debug", false, "enable debug logging")
 	jsonMode := flag.Bool("json", false, "output logs in json format")
 	flag.Parse()

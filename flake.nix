@@ -13,6 +13,7 @@
   outputs = { self, nixpkgs, treefmt-nix }:
     let
       defaultPort = 4998;
+      debugPort = 8080;
 
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
@@ -55,7 +56,7 @@
             buildFlags = [ "-gcflags=all=-N -l" ];
             ldflags = [
               "-X main.Version=${commonArgs.version}-${gitRev}-debug"
-              "-X main.DefaultPort=${toString defaultPort}"
+              "-X main.DefaultPort=${toString debugPort}"
             ];
             tags = [ "debug" ];
           });
@@ -106,14 +107,14 @@
         let
           pkgs = nixpkgsFor.${system};
 
-          runServerScript = pkgs.writeShellApplication {
-            name = "run-server";
+          runDevServerScript = pkgs.writeShellApplication {
+            name = "run-dev-server";
 
             runtimeInputs = [ pkgs.go ];
 
             text = ''
               echo "Starting the server on port ${toString defaultPort} in development mode..."
-              PORT="${toString defaultPort}" go run ./cmd/server/main.go "$@"
+              PORT="8080" go run ./cmd/server/main.go "$@"
             '';
           };
 
@@ -201,7 +202,7 @@
           };
 
           commandBinaries = [
-            runServerScript
+            runDevServerScript
             mirrorBBKScript
             testRateLimitingScript
             lineCounterScript

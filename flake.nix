@@ -317,7 +317,7 @@
               };
             };
 
-            networing.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.port ];
+            networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.port ];
           };
         };
     };

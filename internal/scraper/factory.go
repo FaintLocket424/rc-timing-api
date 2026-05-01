@@ -47,5 +47,5 @@ func NewScraperForURL(url string) (Scraper, error) {
 		}, nil
 	}
 
-	return nil, errors.New("Unable to determine scraper")
+	return nil, errors.New("unable to determine scraper")
 }

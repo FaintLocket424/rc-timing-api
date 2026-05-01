@@ -18,12 +18,16 @@
 
           gitRev = self.shortRev or self.dirtyShortRev or "unknown";
 
-          commonArgs = {
+          commonArgs = rec {
             pname = "rc-timing-api";
             version = "0.1.0";
             src = ./.;
             subPackages = [ "cmd/server" ];
             vendorHash = "sha256-IUww4dVh6MWv7SQITZY+LKgOT1ReVgmEHY3bl2f/tM4=";
+
+            postInstall = ''
+              mv $out/bin/server $out/bin/$pname
+            '';
           };
         in
         rec {

@@ -35,16 +35,16 @@ func TestParseRaceResult(t *testing.T) {
 	for _, tt := range tests {
 		laps, dur, err := ParseRaceResult(tt.input)
 		if (err != nil) != tt.wantErr {
-			t.Errorf("ParseRaceResult(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
+			t.Errorf("incorrect error running ParseRaceResult(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue
 		}
 
 		// Compare pointers: both nil or both pointing to equal values
 		if (laps == nil) != (tt.wantLaps == nil) || (laps != nil && *laps != *tt.wantLaps) {
-			t.Errorf("ParseRaceResult(%q) laps = %v, want %v", tt.input, laps, tt.wantLaps)
+			t.Errorf("incorrect laps returned by ParseRaceResult(%q) laps = %v, want %v", tt.input, laps, tt.wantLaps)
 		}
 		if (dur == nil) != (tt.wantDur == nil) || (dur != nil && *dur != *tt.wantDur) {
-			t.Errorf("ParseRaceResult(%q) dur = %v, want %v", tt.input, dur, tt.wantDur)
+			t.Errorf("incorrect duration returned by ParseRaceResult(%q) dur = %v, want %v", tt.input, dur, tt.wantDur)
 		}
 	}
 }
@@ -66,11 +66,11 @@ func TestParseGap(t *testing.T) {
 	for _, tt := range tests {
 		dur, err := ParseGap(tt.input)
 		if (err != nil) != tt.wantErr {
-			t.Errorf("ParseGap(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
+			t.Errorf("incorrect error returned by ParseGap(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue
 		}
 		if (dur == nil) != (tt.wantDur == nil) || (dur != nil && *dur != *tt.wantDur) {
-			t.Errorf("ParseGap(%q) = %v, want %v", tt.input, dur, tt.wantDur)
+			t.Errorf("incorrect duration returned by ParseGap(%q) = %v, want %v", tt.input, dur, tt.wantDur)
 		}
 	}
 }
@@ -92,14 +92,14 @@ func TestParseLap(t *testing.T) {
 	for _, tt := range tests {
 		dur, lap, err := ParseLap(tt.input)
 		if (err != nil) != tt.wantErr {
-			t.Errorf("ParseLap(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
+			t.Errorf("incorrect errror returned by ParseLap(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue
 		}
 		if (dur == nil) != (tt.wantDur == nil) || (dur != nil && *dur != *tt.wantDur) {
-			t.Errorf("ParseLap(%q) dur = %v, want %v", tt.input, dur, tt.wantDur)
+			t.Errorf("incorrect duration returned by ParseLap(%q) dur = %v, want %v", tt.input, dur, tt.wantDur)
 		}
 		if (lap == nil) != (tt.wantLap == nil) || (lap != nil && *lap != *tt.wantLap) {
-			t.Errorf("ParseLap(%q) lap = %v, want %v", tt.input, lap, tt.wantLap)
+			t.Errorf("incorrect lap returned by ParseLap(%q) lap = %v, want %v", tt.input, lap, tt.wantLap)
 		}
 	}
 }

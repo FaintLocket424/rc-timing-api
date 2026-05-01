@@ -67,7 +67,7 @@ func (c *Cache) GetLiveTiming(url string) (*models.RaceResultScrape, error) {
 
 func (c *Cache) SavePracticeRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.PracticeNumber == nil || model.Round == nil {
-		return fmt.Errorf("Cannot store race result, practice=%v; round=%v", model.PracticeNumber, model.Round)
+		return fmt.Errorf("cannot store race result, practice=%v; round=%v", model.PracticeNumber, model.Round)
 	}
 
 	c.mu.Lock()
@@ -97,7 +97,7 @@ func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.Race
 
 func (c *Cache) SaveQualiRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.HeatNumber == nil || model.Round == nil {
-		return fmt.Errorf("Cannot store race result, heat=%v; round=%v", model.HeatNumber, model.Round)
+		return fmt.Errorf("cannot store race result, heat=%v; round=%v", model.HeatNumber, model.Round)
 	}
 
 	c.mu.Lock()
@@ -127,7 +127,7 @@ func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.RaceRes
 
 func (c *Cache) SaveFinalRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.FinalNumber == nil || model.Round == nil {
-		return fmt.Errorf("Cannot store race result, final=%v; round=%v", model.FinalNumber, model.Round)
+		return fmt.Errorf("cannot store race result, final=%v; round=%v", model.FinalNumber, model.Round)
 	}
 
 	c.mu.Lock()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/FaintLocket424/rc-timing-api/internal/models"
 )
@@ -19,13 +20,37 @@ type EventData struct {
 }
 
 type Cache struct {
-	data map[string]*EventData
-	mu   sync.RWMutex
+	data   map[string]*EventData
+	mu     sync.RWMutex
+	logger *slog.Logger
 }
 
 func NewCache() *Cache {
-	return &Cache{
-		data: make(map[string]*EventData),
+	c := &Cache{
+		data:   make(map[string]*EventData),
+		logger: slog.Default().With("component", "cache"),
+	}
+
+	go c.startReaper()
+	c.logger.Info("Reaper process started")
+	return c
+}
+
+func (c *Cache) startReaper() {
+	for {
+		now := time.Now()
+
+		nextMidnight := time.Date(now.Year(), now.Month(), now.Day()+1, 4, 0, 0, 0, now.Location())
+
+		duration := nextMidnight.Sub(now)
+
+		time.Sleep(duration)
+
+		c.mu.Lock()
+		c.data = make(map[string]*EventData)
+		c.mu.Unlock()
+
+		c.logger.Info("Cache cleared by midnight reaper process")
 	}
 }
 

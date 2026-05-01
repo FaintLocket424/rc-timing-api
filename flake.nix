@@ -22,12 +22,8 @@
           pname = "rc-timing-api";
           version = "0.1.0";
           src = ./.;
-          subPackages = [ "cmd/server" ];
+          subPackages = [ "cmd/rc-timing-api" ];
           vendorHash = "sha256-IUww4dVh6MWv7SQITZY+LKgOT1ReVgmEHY3bl2f/tM4=";
-
-          postInstall = ''
-            mv $out/bin/server $out/bin/$pname
-          '';
         };
 
         pkgs = import nixpkgs { inherit system; };
@@ -108,7 +104,7 @@
 
               text = ''
                 echo "Starting the server on port ${toString defaultPort} in development mode..."
-                PORT="8080" go run ./cmd/server/main.go "$@"
+                PORT="8080" go run ./cmd/rc-timing-api/main.go "$@"
               '';
             };
 

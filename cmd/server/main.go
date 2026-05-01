@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	version         = "dev"
+	Version         = "dev"
 	GinMode  string = "debug"
 	LogLevel        = new(slog.LevelVar)
 )
@@ -40,7 +40,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	debugMode := version == "dev" || strings.HasSuffix(version, "debug")
+	debugMode := Version == "dev" || strings.HasSuffix(Version, "debug")
 	jsonMode := flag.Bool("json", false, "output logs in json format")
 	flag.Parse()
 
@@ -50,7 +50,7 @@ func main() {
 		LogLevel.Set(slog.LevelDebug)
 	}
 
-	slog.Info("Starting RC Timing API", "version", version)
+	slog.Info("Starting RC Timing API", "version", Version)
 
 	cache := cache.NewCache()
 	manager := manager.NewManager(cache)

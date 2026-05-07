@@ -115,8 +115,7 @@
                 settings.global.excludes = [ "**/testdata/**" ];
               };
             in
-            treefmtEval.config.build.wrapper
-          ;
+            treefmtEval.config.build.wrapper;
 
           devShells =
             let
@@ -242,7 +241,6 @@
                 '';
               };
             };
-
         }
       ) // {
       nixosModules.rc-timing-api = { config, lib, pkgs, ... }:
@@ -291,5 +289,4 @@
           };
         };
     };
-
 }

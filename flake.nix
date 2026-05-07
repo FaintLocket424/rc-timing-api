@@ -47,6 +47,8 @@
           };
 
           golangciYaml = pkgs.writeText "golangci.yaml" ''
+            version: "2"
+
             run:
               timeout: 5m
               skip-dirs:

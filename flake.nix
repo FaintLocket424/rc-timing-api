@@ -10,9 +10,14 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, treefmt-nix }:
+  outputs = { self, nixpkgs, flake-utils, treefmt-nix, git-hooks }:
     let
       defaultPort = 4998;
     in
@@ -30,6 +35,27 @@
           };
 
           pkgs = import nixpkgs { inherit system; };
+
+          treefmtEval = treefmt-nix.lib.evalModule pkgs {
+            projectRootFile = "flake.nix";
+            programs = {
+              nixpkgs-fmt.enable = true;
+              gofumpt.enable = true;
+              mdformat.enable = true;
+            };
+            settings.global.excludes = [ "**/testdata/**" ];
+          };
+
+          pre-commit-check = git-hooks.lib.${system}.run {
+            src = ./.;
+            hooks = {
+              treefmt = {
+                enable = true;
+                package = treefmtEval.config.build.wrapper;
+              };
+              golangci-lint.enable = true;
+            };
+          };
         in
         rec {
           packages =
@@ -41,7 +67,6 @@
                 ldflags = [
                   "-s"
                   "-w"
-
                   "-X main.Version=${commonArgs.version}-${gitRev}"
                 ];
 
@@ -85,6 +110,8 @@
           };
 
           checks = {
+            formatting = treefmtEval.config.build.check;
+
             go-test = pkgs.buildGoModule (commonArgs // {
               pname = "rc-timing-api-tests";
               buildPhase = "";
@@ -93,6 +120,7 @@
 
             golangci-lint = pkgs.buildGoModule (commonArgs // {
               pname = "rc-timing-api-lint";
+              doCheck = false;
 
               buildPhase = ''
                 export GOCACHE=$TMPDIR/go-cache
@@ -105,24 +133,10 @@
             });
           };
 
-          formatter =
-            let
-              treefmtEval = treefmt-nix.lib.evalModule pkgs {
-                projectRootFile = "flake.nix";
-                programs = {
-                  nixpkgs-fmt.enable = true;
-                  gofmt.enable = true;
-                  mdformat.enable = true;
-                };
-
-                settings.global.excludes = [ "**/testdata/**" ];
-              };
-            in
-            treefmtEval.config.build.wrapper;
+          formatter = treefmtEval.config.build.wrapper;
 
           devShells =
             let
-
               runDevServerScript = pkgs.writeShellApplication {
                 name = "run-dev-server";
 
@@ -165,22 +179,6 @@
                 '';
               };
 
-              testRateLimitingScript = pkgs.writeShellApplication {
-                name = "test-rate-limiting";
-                runtimeInputs = [ pkgs.vegeta pkgs.jq ];
-                text = ''
-                  RATE="''${1:-5}"
-                  DURATION="''${2:-10}"
-
-                  echo "Attacking at $RATE req/s for $DURATION seconds..."
-
-                  echo "GET http://localhost:${toString debugPort}/api/v1/ping" | \
-                      vegeta attack -rate="$RATE"/1s -duration="$DURATION"s | \
-                      vegeta encode | \
-                      jq -r '. | "\(.code) \(.latency / 1000000)ms \(.error)"'
-                '';
-              };
-
               lineCounterScript = pkgs.writeShellApplication {
                 name = "line-count";
                 runtimeInputs = [ pkgs.findutils pkgs.coreutils ];
@@ -220,7 +218,6 @@
               commandBinaries = [
                 runDevServerScript
                 mirrorBBKScript
-                testRateLimitingScript
                 lineCounterScript
                 listFunctions
               ];
@@ -233,9 +230,11 @@
                   go
                   gopls
                   delve
+                  golangci-lint
                 ] ++ commandBinaries;
 
                 shellHook = ''
+                  ${pre-commit-check.shellHook}
                   echo "---"
                   echo "Go development environment loaded."
                   echo "Default Dev Port: ${toString debugPort}"

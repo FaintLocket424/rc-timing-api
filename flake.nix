@@ -46,6 +46,38 @@
             settings.global.excludes = [ "**/testdata/**" ];
           };
 
+          golangciYaml = pkgs.writeText "golangci.yaml" ''
+            run:
+              timeout: 5m
+              skip-dirs:
+                - testdata
+
+            linters:
+              disable-all: false
+              enable:
+                - revive
+                - gosec
+                - gocritic
+                - nilerr
+                - errcheck
+                - godot
+                - goconst
+          '';
+
+          custom-golangci-lint = pkgs.writeShellApplication {
+            name = "golangci-lint";
+            runtimeInputs = [ pkgs.golangci-lint ];
+            text = ''
+              # If the first argument is 'run', inject our Nix-managed config
+              if [ "''${1:-}" = "run" ]; then
+                exec golangci-lint "$1" --config="${golangciYaml}" "''${@:2}"
+              else
+                # For commands like 'version' or 'cache', just pass normally
+                exec golangci-lint "$@"
+              fi
+            '';
+          };
+
           pre-commit-check = git-hooks.lib.${system}.run {
             src = ./.;
             hooks = {
@@ -53,7 +85,10 @@
                 enable = true;
                 package = treefmtEval.config.build.wrapper;
               };
-              golangci-lint.enable = true;
+              golangci-lint = {
+                enable = true;
+                package = custom-golangci-lint;
+              };
             };
           };
         in
@@ -101,16 +136,19 @@
                   };
                 in
                 "${runner}/bin/rc-timing-api-debug-runner";
+
+              meta.description = "Run the API in debug mode";
             };
 
             default = {
               type = "app";
               program = "${packages.default}/bin/${commonArgs.pname}";
+              meta.description = "Run the API in release mode";
             };
           };
 
           checks = {
-            formatting = treefmtEval.config.build.check;
+            formatting = treefmtEval.config.build.check self;
 
             go-test = pkgs.buildGoModule (commonArgs // {
               pname = "rc-timing-api-tests";
@@ -126,7 +164,7 @@
                 export GOCACHE=$TMPDIR/go-cache
                 export GOLANGCI_LINT_CACHE=$TMPDIR/golangci-cache
 
-                ${pkgs.golangci-lint}/bin/golangci-lint run --timeout 5m --skip-dirs "testdata"
+                ${custom-golangci-lint}/bin/golangci-lint run
               '';
 
               installPhase = "touch $out";
@@ -230,7 +268,7 @@
                   go
                   gopls
                   delve
-                  golangci-lint
+                  custom-golangci-lint
                 ] ++ commandBinaries;
 
                 shellHook = ''

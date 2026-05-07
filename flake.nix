@@ -109,8 +109,11 @@
             let
               treefmtEval = treefmt-nix.lib.evalModule pkgs {
                 projectRootFile = "flake.nix";
-                programs.nixpkgs-fmt.enable = true;
-                programs.gofmt.enable = true;
+                programs = {
+                  nixpkgs-fmt.enable = true;
+                  gofmt.enable = true;
+                  mdformat.enable = true;
+                };
 
                 settings.global.excludes = [ "**/testdata/**" ];
               };

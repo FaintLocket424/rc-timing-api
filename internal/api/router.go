@@ -11,7 +11,10 @@ import (
 
 func SetupRouter(store storage.Store, manager *manager.Manager) *gin.Engine {
 	r := gin.Default()
-	r.SetTrustedProxies(nil)
+	if err := r.SetTrustedProxies(nil); err != nil {
+		panic(err)
+	}
+
 	r.Use(middleware.RateLimiter(5, 10))
 
 	handler := NewHandler(store, manager)

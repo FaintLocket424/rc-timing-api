@@ -17,10 +17,14 @@ type Handler struct {
 	manager *manager.Manager
 }
 
+// NewHandler creates a new Handler struct with references to a store and manager.
 func NewHandler(store storage.Store, manager *manager.Manager) *Handler {
 	return &Handler{store, manager}
 }
 
+// GetLiveTiming is a gin route handler function for getting the live timing.
+// It spawns a worker thread in the manager if it doesn't already exist for the URL.
+// Then it checks the cache and returns what it finds.
 func (h *Handler) GetLiveTiming(c *gin.Context) {
 	url := c.Query("target_url")
 

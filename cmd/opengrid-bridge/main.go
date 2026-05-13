@@ -1,3 +1,8 @@
+// Package main is the entry point for the rc-timing-api web server.
+//
+// It creates a cache from the [internal/storage/cache] package.
+// It creates a manager from the [internal/storage/manager] package.
+// It then uses the cache and manager to create a router in the [internal/api] package.
 package main
 
 import (

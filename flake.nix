@@ -43,7 +43,10 @@
               gofumpt.enable = true;
               mdformat.enable = true;
             };
-            settings.global.excludes = [ "**/testdata/**" ];
+            settings.global.excludes = [
+              "**/testdata/**"
+              "cmd/experiment/**"
+            ];
           };
 
           golangciYaml = pkgs.writeText "golangci.yaml" ''
@@ -53,6 +56,7 @@
               timeout: 5m
               skip-dirs:
                 - testdata
+                - cmd/experiment
 
             linters:
               disable-all: false

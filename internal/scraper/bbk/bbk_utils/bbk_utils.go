@@ -16,6 +16,8 @@ var (
 	lapRegex = regexp.MustCompile(`(?P<time>\d+\.\d+)(?:\[(?P<lap>\d+)\])?`)
 )
 
+// NamedCapture extracts named groups from regular expressions
+// and returns them as a map.
 func NamedCapture(re *regexp.Regexp, input string) map[string]string {
 	matches := re.FindStringSubmatch(input)
 	if matches == nil {

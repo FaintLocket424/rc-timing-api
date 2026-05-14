@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Handler holds referencefs to the current store and manager.
+// Handler holds references to the current store and manager.
 // It contains methods for handling different request types.
 type Handler struct {
 	store   storage.Store

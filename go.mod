@@ -1,4 +1,4 @@
-module github.com/FaintLocket424/rc-timing-api
+module github.com/FaintLocket424/opengrid-bridge
 
 go 1.25.8
 

@@ -1,5 +1,5 @@
 {
-  description = "RC Timing API";
+  description = "OpenGrid Timing Bridge development flake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
@@ -27,10 +27,10 @@
           debugPort = 8080;
 
           commonArgs = {
-            pname = "rc-timing-api";
+            pname = "opengrid-bridge";
             version = "0.1.0";
             src = ./.;
-            subPackages = [ "cmd/rc-timing-api" ];
+            subPackages = [ "cmd/opengrid-bridge" ];
             vendorHash = "sha256-IUww4dVh6MWv7SQITZY+LKgOT1ReVgmEHY3bl2f/tM4=";
           };
 
@@ -127,7 +127,7 @@
               program =
                 let
                   runner = pkgs.writeShellApplication {
-                    name = "rc-timing-api-debug-runner";
+                    name = "opengrid-bridge-debug-runner";
                     text = ''
                       echo "Running Debug Build on Port ${toString debugPort}..."
                       export PORT=${toString debugPort}
@@ -135,7 +135,7 @@
                     '';
                   };
                 in
-                "${runner}/bin/rc-timing-api-debug-runner";
+                "${runner}/bin/opengrid-bridge-debug-runner";
 
               meta.description = "Run the API in debug mode";
             };
@@ -151,13 +151,13 @@
             formatting = treefmtEval.config.build.check self;
 
             go-test = pkgs.buildGoModule (commonArgs // {
-              pname = "rc-timing-api-tests";
+              pname = "opengrid-bridge-tests";
               buildPhase = "";
               installPhase = "touch $out";
             });
 
             golangci-lint = pkgs.buildGoModule (commonArgs // {
-              pname = "rc-timing-api-lint";
+              pname = "opengrid-bridge-lint";
               doCheck = false;
 
               buildPhase = ''
@@ -182,7 +182,7 @@
 
                 text = ''
                   echo "Starting the server on port ${toString debugPort} in development mode..."
-                  PORT="${toString debugPort}" go run ./cmd/rc-timing-api/main.go "$@"
+                  PORT="${toString debugPort}" go run ./cmd/opengrid-bridge/main.go "$@"
                 '';
               };
 
@@ -283,10 +283,10 @@
             };
         }
       ) // {
-      nixosModules.rc-timing-api = { config, lib, pkgs, ... }:
-        let cfg = config.services.rc-timing-api; in {
-          options.services.rc-timing-api = {
-            enable = lib.mkEnableOption "RC Timing API Service";
+      nixosModules.opengrid-bridge = { config, lib, pkgs, ... }:
+        let cfg = config.services.opengrid-bridge; in {
+          options.services.opengrid-bridge = {
+            enable = lib.mkEnableOption "OpenGrid Timing Bridge Service";
             port = lib.mkOption {
               type = lib.types.port;
               default = defaultPort;
@@ -300,20 +300,20 @@
             package = lib.mkOption {
               type = lib.types.package;
               default = self.packages.${pkgs.system}.default;
-              description = "The rc-timing-api package to use.";
+              description = "The opengrid-bridge package to use.";
             };
           };
 
           config = lib.mkIf cfg.enable {
             environment.systemPackages = [ cfg.package ];
 
-            systemd.services.rc-timing-api = {
-              description = "RC Timing API Server";
+            systemd.services.opengrid-bridge = {
+              description = "OpenGrid Timing Bridge Server";
               after = [ "network.target" ];
               wantedBy = [ "multi-user.target" ];
 
               serviceConfig = {
-                ExecStart = "${cfg.package}/bin/rc-timing-api";
+                ExecStart = "${cfg.package}/bin/opengrid-bridge";
                 Restart = "always";
                 RestartSec = "3";
                 DynamicUser = true;

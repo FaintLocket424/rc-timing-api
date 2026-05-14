@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/FaintLocket424/rc-timing-api/internal/api"
-	"github.com/FaintLocket424/rc-timing-api/internal/manager"
-	"github.com/FaintLocket424/rc-timing-api/internal/storage/cache"
+	"github.com/FaintLocket424/opengrid-bridge/internal/api"
+	"github.com/FaintLocket424/opengrid-bridge/internal/manager"
+	"github.com/FaintLocket424/opengrid-bridge/internal/storage/cache"
 )
 
 var (
@@ -59,7 +59,7 @@ func main() {
 
 	listenAddr := fmt.Sprintf("%s:%d", *host, *port)
 
-	slog.Info("Starting RC Timing API", "version", Version, "address", listenAddr)
+	slog.Info("Starting OpenGrid Timing Bridge", "version", Version, "address", listenAddr)
 
 	cache := cache.NewCache()
 	manager := manager.NewManager(cache)

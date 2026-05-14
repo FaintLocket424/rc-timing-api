@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FaintLocket424/rc-timing-api/internal/models"
-	"github.com/FaintLocket424/rc-timing-api/internal/scraper/bbk/utils"
+	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk/utils"
 	"github.com/PuerkitoBio/goquery"
 )
 

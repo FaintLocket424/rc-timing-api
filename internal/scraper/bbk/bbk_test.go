@@ -1,4 +1,4 @@
-package bbk_scraper
+package bbk
 
 import (
 	"net/http"

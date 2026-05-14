@@ -1,4 +1,4 @@
-package bbk_scraper
+package bbk
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk_scraper/bbk_utils"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk/bbk_utils"
 	"github.com/PuerkitoBio/goquery"
 )
 

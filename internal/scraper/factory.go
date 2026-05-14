@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk_scraper"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -49,7 +49,7 @@ func NewScraperForURL(url string) (scraper Scraper, err error) {
 	author, exists := doc.Find("meta[name='author']").Attr("content")
 
 	if exists && author == "bbkRClive" {
-		return &bbk_scraper.BBKScraper{
+		return &bbk.BBKScraper{
 			Target: url,
 			Client: client,
 		}, nil

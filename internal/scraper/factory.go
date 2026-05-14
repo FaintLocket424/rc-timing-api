@@ -49,7 +49,7 @@ func NewScraperForURL(url string) (scraper Scraper, err error) {
 	author, exists := doc.Find("meta[name='author']").Attr("content")
 
 	if exists && author == "bbkRClive" {
-		return &bbk.BBKScraper{
+		return &bbk.Scraper{
 			Target: url,
 			Client: client,
 		}, nil

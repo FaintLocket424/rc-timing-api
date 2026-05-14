@@ -275,7 +275,7 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 
 	for _, tc := range tests {
 		suite.Run(tc.name, func() {
-			scraper := &BBKScraper{
+			scraper := &Scraper{
 				Target: fmt.Sprintf("%s/%s/%s", suite.server.URL, tc.timestamp.Format("2006-01-02_15-04-05"), tc.url),
 				Client: suite.server.Client(),
 			}

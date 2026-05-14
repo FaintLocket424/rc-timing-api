@@ -23,9 +23,9 @@ type HTTPClient interface {
 	Get(url string) (*http.Response, error)
 }
 
-// BBKScraper represents a scraper that operates on bbk pages.
+// Scraper represents a scraper that operates on bbk pages.
 // Holds a reference to its target URL and HTTP Client to use.
-type BBKScraper struct {
+type Scraper struct {
 	Target string
 	Client HTTPClient
 }
@@ -33,7 +33,7 @@ type BBKScraper struct {
 // fetchPage makes an HTTP request to the input parameter url using the
 // scraper's HTTPClient. It checks if the status is 200 OK and returns
 // the Body of the request.
-func (s *BBKScraper) fetchPage(url string) (io.ReadCloser, error) {
+func (s *Scraper) fetchPage(url string) (io.ReadCloser, error) {
 	res, err := s.Client.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("network error: %w", err)
@@ -52,7 +52,7 @@ func (s *BBKScraper) fetchPage(url string) (io.ReadCloser, error) {
 // GetLiveTiming calls the scraper to fetch the `liveraceres.htm` page from the
 // target and run the parser on it to create a *models.RaceResultsScrape of the
 // current live race.
-func (s *BBKScraper) GetLiveTiming() (res *models.RaceResultScrape, err error) {
+func (s *Scraper) GetLiveTiming() (res *models.RaceResultScrape, err error) {
 	body, fetchErr := s.fetchPage(s.Target + "/liveraceres.htm")
 	if fetchErr != nil {
 		return nil, fetchErr
@@ -68,7 +68,7 @@ func (s *BBKScraper) GetLiveTiming() (res *models.RaceResultScrape, err error) {
 
 // GetPracticeRaceResult calls the scraper to fetch the `pxryres.htm` for a given
 // practice heat x and round y.
-func (s *BBKScraper) GetPracticeRaceResult(practice, round int) (res *models.RaceResultScrape, err error) {
+func (s *Scraper) GetPracticeRaceResult(practice, round int) (res *models.RaceResultScrape, err error) {
 	if practice < 1 || round < 1 {
 		return nil, fmt.Errorf("practice and round must be >= 1 (got %d, %d)", practice, round)
 	}
@@ -89,7 +89,7 @@ func (s *BBKScraper) GetPracticeRaceResult(practice, round int) (res *models.Rac
 
 // GetQualiRaceResult calls the scraper to fetch the `hxryres.htm` for a given
 // qualifying heat x and round y.
-func (s *BBKScraper) GetQualiRaceResult(heat, round int) (res *models.RaceResultScrape, err error) {
+func (s *Scraper) GetQualiRaceResult(heat, round int) (res *models.RaceResultScrape, err error) {
 	if heat < 1 || round < 1 {
 		return nil, fmt.Errorf("heat and round must be >= 1 (got %d, %d)", heat, round)
 	}
@@ -110,7 +110,7 @@ func (s *BBKScraper) GetQualiRaceResult(heat, round int) (res *models.RaceResult
 
 // GetFinalRaceResult calls the scraper to fetch the `fxryres.htm` for a given
 // final number x and round y.
-func (s *BBKScraper) GetFinalRaceResult(final, leg int) (res *models.RaceResultScrape, err error) {
+func (s *Scraper) GetFinalRaceResult(final, leg int) (res *models.RaceResultScrape, err error) {
 	if final < 1 || leg < 1 {
 		return nil, fmt.Errorf("final and leg must be >= 1 (got %d, %d)", final, leg)
 	}
@@ -131,7 +131,7 @@ func (s *BBKScraper) GetFinalRaceResult(final, leg int) (res *models.RaceResultS
 
 // GetRaceResultsIndex calls the scraper to get the `liveresults.htm` index page and parse it
 // for all the links.
-func (s *BBKScraper) GetRaceResultsIndex() (res *models.RaceResultsIndexScrape, err error) {
+func (s *Scraper) GetRaceResultsIndex() (res *models.RaceResultsIndexScrape, err error) {
 	body, fetchErr := s.fetchPage(s.Target + "/liveresults.htm")
 	if fetchErr != nil {
 		return nil, fetchErr

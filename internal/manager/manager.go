@@ -21,6 +21,11 @@ type workerState struct {
 	cancel       context.CancelFunc
 }
 
+// Manager holds references to the active store, a Mutex and a logger.
+// It also holds a map of timing URLs to a struct representing the state of
+// the tracking goroutine associated with the URL.
+// The struct has methods for making sure a URL is tracked, starting a
+// new worker goroutine etc.
 type Manager struct {
 	store         storage.Store
 	activeWorkers map[string]*workerState // Set of URLs which have an active worker

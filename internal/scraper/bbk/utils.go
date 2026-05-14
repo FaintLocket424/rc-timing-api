@@ -88,7 +88,7 @@ func parseLapStr(lapStr string) (*time.Duration, *int, error) {
 		} else {
 			return &duration, &lapNum, nil
 		}
-	} else {
-		return &duration, nil, nil
 	}
+
+	return &duration, nil, nil
 }

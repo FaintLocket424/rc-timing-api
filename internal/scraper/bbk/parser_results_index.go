@@ -42,7 +42,7 @@ func parseRaceResultsIndex(body io.Reader) (*models.RaceResultsIndexScrape, erro
 
 	links := tables.Find("a")
 
-	links.Each(func(i int, s *goquery.Selection) {
+	links.Each(func(_ int, s *goquery.Selection) {
 		if attr, exists := s.Attr("href"); exists {
 			if data := bbk_utils.NamedCapture(resultsLinkRegex, attr); data != nil {
 				heat, err := strconv.Atoi(data["heat"])

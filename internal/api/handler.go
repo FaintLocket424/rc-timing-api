@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/FaintLocket424/rc-timing-api/internal/manager"
-	"github.com/FaintLocket424/rc-timing-api/internal/storage"
+	"github.com/FaintLocket424/opengrid-bridge/internal/manager"
+	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 	"github.com/gin-gonic/gin"
 )
 

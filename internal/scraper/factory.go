@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/FaintLocket424/rc-timing-api/internal/scraper/bbk"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk"
 	"github.com/PuerkitoBio/goquery"
 )
 

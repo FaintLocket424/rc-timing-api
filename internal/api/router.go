@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 
-	"github.com/FaintLocket424/rc-timing-api/internal/api/middleware"
-	"github.com/FaintLocket424/rc-timing-api/internal/manager"
-	"github.com/FaintLocket424/rc-timing-api/internal/storage"
+	"github.com/FaintLocket424/opengrid-bridge/internal/api/middleware"
+	"github.com/FaintLocket424/opengrid-bridge/internal/manager"
+	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 	"github.com/gin-gonic/gin"
 )
 

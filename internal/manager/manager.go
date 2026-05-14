@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FaintLocket424/rc-timing-api/internal/models"
-	"github.com/FaintLocket424/rc-timing-api/internal/scraper"
-	"github.com/FaintLocket424/rc-timing-api/internal/storage"
+	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper"
+	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 )
 
 var workerLifespan = 30 * time.Minute

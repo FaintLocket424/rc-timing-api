@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/FaintLocket424/rc-timing-api/internal/models"
+	"github.com/FaintLocket424/opengrid-bridge/internal/models"
 )
 
 func ptr[T any](v T) *T {

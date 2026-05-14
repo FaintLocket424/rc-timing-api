@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/FaintLocket424/rc-timing-api/internal/models"
+import "github.com/FaintLocket424/opengrid-bridge/internal/models"
 
 type Store interface {
 	SaveLiveTiming(url string, model *models.RaceResultScrape) error

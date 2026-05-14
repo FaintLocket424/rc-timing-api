@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FaintLocket424/rc-timing-api/internal/models"
+	"github.com/FaintLocket424/opengrid-bridge/internal/models"
 )
 
 var ErrNotFound = errors.New("event data not found")

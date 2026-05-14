@@ -33,6 +33,8 @@ type Manager struct {
 	logger        *slog.Logger
 }
 
+// NewManager creates a new manager object with a reference to the input store.
+// It then starts the reaper goroutine, whose job it is to kill inactive worker goroutines.
 func NewManager(store storage.Store) *Manager {
 	m := &Manager{
 		store:         store,
@@ -45,7 +47,9 @@ func NewManager(store storage.Store) *Manager {
 	return m
 }
 
-func (m *Manager) cleanupWorkerInternal(url string) {
+// reapWorker kills the goroutine associated with the url parameter, giving it
+// the cancel signal and deleting it from the active workers struct.
+func (m *Manager) reapWorker(url string) {
 	if state, ok := m.activeWorkers[url]; ok {
 		state.cancel()
 		delete(m.activeWorkers, url)
@@ -53,13 +57,16 @@ func (m *Manager) cleanupWorkerInternal(url string) {
 	}
 }
 
+// startWorker is the main function of the tracking goroutines.
+// It handles creating the scraper for the URL and using it to
+// scrape the url on a fixed interval.
 func (m *Manager) startWorker(ctx context.Context, url string) {
 	logger := m.logger.With("url", url)
 	s, err := scraper.NewScraperForURL(url)
 	if err != nil {
 		logger.Error("failed to init scraper", "err", err)
 		m.mu.Lock()
-		m.cleanupWorkerInternal(url)
+		m.reapWorker(url)
 		m.mu.Unlock()
 		return
 	}
@@ -151,6 +158,9 @@ func (m *Manager) startWorker(ctx context.Context, url string) {
 	}
 }
 
+// EnsureTracking creates a tracking goroutine for the input URL, if it doesn't
+// exist already. It also handles updating the last accessed time for the URL
+// so the manager knows to keep it alive.
 func (m *Manager) EnsureTracking(url string) (workerStarted bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -167,6 +177,9 @@ func (m *Manager) EnsureTracking(url string) (workerStarted bool) {
 	return true
 }
 
+// startReaper is the main function of the reaper goroutine, which runs on a
+// fixed interval and reaps any worker tracking goroutines that have not been
+// accessed for longer than the workerLifespan.
 func (m *Manager) startReaper() {
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
@@ -177,7 +190,7 @@ func (m *Manager) startReaper() {
 		for url, state := range m.activeWorkers {
 			if time.Since(state.lastAccessed) > workerLifespan {
 				m.logger.Info("reaping idle worker", "url", url)
-				m.cleanupWorkerInternal(url)
+				m.reapWorker(url)
 			}
 		}
 

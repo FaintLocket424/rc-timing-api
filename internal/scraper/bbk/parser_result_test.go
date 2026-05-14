@@ -71,7 +71,7 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 						Name:      ptr("Dave Mackins"),
 					},
 				},
-				BestLap: &models.BestLap{
+				BestLap: &models.RaceBestLap{
 					DriverName: ptr("Stuart Clifford"),
 					Time:       ptr(time.Duration(10_936) * time.Millisecond),
 					LapNumber:  ptr(9),
@@ -180,7 +180,7 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 						BestLapNumber:   ptr(3),
 					},
 				},
-				BestLap: &models.BestLap{
+				BestLap: &models.RaceBestLap{
 					DriverName: ptr("Chris Elworthy"),
 					Time:       ptr(time.Duration(26_410) * time.Millisecond),
 					LapNumber:  ptr(11),
@@ -264,7 +264,7 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 						LastLapDuration: ptr(time.Duration(29_250) * time.Millisecond),
 					},
 				},
-				BestLap: &models.BestLap{
+				BestLap: &models.RaceBestLap{
 					DriverName: ptr("Colin Mulligan"),
 					Time:       ptr(time.Duration(28_130) * time.Millisecond),
 					LapNumber:  ptr(2),
@@ -275,9 +275,9 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 
 	for _, tc := range tests {
 		suite.Run(tc.name, func() {
-			scraper := &BBKScraper{
-				Target: fmt.Sprintf("%s/%s/%s", suite.server.URL, tc.timestamp.Format("2006-01-02_15-04-05"), tc.url),
-				Client: suite.server.Client(),
+			scraper := &Scraper{
+				target: fmt.Sprintf("%s/%s/%s", suite.server.URL, tc.timestamp.Format("2006-01-02_15-04-05"), tc.url),
+				client: suite.server.Client(),
 			}
 
 			data, err := scraper.GetLiveTiming()

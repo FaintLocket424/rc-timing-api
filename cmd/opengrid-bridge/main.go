@@ -1,3 +1,26 @@
+/*
+ * OpenGrid Timing Bridge
+ * Copyright (C) 2026 OpenGrid RC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// Package main is the entry point for the rc-timing-api web server.
+//
+// It creates a cache from the [internal/storage/cache] package.
+// It creates a manager from the [internal/storage/manager] package.
+// It then uses the cache and manager to create a router in the [internal/api] package.
 package main
 
 import (
@@ -10,6 +33,7 @@ import (
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api"
 	"github.com/FaintLocket424/opengrid-bridge/internal/manager"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage/cache"
 )
 
@@ -62,7 +86,8 @@ func main() {
 	slog.Info("Starting OpenGrid Timing Bridge", "version", Version, "address", listenAddr)
 
 	cache := cache.NewCache()
-	manager := manager.NewManager(cache)
+	scraperFactory := scraper.NewFactory(Version)
+	manager := manager.NewManager(cache, scraperFactory)
 	router := api.SetupRouter(cache, manager)
 
 	if err := router.Run(listenAddr); err != nil {

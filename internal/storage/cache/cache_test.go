@@ -62,18 +62,21 @@ func (suite *CacheTestSuite) TestConcurrentAccess() {
 
 			if id%2 == 0 {
 				for range 100 {
-					suite.cache.SaveLiveTiming(url, &data)
+					err := suite.cache.SaveLiveTiming(url, &data)
+					suite.NoError(err, "SaveLiveTiming failed during concurrent write")
 				}
 			} else {
 				for range 100 {
-					suite.cache.GetLiveTiming(url)
+					_, err := suite.cache.GetLiveTiming(url)
+					if err != nil {
+						suite.ErrorIs(err, errNotFound, "GetLiveTiming returned an unexpected error")
+					}
 				}
 			}
 		}(i)
 	}
 
 	wg.Wait()
-
 }
 
 func TestCacheSuite(t *testing.T) {

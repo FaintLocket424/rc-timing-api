@@ -43,14 +43,20 @@
               gofumpt.enable = true;
               mdformat.enable = true;
             };
-            settings.global.excludes = [ "**/testdata/**" ];
+            settings.global.excludes = [
+              "**/testdata/**"
+              "cmd/experiment/**"
+            ];
           };
 
           golangciYaml = pkgs.writeText "golangci.yaml" ''
+            version: "2"
+
             run:
               timeout: 5m
               skip-dirs:
                 - testdata
+                - cmd/experiment
 
             linters:
               disable-all: false
@@ -62,6 +68,18 @@
                 - errcheck
                 - godot
                 - goconst
+                - godoclint
+
+            linters-settings:
+              godoclint:
+                options:
+                  require-doc:
+                    ignore-unexported: false
+
+            issues:
+              exclude-use-default: false
+              max-issues-per-linter: 3
+              max-same-issues: 3
           '';
 
           custom-golangci-lint = pkgs.writeShellApplication {
@@ -80,6 +98,9 @@
 
           pre-commit-check = git-hooks.lib.${system}.run {
             src = ./.;
+
+            package = pkgs.prek;
+
             hooks = {
               treefmt = {
                 enable = true;
@@ -268,6 +289,7 @@
                   go
                   gopls
                   delve
+                  prek
                   custom-golangci-lint
                 ] ++ commandBinaries;
 

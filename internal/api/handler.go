@@ -10,15 +10,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Handler holds references to the current store and manager.
+// It contains methods for handling different request types.
 type Handler struct {
 	store   storage.Store
 	manager *manager.Manager
 }
 
+// NewHandler creates a new Handler struct with references to a store and manager.
 func NewHandler(store storage.Store, manager *manager.Manager) *Handler {
 	return &Handler{store, manager}
 }
 
+// GetLiveTiming handles HTTP requests to fetch live timing data.
+// It ensures a tracking goroutine is running for the provided URL, then
+// checks the cache. If tracking is initialising, it prompts the client to poll again.
 func (h *Handler) GetLiveTiming(c *gin.Context) {
 	url := c.Query("target_url")
 
@@ -42,10 +48,11 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 	c.JSON(http.StatusOK, model)
 }
 
+// GetPracticeRaceResult handles HTTP requests to fetch practice results.
+// It ensures a tracking goroutine is running for the provided URL, then
+// checks the cache. If tracking is initialising, it prompts the client to poll again.
 func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 	url := c.Query("target_url")
-	heat, _ := strconv.Atoi(c.Param("heat"))
-	round, _ := strconv.Atoi(c.Param("round"))
 
 	if url == "" {
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -53,6 +60,9 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 	}
 
 	newWorkerSpawned := h.manager.EnsureTracking(url)
+
+	heat, _ := strconv.Atoi(c.Param("heat"))
+	round, _ := strconv.Atoi(c.Param("round"))
 
 	model, err := h.store.GetPracticeRaceResult(url, heat, round)
 	if err != nil {
@@ -68,10 +78,11 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 	c.JSON(http.StatusOK, model)
 }
 
+// GetQualiRaceResult handles HTTP requests to fetch practice results.
+// It ensures a tracking goroutine is running for the provided URL, then
+// checks the cache. If tracking is initialising, it prompts the client to poll again.
 func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 	url := c.Query("target_url")
-	heat, _ := strconv.Atoi(c.Param("heat"))
-	round, _ := strconv.Atoi(c.Param("round"))
 
 	if url == "" {
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -79,6 +90,9 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 	}
 
 	newWorkerSpawned := h.manager.EnsureTracking(url)
+
+	heat, _ := strconv.Atoi(c.Param("heat"))
+	round, _ := strconv.Atoi(c.Param("round"))
 
 	model, err := h.store.GetQualiRaceResult(url, heat, round)
 	if err != nil {
@@ -94,6 +108,9 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 	c.JSON(http.StatusOK, model)
 }
 
+// GetFinalRaceResult handles HTTP requests to fetch practice results.
+// It ensures a tracking goroutine is running for the provided URL, then
+// checks the cache. If tracking is initialising, it prompts the client to poll again.
 func (h *Handler) GetFinalRaceResult(c *gin.Context) {
 	url := c.Query("target_url")
 	heat, _ := strconv.Atoi(c.Param("heat"))

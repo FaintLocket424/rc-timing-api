@@ -1,7 +1,10 @@
+// Package storage holds the Store interface, representing a data structure for storing previously
+// fetched data for quick retrieval later.
 package storage
 
 import "github.com/FaintLocket424/opengrid-bridge/internal/models"
 
+// Store represents a data cache with methods to save and retrieve timing data.
 type Store interface {
 	SaveLiveTiming(url string, model *models.RaceResultScrape) error
 	GetLiveTiming(url string) (*models.RaceResultScrape, error)

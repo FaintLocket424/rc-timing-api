@@ -9,42 +9,48 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type RealHTTPClient struct {
+// Factory is a scraper factory with a Create method that makes new scrapers.
+// It holds a reference to the programVersion to be used in the scraper's
+// User-Agent http header.
+type Factory struct {
 	client *http.Client
 }
 
-func (c *RealHTTPClient) Get(url string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
+// NewFactory creates a new Scraper Factory with the program version injected.
+func NewFactory(programVersion string) *Factory {
+	return &Factory{
+		client: NewClient(programVersion),
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
-	return c.client.Do(req)
 }
 
-// NewScraperForURL takes in a target url and detects which Scraper is suitable.
-func NewScraperForURL(url string) (Scraper, error) {
-	client := &RealHTTPClient{http.DefaultClient}
+// Create makes a new scraper using the factory.
+func (f *Factory) Create(url string) (scraper Scraper, err error) {
+	client := f.client
 
-	res, err := client.Get(url)
-	if err != nil {
-		return nil, err
+	res, fetchErr := client.Get(url)
+	if fetchErr != nil {
+		return nil, fetchErr
 	}
-	defer res.Body.Close()
+
+	defer func() {
+		if closeErr := res.Body.Close(); closeErr != nil {
+			err = errors.Join(err, closeErr)
+		}
+	}()
 
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to reach index, status code error: %d, %s", res.StatusCode, res.Status)
 	}
 
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	doc, docErr := goquery.NewDocumentFromReader(res.Body)
+	if docErr != nil {
+		return nil, docErr
+	}
 
 	author, exists := doc.Find("meta[name='author']").Attr("content")
 
 	if exists && author == "bbkRClive" {
-		return &bbk.BBKScraper{
-			Target: url,
-			Client: client,
-		}, nil
+		return bbk.NewScraper(url, client), nil
 	}
 
 	return nil, errors.New("unable to determine scraper")

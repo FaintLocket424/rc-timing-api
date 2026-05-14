@@ -28,7 +28,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api"
@@ -60,17 +59,7 @@ func InitLogger(useJSON bool) {
 }
 
 func main() {
-	defaultPort := 4998
-
-	if envPort := os.Getenv("PORT"); envPort != "" {
-		if p, err := strconv.Atoi(envPort); err == nil {
-			defaultPort = p
-		} else {
-			slog.Warn("Invalid PORT environment variable, falling back to default", "envPort", envPort, "default", defaultPort)
-		}
-	}
-
-	port := flag.Int("port", defaultPort, "Port to listen on (overrides PORT env var)")
+	port := flag.Int("port", 4998, "Port to listen on (overrides PORT env var)")
 	host := flag.String("host", "0.0.0.0", "Host interface to bind to (e.g., 127.0.0.1 for localhost only)")
 	jsonMode := flag.Bool("json", false, "Output logs in json format")
 	flag.Parse()

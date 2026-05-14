@@ -1,4 +1,4 @@
-package bbk
+package bbk_scraper
 
 import (
 	"errors"

@@ -69,7 +69,7 @@ func (suite *CacheTestSuite) TestConcurrentAccess() {
 				for range 100 {
 					_, err := suite.cache.GetLiveTiming(url)
 					if err != nil {
-						suite.ErrorIs(err, ErrNotFound, "GetLiveTiming returned an unexpected error")
+						suite.ErrorIs(err, errNotFound, "GetLiveTiming returned an unexpected error")
 					}
 				}
 			}

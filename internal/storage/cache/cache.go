@@ -11,7 +11,7 @@ import (
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
 )
 
-var ErrNotFound = errors.New("event data not found")
+var errNotFound = errors.New("event data not found")
 
 // EventData holds all the data which has been scraped from an event so far.
 type EventData struct {
@@ -97,7 +97,7 @@ func (c *Cache) GetLiveTiming(url string) (*models.RaceResultScrape, error) {
 
 	ed, ok := c.data[url]
 	if !ok || ed.Live == nil {
-		return nil, ErrNotFound
+		return nil, errNotFound
 	}
 
 	return ed.Live, nil
@@ -133,7 +133,7 @@ func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.Race
 
 	ed, ok := c.data[url]
 	if !ok || ed.PracticeResults[key] == nil {
-		return nil, ErrNotFound
+		return nil, errNotFound
 	}
 
 	return ed.PracticeResults[key], nil
@@ -167,7 +167,7 @@ func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.RaceRes
 
 	ed, ok := c.data[url]
 	if !ok || ed.QualiResults[key] == nil {
-		return nil, ErrNotFound
+		return nil, errNotFound
 	}
 
 	return ed.QualiResults[key], nil
@@ -201,7 +201,7 @@ func (c *Cache) GetFinalRaceResult(url string, final, round int) (*models.RaceRe
 
 	ed, ok := c.data[url]
 	if !ok || ed.FinalResults[key] == nil {
-		return nil, ErrNotFound
+		return nil, errNotFound
 	}
 
 	return ed.FinalResults[key], nil

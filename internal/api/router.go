@@ -1,3 +1,6 @@
+// Package api handles the Gin router, taking incoming requests and using the
+// [internal/manager] and [internal/storage] packages to retrieve the response
+// and then sending it back to the user.
 package api
 
 import (
@@ -9,6 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetupRouter creates the Gin router with a rate limiter middleware from
+// [internal/api/middleware]. It also initialises the Handler struct which
+// contains the methods to process the incoming requests.
 func SetupRouter(store storage.Store, manager *manager.Manager) *gin.Engine {
 	r := gin.Default()
 	if err := r.SetTrustedProxies(nil); err != nil {
@@ -53,8 +59,6 @@ func SetupRouter(store storage.Store, manager *manager.Manager) *gin.Engine {
 				}
 			}
 		}
-
-		// localhost:8080/results/practice/round/1/heat/1
 	}
 
 	return r

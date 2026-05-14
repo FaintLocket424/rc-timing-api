@@ -1,3 +1,5 @@
+// Package manager handles the lifecycle of the tracking goroutines used to
+// scrape each active timing URL.
 package manager
 
 import (

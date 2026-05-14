@@ -18,9 +18,6 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, treefmt-nix, git-hooks }:
-    let
-      defaultPort = 4998;
-    in
     flake-utils.lib.eachDefaultSystem
       (system:
         let
@@ -151,8 +148,7 @@
                     name = "opengrid-bridge-debug-runner";
                     text = ''
                       echo "Running Debug Build on Port ${toString debugPort}..."
-                      export PORT=${toString debugPort}
-                      exec ${packages.debug}/bin/${commonArgs.pname} "$@"
+                      exec ${packages.debug}/bin/${commonArgs.pname} -port ${toString debugPort} "$@"
                     '';
                   };
                 in
@@ -203,7 +199,7 @@
 
                 text = ''
                   echo "Starting the server on port ${toString debugPort} in development mode..."
-                  PORT="${toString debugPort}" go run ./cmd/opengrid-bridge/main.go "$@"
+                  go run ./cmd/opengrid-bridge/main.go -port ${toString debugPort} "$@"
                 '';
               };
 
@@ -311,7 +307,7 @@
             enable = lib.mkEnableOption "OpenGrid Timing Bridge Service";
             port = lib.mkOption {
               type = lib.types.port;
-              default = defaultPort;
+              default = 4998;
               description = "The port the API should listen on.";
             };
             openFirewall = lib.mkOption {
@@ -335,7 +331,7 @@
               wantedBy = [ "multi-user.target" ];
 
               serviceConfig = {
-                ExecStart = "${cfg.package}/bin/opengrid-bridge";
+                ExecStart = "${cfg.package}/bin/opengrid-bridge -port ${toString cfg.port}";
                 Restart = "always";
                 RestartSec = "3";
                 DynamicUser = true;
@@ -343,7 +339,6 @@
 
               environment = {
                 GIN_MODE = "release";
-                PORT = toString cfg.port;
               };
             };
 

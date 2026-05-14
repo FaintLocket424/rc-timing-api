@@ -21,25 +21,28 @@ type workerState struct {
 	cancel       context.CancelFunc
 }
 
-// Manager holds references to the active store, a Mutex and a logger.
+// Manager holds references to the active store, the scraper factory, a Mutex and a logger.
 // It also holds a map of timing URLs to a struct representing the state of
 // the tracking goroutine associated with the URL.
 // The struct has methods for making sure a URL is tracked, starting a
 // new worker goroutine etc.
 type Manager struct {
-	store         storage.Store
-	activeWorkers map[string]*workerState // Set of URLs which have an active worker
-	mu            sync.Mutex
-	logger        *slog.Logger
+	store          storage.Store
+	scraperFactory *scraper.Factory
+	activeWorkers  map[string]*workerState // Set of URLs which have an active worker
+	mu             sync.Mutex
+	logger         *slog.Logger
 }
 
-// NewManager creates a new manager object with a reference to the input store.
-// It then starts the reaper goroutine, whose job it is to kill inactive worker goroutines.
-func NewManager(store storage.Store) *Manager {
+// NewManager creates a new manager object with a reference to the input store and
+// factory scraper. It then starts the reaper goroutine, whose job it is to kill
+// inactive worker goroutines.
+func NewManager(store storage.Store, scraperFactory *scraper.Factory) *Manager {
 	m := &Manager{
-		store:         store,
-		activeWorkers: make(map[string]*workerState),
-		logger:        slog.Default().With("component", "manager"),
+		store:          store,
+		scraperFactory: scraperFactory,
+		activeWorkers:  make(map[string]*workerState),
+		logger:         slog.Default().With("component", "manager"),
 	}
 
 	go m.startReaper()
@@ -62,7 +65,7 @@ func (m *Manager) reapWorker(url string) {
 // scrape the url on a fixed interval.
 func (m *Manager) startWorker(ctx context.Context, url string) {
 	logger := m.logger.With("url", url)
-	s, err := scraper.NewScraperForURL(url)
+	s, err := m.scraperFactory.Create(url)
 	if err != nil {
 		logger.Error("failed to init scraper", "err", err)
 		m.mu.Lock()

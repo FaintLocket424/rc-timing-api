@@ -12,9 +12,3 @@ type Scraper interface {
 	GetFinalRaceResult(final, leg int) (*models.RaceResultScrape, error)
 	GetRaceResultsIndex() (*models.RaceResultsIndexScrape, error)
 }
-
-// HTTPClient represents a *http.Client with a Get method.
-// Used to customise the client to dependency inject in tests.
-// type HTTPClient interface {
-// 	Get(url string) (*http.Response, error)
-// }

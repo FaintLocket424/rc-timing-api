@@ -33,6 +33,7 @@ import (
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api"
 	"github.com/FaintLocket424/opengrid-bridge/internal/manager"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage/cache"
 )
 
@@ -85,7 +86,8 @@ func main() {
 	slog.Info("Starting OpenGrid Timing Bridge", "version", Version, "address", listenAddr)
 
 	cache := cache.NewCache()
-	manager := manager.NewManager(cache)
+	scraperFactory := scraper.NewFactory(Version)
+	manager := manager.NewManager(cache, scraperFactory)
 	router := api.SetupRouter(cache, manager)
 
 	if err := router.Run(listenAddr); err != nil {

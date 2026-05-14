@@ -20,15 +20,23 @@ func ptr[T any](v T) *T {
 // Scraper represents a scraper that operates on bbk pages.
 // Holds a reference to its target URL and HTTP Client to use.
 type Scraper struct {
-	Target string
-	Client *http.Client
+	target string
+	client *http.Client
+}
+
+// NewScraper creates a new Scraper for bbk for the targetURL using client.
+func NewScraper(targetURL string, client *http.Client) *Scraper {
+	return &Scraper{
+		target: targetURL,
+		client: client,
+	}
 }
 
 // fetchPage makes an HTTP request to the input parameter url using the
 // scraper's HTTPClient. It checks if the status is 200 OK and returns
 // the Body of the request.
 func (s *Scraper) fetchPage(url string) (io.ReadCloser, error) {
-	res, err := s.Client.Get(url)
+	res, err := s.client.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("network error: %w", err)
 	}
@@ -47,7 +55,7 @@ func (s *Scraper) fetchPage(url string) (io.ReadCloser, error) {
 // target and run the parser on it to create a *models.RaceResultsScrape of the
 // current live race.
 func (s *Scraper) GetLiveTiming() (res *models.RaceResultScrape, err error) {
-	body, fetchErr := s.fetchPage(s.Target + "/liveraceres.htm")
+	body, fetchErr := s.fetchPage(s.target + "/liveraceres.htm")
 	if fetchErr != nil {
 		return nil, fetchErr
 	}
@@ -67,7 +75,7 @@ func (s *Scraper) GetPracticeRaceResult(practice, round int) (res *models.RaceRe
 		return nil, fmt.Errorf("practice and round must be >= 1 (got %d, %d)", practice, round)
 	}
 
-	url := fmt.Sprintf("%s/p%dr%dres.htm", s.Target, practice, round)
+	url := fmt.Sprintf("%s/p%dr%dres.htm", s.target, practice, round)
 	body, fetchErr := s.fetchPage(url)
 	if fetchErr != nil {
 		return nil, fetchErr
@@ -88,7 +96,7 @@ func (s *Scraper) GetQualiRaceResult(heat, round int) (res *models.RaceResultScr
 		return nil, fmt.Errorf("heat and round must be >= 1 (got %d, %d)", heat, round)
 	}
 
-	url := fmt.Sprintf("%s/h%dr%dres.htm", s.Target, heat, round)
+	url := fmt.Sprintf("%s/h%dr%dres.htm", s.target, heat, round)
 	body, fetchErr := s.fetchPage(url)
 	if fetchErr != nil {
 		return nil, fetchErr
@@ -109,7 +117,7 @@ func (s *Scraper) GetFinalRaceResult(final, leg int) (res *models.RaceResultScra
 		return nil, fmt.Errorf("final and leg must be >= 1 (got %d, %d)", final, leg)
 	}
 
-	url := fmt.Sprintf("%s/f%dr%dres.htm", s.Target, final, leg)
+	url := fmt.Sprintf("%s/f%dr%dres.htm", s.target, final, leg)
 	body, fetchErr := s.fetchPage(url)
 	if fetchErr != nil {
 		return nil, fetchErr
@@ -126,7 +134,7 @@ func (s *Scraper) GetFinalRaceResult(final, leg int) (res *models.RaceResultScra
 // GetRaceResultsIndex calls the scraper to get the `liveresults.htm` index page and parse it
 // for all the links.
 func (s *Scraper) GetRaceResultsIndex() (res *models.RaceResultsIndexScrape, err error) {
-	body, fetchErr := s.fetchPage(s.Target + "/liveresults.htm")
+	body, fetchErr := s.fetchPage(s.target + "/liveresults.htm")
 	if fetchErr != nil {
 		return nil, fetchErr
 	}

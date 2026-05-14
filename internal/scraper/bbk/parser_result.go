@@ -171,7 +171,7 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 }
 
 func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
-	meta.Find("tr td").Each(func(i int, s *goquery.Selection) {
+	meta.Find("tr td").Each(func(_ int, s *goquery.Selection) {
 		font := s.Find("font").First().Text()
 		text := s.Text()
 

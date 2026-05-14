@@ -85,9 +85,9 @@ func parseLapStr(lapStr string) (*time.Duration, *int, error) {
 		lapNum, err := strconv.Atoi(data["lap"])
 		if err != nil {
 			return &duration, nil, fmt.Errorf("cannot parse lap")
-		} else {
-			return &duration, &lapNum, nil
 		}
+
+		return &duration, &lapNum, nil
 	}
 
 	return &duration, nil, nil

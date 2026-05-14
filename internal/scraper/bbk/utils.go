@@ -1,5 +1,4 @@
-// Package bbk_utils is
-package bbk_utils
+package bbk
 
 import (
 	"fmt"
@@ -33,8 +32,8 @@ func NamedCapture(re *regexp.Regexp, input string) map[string]string {
 	return results
 }
 
-// ParseRaceResult parses "11/34.234" or "11/1'34.234" inputs.
-func ParseRaceResult(res string) (*int, *time.Duration, error) {
+// parseRaceResultStr parses "11/34.234" or "11/1'34.234" inputs.
+func parseRaceResultStr(res string) (*int, *time.Duration, error) {
 	data := NamedCapture(resultRegex, res)
 	if data == nil {
 		return nil, nil, fmt.Errorf("invalid result format")
@@ -57,8 +56,8 @@ func ParseRaceResult(res string) (*int, *time.Duration, error) {
 	return &laps, &duration, nil
 }
 
-// ParseGap parses "+3.45" formats.
-func ParseGap(gap string) (*time.Duration, error) {
+// parseGapStr parses "+3.45" formats.
+func parseGapStr(gap string) (*time.Duration, error) {
 	if !strings.HasPrefix(gap, "+") {
 		return nil, fmt.Errorf("invalid gap format")
 	}
@@ -70,8 +69,8 @@ func ParseGap(gap string) (*time.Duration, error) {
 	return &dur, nil
 }
 
-// ParseLap parses "11.345" or "11.345[9]" into duration and lap number.
-func ParseLap(lapStr string) (*time.Duration, *int, error) {
+// parseLapStr parses "11.345" or "11.345[9]" into duration and lap number.
+func parseLapStr(lapStr string) (*time.Duration, *int, error) {
 	data := NamedCapture(lapRegex, lapStr)
 	if data == nil {
 		return nil, nil, fmt.Errorf("invalid lap format")

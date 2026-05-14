@@ -8,13 +8,12 @@ import (
 	"time"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk/bbk_utils"
 	"github.com/PuerkitoBio/goquery"
 )
 
 var resultsLinkRegex = regexp.MustCompile(`^(?P<type>[phf])(?P<heat>\d+)r(?P<round>\d+)res\.htm$`)
 
-func parseRaceResultsIndex(body io.Reader) (*models.RaceResultsIndexScrape, error) {
+func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse HTML body: %w", err)
@@ -44,7 +43,7 @@ func parseRaceResultsIndex(body io.Reader) (*models.RaceResultsIndexScrape, erro
 
 	links.Each(func(_ int, s *goquery.Selection) {
 		if attr, exists := s.Attr("href"); exists {
-			if data := bbk_utils.NamedCapture(resultsLinkRegex, attr); data != nil {
+			if data := NamedCapture(resultsLinkRegex, attr); data != nil {
 				heat, err := strconv.Atoi(data["heat"])
 				if err != nil {
 					return

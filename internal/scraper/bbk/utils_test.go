@@ -1,13 +1,9 @@
-package bbk_utils
+package bbk
 
 import (
 	"testing"
 	"time"
 )
-
-func ptr[T any](v T) *T {
-	return &v
-}
 
 func mustParseDuration(s string) time.Duration {
 	d, err := time.ParseDuration(s)
@@ -33,7 +29,7 @@ func TestParseRaceResult(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		laps, dur, err := ParseRaceResult(tt.input)
+		laps, dur, err := parseRaceResultStr(tt.input)
 		if (err != nil) != tt.wantErr {
 			t.Errorf("incorrect error running ParseRaceResult(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue
@@ -64,7 +60,7 @@ func TestParseGap(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		dur, err := ParseGap(tt.input)
+		dur, err := parseGapStr(tt.input)
 		if (err != nil) != tt.wantErr {
 			t.Errorf("incorrect error returned by ParseGap(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue
@@ -90,7 +86,7 @@ func TestParseLap(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		dur, lap, err := ParseLap(tt.input)
+		dur, lap, err := parseLapStr(tt.input)
 		if (err != nil) != tt.wantErr {
 			t.Errorf("incorrect errror returned by ParseLap(%q) error = %v, wantErr %v", tt.input, err, tt.wantErr)
 			continue

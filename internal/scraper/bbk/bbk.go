@@ -52,7 +52,7 @@ func (s *BBKScraper) GetLiveTiming() (res *models.RaceResultScrape, err error) {
 		}
 	}()
 
-	return parseRaceResult(body)
+	return parseRaceResultHTML(body)
 }
 
 func (s *BBKScraper) GetPracticeRaceResult(practice, round int) (res *models.RaceResultScrape, err error) {
@@ -71,7 +71,7 @@ func (s *BBKScraper) GetPracticeRaceResult(practice, round int) (res *models.Rac
 		}
 	}()
 
-	return parseRaceResult(body)
+	return parseRaceResultHTML(body)
 }
 
 func (s *BBKScraper) GetQualiRaceResult(heat, round int) (res *models.RaceResultScrape, err error) {
@@ -90,7 +90,7 @@ func (s *BBKScraper) GetQualiRaceResult(heat, round int) (res *models.RaceResult
 		}
 	}()
 
-	return parseRaceResult(body)
+	return parseRaceResultHTML(body)
 }
 
 func (s *BBKScraper) GetFinalRaceResult(final, leg int) (res *models.RaceResultScrape, err error) {
@@ -109,7 +109,7 @@ func (s *BBKScraper) GetFinalRaceResult(final, leg int) (res *models.RaceResultS
 		}
 	}()
 
-	return parseRaceResult(body)
+	return parseRaceResultHTML(body)
 }
 
 func (s *BBKScraper) GetRaceResultsIndex() (res *models.RaceResultsIndexScrape, err error) {
@@ -123,5 +123,5 @@ func (s *BBKScraper) GetRaceResultsIndex() (res *models.RaceResultsIndexScrape, 
 		}
 	}()
 
-	return parseRaceResultsIndex(body)
+	return parseRaceResultsIndexHTML(body)
 }

@@ -25,7 +25,7 @@
 
           commonArgs = {
             pname = "opengrid-bridge";
-            version = "0.1.0";
+            version = "0.2.0";
             src = ./.;
             subPackages = [ "cmd/opengrid-bridge" ];
             vendorHash = "sha256-IUww4dVh6MWv7SQITZY+LKgOT1ReVgmEHY3bl2f/tM4=";

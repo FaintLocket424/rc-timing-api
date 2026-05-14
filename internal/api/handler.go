@@ -22,9 +22,9 @@ func NewHandler(store storage.Store, manager *manager.Manager) *Handler {
 	return &Handler{store, manager}
 }
 
-// GetLiveTiming is a gin route handler function for getting the live timing.
-// It spawns a worker thread in the manager if it doesn't already exist for the URL.
-// Then it checks the cache and returns what it finds.
+// GetLiveTiming handles HTTP requests to fetch live timing data.
+// It checks the store for cached data and ensures a tracking goroutine is running
+// for the provided URL. If tracking is initializing, it prompts the client to poll again.
 func (h *Handler) GetLiveTiming(c *gin.Context) {
 	url := c.Query("target_url")
 

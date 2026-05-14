@@ -208,6 +208,5 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 				slog.Warn("failed to parse Class Best Lap meta", "raw", text)
 			}
 		}
-
 	})
 }

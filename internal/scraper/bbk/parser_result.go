@@ -179,7 +179,7 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 		switch font {
 		case "Best Lap:":
 			if data := bbk_utils.NamedCapture(bestLapRegex, text); data != nil {
-				lt.BestLap = &models.BestLap{DriverName: ptr(data["name"])}
+				lt.BestLap = &models.RaceBestLap{DriverName: ptr(data["name"])}
 				dur, ln, _ := bbk_utils.ParseLap(fmt.Sprintf("%s[%s]", data["time"], data["lap"]))
 				lt.BestLap.Time, lt.BestLap.LapNumber = dur, ln
 			} else {

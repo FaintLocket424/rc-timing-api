@@ -68,6 +68,18 @@
                 - errcheck
                 - godot
                 - goconst
+                - godoclint
+
+            linters-settings:
+              godoclint:
+                options:
+                  require-doc:
+                    ignore-unexported: false
+
+            issues:
+              exclude-use-default: false
+              max-issues-per-linter: 3
+              max-same-issues: 3
           '';
 
           custom-golangci-lint = pkgs.writeShellApplication {

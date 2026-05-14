@@ -1,3 +1,4 @@
+// Package cache is an in-memory cache that follows the [internal/storage] Storage interface.
 package cache
 
 import (
@@ -12,6 +13,7 @@ import (
 
 var ErrNotFound = errors.New("event data not found")
 
+// EventData holds all the data which has been scraped from an event so far.
 type EventData struct {
 	Live            *models.RaceResultScrape
 	PracticeResults map[models.HeatRound]*models.RaceResultScrape
@@ -19,12 +21,16 @@ type EventData struct {
 	FinalResults    map[models.HeatRound]*models.RaceResultScrape
 }
 
+// Cache is an in-memory cache that implements the [internal/storage] Storage interface.
+// It maps timing URL links to an EventData struct, as well as holds a mutex for
+// concurrent access.
 type Cache struct {
 	data   map[string]*EventData
 	mu     sync.RWMutex
 	logger *slog.Logger
 }
 
+// NewCache creates a new cache object and starts the cache reaper goroutine.
 func NewCache() *Cache {
 	c := &Cache{
 		data:   make(map[string]*EventData),
@@ -36,13 +42,16 @@ func NewCache() *Cache {
 	return c
 }
 
+// startReaper is the main function of the cache reaper goroutine.
+// It sleeps until 4am and then cleans out the cache since events rarely
+// go for multiple days and the cache can be refilled later.
 func (c *Cache) startReaper() {
 	for {
 		now := time.Now()
 
-		nextMidnight := time.Date(now.Year(), now.Month(), now.Day()+1, 4, 0, 0, 0, now.Location())
+		nextFourAM := time.Date(now.Year(), now.Month(), now.Day()+1, 4, 0, 0, 0, now.Location())
 
-		duration := nextMidnight.Sub(now)
+		duration := nextFourAM.Sub(now)
 
 		time.Sleep(duration)
 
@@ -50,10 +59,12 @@ func (c *Cache) startReaper() {
 		c.data = make(map[string]*EventData)
 		c.mu.Unlock()
 
-		c.logger.Info("Cache cleared by midnight reaper process")
+		c.logger.Info("Cache cleared by 4am reaper process")
 	}
 }
 
+// getOrCreateEvent retrieves the EventData for a URL from the cache, or creates a
+// new empty object.
 func (c *Cache) getOrCreateEvent(url string) *EventData {
 	if _, ok := c.data[url]; !ok {
 		c.data[url] = &EventData{
@@ -66,6 +77,7 @@ func (c *Cache) getOrCreateEvent(url string) *EventData {
 	return c.data[url]
 }
 
+// SaveLiveTiming saves a live race result scrape for a URL into the cache.
 func (c *Cache) SaveLiveTiming(url string, model *models.RaceResultScrape) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -78,6 +90,7 @@ func (c *Cache) SaveLiveTiming(url string, model *models.RaceResultScrape) error
 	return nil
 }
 
+// GetLiveTiming retrieves the currently stored live race scrape for a URL stored in the cache.
 func (c *Cache) GetLiveTiming(url string) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -90,9 +103,12 @@ func (c *Cache) GetLiveTiming(url string) (*models.RaceResultScrape, error) {
 	return ed.Live, nil
 }
 
+// SavePracticeRaceResult saves a scraped practice result for a URL into the cache.
+// It uses the data in the scrape to work out the practice heat and round it represents.
 func (c *Cache) SavePracticeRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.PracticeNumber == nil || model.Round == nil {
-		return fmt.Errorf("cannot store race result, practice=%v; round=%v", model.PracticeNumber, model.Round)
+		return fmt.Errorf("cannot store race result, practice=%v; round=%v",
+			model.PracticeNumber, model.Round)
 	}
 
 	c.mu.Lock()
@@ -101,11 +117,14 @@ func (c *Cache) SavePracticeRaceResult(url string, model *models.RaceResultScrap
 	ed := c.getOrCreateEvent(url)
 	ed.PracticeResults[models.HeatRound{Heat: *model.PracticeNumber, Round: *model.Round}] = model
 
-	slog.Debug("Saved practice race result to cache", "url", url, "heat", *model.PracticeNumber, "round", *model.Round)
+	slog.Debug("Saved practice race result to cache", "url", url,
+		"heat", *model.PracticeNumber, "round", *model.Round)
 
 	return nil
 }
 
+// GetPracticeRaceResult retrieves the currently stored practice race result from a given heat/round
+// for a URL in the cache.
 func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -120,6 +139,8 @@ func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.Race
 	return ed.PracticeResults[key], nil
 }
 
+// SaveQualiRaceResult saves a scraped qualifying result for a URL into the cache.
+// It uses the data in the scrape to work out the qualifying heat and round it represents.
 func (c *Cache) SaveQualiRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.HeatNumber == nil || model.Round == nil {
 		return fmt.Errorf("cannot store race result, heat=%v; round=%v", model.HeatNumber, model.Round)
@@ -136,6 +157,8 @@ func (c *Cache) SaveQualiRaceResult(url string, model *models.RaceResultScrape) 
 	return nil
 }
 
+// GetQualiRaceResult retrieves the currently stored qualifying race result from a given heat/round
+// for a URL in the cache.
 func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -150,6 +173,8 @@ func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.RaceRes
 	return ed.QualiResults[key], nil
 }
 
+// SaveFinalRaceResult saves a scraped final result for a URL into the cache.
+// It uses the data in the scrape to work out the final number and round it represents.
 func (c *Cache) SaveFinalRaceResult(url string, model *models.RaceResultScrape) error {
 	if model.FinalNumber == nil || model.Round == nil {
 		return fmt.Errorf("cannot store race result, final=%v; round=%v", model.FinalNumber, model.Round)
@@ -166,6 +191,8 @@ func (c *Cache) SaveFinalRaceResult(url string, model *models.RaceResultScrape) 
 	return nil
 }
 
+// GetFinalRaceResult retrieves the currently stored final race result from a given final/round
+// for a URL in the cache.
 func (c *Cache) GetFinalRaceResult(url string, final, round int) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()

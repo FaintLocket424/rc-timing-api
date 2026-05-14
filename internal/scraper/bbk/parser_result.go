@@ -147,12 +147,12 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 				dr.Laps = ptr(*lt.Drivers[0].Laps)
 				dr.Time = ptr(*lt.Drivers[0].Time + *gap)
 			}
-		} else if resText == "" {
-			// empty string may mean DNS
-		} else if strings.HasPrefix(resText, "W-") {
-			// warm up laps
-		} else if resText == "DNS" {
-			// Did not start
+			// } else if resText == "" {
+			// 	// empty string may mean DNS
+			// } else if strings.HasPrefix(resText, "W-") {
+			// 	// warm up laps
+			// } else if resText == "DNS" {
+			// 	// Did not start
 		} else {
 			slog.Warn("unparseable result", "row", i+1, "result", resText)
 		}

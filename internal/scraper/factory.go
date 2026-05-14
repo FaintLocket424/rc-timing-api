@@ -9,22 +9,9 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-type RealHTTPClient struct {
-	client *http.Client
-}
-
-func (c *RealHTTPClient) Get(url string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
-	return c.client.Do(req)
-}
-
 // NewScraperForURL takes in a target url and detects which Scraper is suitable.
 func NewScraperForURL(url string) (scraper Scraper, err error) {
-	client := &RealHTTPClient{http.DefaultClient}
+	client := NewClient()
 
 	res, fetchErr := client.Get(url)
 	if fetchErr != nil {

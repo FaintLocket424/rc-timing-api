@@ -17,17 +17,11 @@ func ptr[T any](v T) *T {
 	return &v
 }
 
-// HTTPClient represents a *http.Client with a Get method.
-// Used to customise the client to dependency inject in tests.
-type HTTPClient interface {
-	Get(url string) (*http.Response, error)
-}
-
 // Scraper represents a scraper that operates on bbk pages.
 // Holds a reference to its target URL and HTTP Client to use.
 type Scraper struct {
 	Target string
-	Client HTTPClient
+	Client *http.Client
 }
 
 // fetchPage makes an HTTP request to the input parameter url using the

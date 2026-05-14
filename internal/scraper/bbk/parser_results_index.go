@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk/utils"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk/bbk_utils"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -44,7 +44,7 @@ func parseRaceResultsIndex(body io.Reader) (*models.RaceResultsIndexScrape, erro
 
 	links.Each(func(i int, s *goquery.Selection) {
 		if attr, exists := s.Attr("href"); exists {
-			if data := utils.NamedCapture(resultsLinkRegex, attr); data != nil {
+			if data := bbk_utils.NamedCapture(resultsLinkRegex, attr); data != nil {
 				heat, err := strconv.Atoi(data["heat"])
 				if err != nil {
 					return

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk/utils"
+	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk/bbk_utils"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -52,7 +52,7 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 
 	text := tds.First().Text()
 
-	if data := utils.NamedCapture(practiceRegex, text); data != nil {
+	if data := bbk_utils.NamedCapture(practiceRegex, text); data != nil {
 		if v, err := strconv.Atoi(data["practice"]); err == nil {
 			lt.PracticeNumber = ptr(v)
 		}
@@ -60,7 +60,7 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 		if v, err := strconv.Atoi(data["round"]); err == nil {
 			lt.Round = ptr(v)
 		}
-	} else if data := utils.NamedCapture(heatRegex, text); data != nil {
+	} else if data := bbk_utils.NamedCapture(heatRegex, text); data != nil {
 		if v, err := strconv.Atoi(data["heat"]); err == nil {
 			lt.HeatNumber = ptr(v)
 		}
@@ -68,7 +68,7 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 		if v, err := strconv.Atoi(data["round"]); err == nil {
 			lt.Round = ptr(v)
 		}
-	} else if data := utils.NamedCapture(finalRegex, text); data != nil {
+	} else if data := bbk_utils.NamedCapture(finalRegex, text); data != nil {
 		final := data["final"]
 
 		if len(final) == 1 {
@@ -137,13 +137,13 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 		// Result Parsing
 		resText := cols.Eq(idx["res"]).Text()
 
-		if laps, dur, err := utils.ParseRaceResult(resText); err == nil {
+		if laps, dur, err := bbk_utils.ParseRaceResult(resText); err == nil {
 			dr.Laps = laps
 			if *dr.Laps < 0 && len(lt.Drivers) > 0 && lt.Drivers[0].Laps != nil {
 				*dr.Laps += *lt.Drivers[0].Laps
 			}
 			dr.Time = dur
-		} else if gap, err := utils.ParseGap(resText); err == nil {
+		} else if gap, err := bbk_utils.ParseGap(resText); err == nil {
 			if len(lt.Drivers) > 0 && lt.Drivers[0].Laps != nil && lt.Drivers[0].Time != nil {
 				dr.Laps = ptr(*lt.Drivers[0].Laps)
 				dr.Time = ptr(*lt.Drivers[0].Time + *gap)
@@ -158,12 +158,12 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 			slog.Warn("unparseable result", "row", i+1, "result", resText)
 		}
 
-		if dur, ln, err := utils.ParseLap(cols.Eq(idx["best"]).Text()); err == nil {
+		if dur, ln, err := bbk_utils.ParseLap(cols.Eq(idx["best"]).Text()); err == nil {
 			dr.BestLapDuration = dur
 			dr.BestLapNumber = ln
 		}
 
-		if dur, _, err := utils.ParseLap(cols.Eq(idx["last"]).Text()); err == nil {
+		if dur, _, err := bbk_utils.ParseLap(cols.Eq(idx["last"]).Text()); err == nil {
 			dr.LastLapDuration = dur
 		}
 
@@ -178,17 +178,17 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 
 		switch font {
 		case "Best Lap:":
-			if data := utils.NamedCapture(bestLapRegex, text); data != nil {
+			if data := bbk_utils.NamedCapture(bestLapRegex, text); data != nil {
 				lt.BestLap = &models.BestLap{DriverName: ptr(data["name"])}
-				dur, ln, _ := utils.ParseLap(fmt.Sprintf("%s[%s]", data["time"], data["lap"]))
+				dur, ln, _ := bbk_utils.ParseLap(fmt.Sprintf("%s[%s]", data["time"], data["lap"]))
 				lt.BestLap.Time, lt.BestLap.LapNumber = dur, ln
 			} else {
 				slog.Warn("failed to parse Best Lap meta", "raw", text)
 			}
 		case "Class FT:":
-			if data := utils.NamedCapture(classFTRegex, text); data != nil {
+			if data := bbk_utils.NamedCapture(classFTRegex, text); data != nil {
 				lt.ClassFT = &models.ClassFT{DriverName: ptr(data["name"])}
-				laps, dur, _ := utils.ParseRaceResult(data["res"])
+				laps, dur, _ := bbk_utils.ParseRaceResult(data["res"])
 				lt.ClassFT.Laps, lt.ClassFT.Time = laps, dur
 				if d, err := time.ParseDuration(data["avg"] + "s"); err == nil {
 					lt.ClassFT.AvgLapDuration = ptr(d)
@@ -200,9 +200,9 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 				slog.Warn("failed to parse Class FT meta", "raw", text)
 			}
 		case "Class Best Lap:":
-			if data := utils.NamedCapture(classBestLapRegex, text); data != nil {
+			if data := bbk_utils.NamedCapture(classBestLapRegex, text); data != nil {
 				lt.ClassBestLap = &models.ClassBestLap{DriverName: ptr(data["name"])}
-				dur, _, _ := utils.ParseLap(data["time"])
+				dur, _, _ := bbk_utils.ParseLap(data["time"])
 				lt.ClassBestLap.Time = dur
 			} else {
 				slog.Warn("failed to parse Class Best Lap meta", "raw", text)

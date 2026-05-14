@@ -1,4 +1,5 @@
-package utils
+// Package bbk_utils is
+package bbk_utils
 
 import (
 	"fmt"

@@ -24,7 +24,6 @@ type ClassFT struct {
 	DriverName *string `json:"driver_name,omitempty"`
 	Laps       *int    `json:"laps,omitempty"`
 	TimeMs     *int64  `json:"time_ms,omitempty"`
-	AvgLapMs   *int64  `json:"avg_lap_ms,omitempty"`
 	Round      *int    `json:"round,omitempty"`
 }
 

@@ -77,11 +77,10 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 					LapNumber:  ptr(9),
 				},
 				ClassFT: &models.ClassFT{
-					DriverName:     ptr("Kyle Moon"),
-					Laps:           ptr(28),
-					Time:           ptr(time.Duration(5)*time.Minute + time.Duration(5_566)*time.Millisecond),
-					AvgLapDuration: ptr(time.Duration(10_913) * time.Millisecond),
-					Round:          ptr(1),
+					DriverName: ptr("Kyle Moon"),
+					Laps:       ptr(28),
+					Time:       ptr(time.Duration(5)*time.Minute + time.Duration(5_566)*time.Millisecond),
+					Round:      ptr(1),
 				},
 				ClassBestLap: &models.ClassBestLap{
 					DriverName: ptr("James Procter"),
@@ -186,10 +185,9 @@ func (suite *BBKTestSuite) TestParseRaceResult() {
 					LapNumber:  ptr(11),
 				},
 				ClassFT: &models.ClassFT{
-					DriverName:     ptr("Josh Holdsworth"),
-					Laps:           ptr(13),
-					Time:           ptr(time.Duration(5)*time.Minute + time.Duration(17_300)*time.Millisecond),
-					AvgLapDuration: ptr(time.Duration(24_410) * time.Millisecond),
+					DriverName: ptr("Josh Holdsworth"),
+					Laps:       ptr(13),
+					Time:       ptr(time.Duration(5)*time.Minute + time.Duration(17_300)*time.Millisecond),
 				},
 				ClassBestLap: &models.ClassBestLap{
 					DriverName: ptr("Phil Campbell"),

@@ -189,9 +189,6 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 				lt.ClassFT = &models.ClassFT{DriverName: ptr(data["name"])}
 				laps, dur, _ := parseRaceResultStr(data["res"])
 				lt.ClassFT.Laps, lt.ClassFT.Time = laps, dur
-				if d, err := time.ParseDuration(data["avg"] + "s"); err == nil {
-					lt.ClassFT.AvgLapDuration = ptr(d)
-				}
 				if r, err := strconv.Atoi(data["round"]); err == nil {
 					lt.ClassFT.Round = ptr(r)
 				}

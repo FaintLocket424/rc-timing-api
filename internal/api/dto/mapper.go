@@ -52,7 +52,6 @@ func ToRaceResultDTO(m *models.RaceResultScrape) *RaceResultScrapeDTO {
 			DriverName: m.ClassFT.DriverName,
 			Laps:       m.ClassFT.Laps,
 			TimeMs:     durationToMs(m.ClassFT.Time),
-			AvgLapMs:   durationToMs(m.ClassFT.AvgLapDuration),
 			Round:      m.ClassFT.Round,
 		}
 	}

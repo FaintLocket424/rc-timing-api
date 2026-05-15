@@ -13,10 +13,11 @@ type ResponseFormat struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-func respondSuccess(c *gin.Context, data any) {
+func respondSuccess(c *gin.Context, data any, message string) {
 	c.JSON(http.StatusOK, ResponseFormat{
-		Status: "success",
-		Data:   data,
+		Status:  "success",
+		Data:    data,
+		Message: message,
 	})
 }
 

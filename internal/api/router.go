@@ -4,6 +4,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api/middleware"
@@ -14,7 +15,7 @@ import (
 // SetupRouter creates the Gin router with a rate limiter middleware from
 // [internal/api/middleware]. It also initialises the Handler struct which
 // contains the methods to process the incoming requests.
-func SetupRouter(store storage.Store, manager Tracker) *gin.Engine {
+func SetupRouter(store storage.Store, manager Tracker, programVersion string) *gin.Engine {
 	r := gin.Default()
 	if err := r.SetTrustedProxies(nil); err != nil {
 		panic(err)
@@ -28,6 +29,12 @@ func SetupRouter(store storage.Store, manager Tracker) *gin.Engine {
 	{
 		v1.GET("/ping", func(c *gin.Context) {
 			c.String(http.StatusOK, "pong")
+		})
+
+		v1.GET("/info", func(c *gin.Context) {
+			respondSuccess(c, nil,
+				fmt.Sprintf("API powered by OpenGrid Timing Bridge %s, licensed under the AGPL-3.0 license. Source available at https://codeberg.org/OpenGrid-RC/bridge", programVersion),
+			)
 		})
 
 		v1.GET("/live", handler.GetLiveTiming)

@@ -77,7 +77,7 @@ func main() {
 	cache := cache.NewCache()
 	scraperFactory := scraper.NewFactory(Version)
 	manager := manager.NewManager(cache, scraperFactory)
-	router := api.SetupRouter(cache, manager)
+	router := api.SetupRouter(cache, manager, Version)
 
 	if err := router.Run(listenAddr); err != nil {
 		slog.Error("An error occurred", "err", err)

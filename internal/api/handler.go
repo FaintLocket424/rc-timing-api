@@ -52,7 +52,7 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 		return
 	}
 
-	respondSuccess(c, dto.ToRaceResultDTO(model))
+	respondSuccess(c, dto.ToRaceResultDTO(model), "")
 }
 
 // GetPracticeRaceResult handles HTTP requests to fetch practice results.
@@ -82,7 +82,7 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 		return
 	}
 
-	respondSuccess(c, dto.ToRaceResultDTO(model))
+	respondSuccess(c, dto.ToRaceResultDTO(model), "")
 }
 
 // GetQualiRaceResult handles HTTP requests to fetch practice results.
@@ -112,7 +112,7 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 		return
 	}
 
-	respondSuccess(c, dto.ToRaceResultDTO(model))
+	respondSuccess(c, dto.ToRaceResultDTO(model), "")
 }
 
 // GetFinalRaceResult handles HTTP requests to fetch practice results.
@@ -141,5 +141,5 @@ func (h *Handler) GetFinalRaceResult(c *gin.Context) {
 		return
 	}
 
-	respondSuccess(c, dto.ToRaceResultDTO(model))
+	respondSuccess(c, dto.ToRaceResultDTO(model), "")
 }

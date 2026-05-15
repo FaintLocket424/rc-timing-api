@@ -19,8 +19,8 @@
 // Package main is the entry point for the rc-timing-api web server.
 //
 // It creates a cache from the [internal/storage/cache] package.
-// It creates a manager from the [internal/storage/manager] package.
-// It then uses the cache and manager to create a router in the [internal/api] package.
+// It creates a supervisor from the [internal/storage/tracking] package.
+// It then uses the cache and supervisor to create a router in the [internal/api] package.
 package main
 
 import (
@@ -31,9 +31,9 @@ import (
 	"strings"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api"
-	"github.com/FaintLocket424/opengrid-bridge/internal/manager"
 	"github.com/FaintLocket424/opengrid-bridge/internal/scraper"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage/cache"
+	"github.com/FaintLocket424/opengrid-bridge/internal/tracking"
 )
 
 var (
@@ -76,8 +76,8 @@ func main() {
 
 	cache := cache.NewCache()
 	scraperFactory := scraper.NewFactory(Version)
-	manager := manager.NewManager(cache, scraperFactory)
-	router := api.SetupRouter(cache, manager, Version)
+	tracker := tracking.NewSupervisor(cache, scraperFactory)
+	router := api.SetupRouter(cache, tracker, Version)
 
 	if err := router.Run(listenAddr); err != nil {
 		slog.Error("An error occurred", "err", err)

@@ -1,5 +1,5 @@
 // Package api handles the Gin router, taking incoming requests and using the
-// [internal/manager] and [internal/storage] packages to retrieve the response
+// [internal/tracking] and [internal/storage] packages to retrieve the response
 // and then sending it back to the user.
 package api
 
@@ -15,7 +15,7 @@ import (
 // SetupRouter creates the Gin router with a rate limiter middleware from
 // [internal/api/middleware]. It also initialises the Handler struct which
 // contains the methods to process the incoming requests.
-func SetupRouter(store storage.Store, manager Tracker, programVersion string) *gin.Engine {
+func SetupRouter(store storage.Store, tracker Tracker, programVersion string) *gin.Engine {
 	r := gin.Default()
 	if err := r.SetTrustedProxies(nil); err != nil {
 		panic(err)
@@ -23,7 +23,7 @@ func SetupRouter(store storage.Store, manager Tracker, programVersion string) *g
 
 	r.Use(middleware.RateLimiter(5, 10))
 
-	handler := NewHandler(store, manager)
+	handler := NewHandler(store, tracker)
 
 	v1 := r.Group("/api/v1")
 	{

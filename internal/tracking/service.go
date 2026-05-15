@@ -1,6 +1,6 @@
-// Package manager handles the lifecycle of the tracking goroutines used to
+// Package tracking handles the lifecycle of the tracking goroutines used to
 // scrape each active timing URL.
-package manager
+package tracking
 
 import (
 	"context"
@@ -21,12 +21,12 @@ type workerState struct {
 	cancel       context.CancelFunc
 }
 
-// Manager holds references to the active store, the scraper factory, a Mutex and a logger.
+// Supervisor holds references to the active store, the scraper factory, a Mutex and a logger.
 // It also holds a map of timing URLs to a struct representing the state of
 // the tracking goroutine associated with the URL.
 // The struct has methods for making sure a URL is tracked, starting a
 // new worker goroutine etc.
-type Manager struct {
+type Supervisor struct {
 	store          storage.Store
 	scraperFactory *scraper.Factory
 	activeWorkers  map[string]*workerState // Set of URLs which have an active worker
@@ -34,15 +34,15 @@ type Manager struct {
 	logger         *slog.Logger
 }
 
-// NewManager creates a new manager object with a reference to the input store and
+// NewSupervisor creates a new supervisor object with a reference to the input store and
 // factory scraper. It then starts the reaper goroutine, whose job it is to kill
 // inactive worker goroutines.
-func NewManager(store storage.Store, scraperFactory *scraper.Factory) *Manager {
-	m := &Manager{
+func NewSupervisor(store storage.Store, scraperFactory *scraper.Factory) *Supervisor {
+	m := &Supervisor{
 		store:          store,
 		scraperFactory: scraperFactory,
 		activeWorkers:  make(map[string]*workerState),
-		logger:         slog.Default().With("component", "manager"),
+		logger:         slog.Default().With("component", "supervisor"),
 	}
 
 	go m.startReaper()
@@ -52,7 +52,7 @@ func NewManager(store storage.Store, scraperFactory *scraper.Factory) *Manager {
 
 // reapWorker kills the goroutine associated with the url parameter, giving it
 // the cancel signal and deleting it from the active workers struct.
-func (m *Manager) reapWorker(url string) {
+func (m *Supervisor) reapWorker(url string) {
 	if state, ok := m.activeWorkers[url]; ok {
 		state.cancel()
 		delete(m.activeWorkers, url)
@@ -63,7 +63,7 @@ func (m *Manager) reapWorker(url string) {
 // startWorker is the main function of the tracking goroutines.
 // It handles creating the scraper for the URL and using it to
 // scrape the url on a fixed interval.
-func (m *Manager) startWorker(ctx context.Context, url string) {
+func (m *Supervisor) startWorker(ctx context.Context, url string) {
 	logger := m.logger.With("url", url)
 	s, err := m.scraperFactory.Create(url)
 	if err != nil {
@@ -163,8 +163,8 @@ func (m *Manager) startWorker(ctx context.Context, url string) {
 
 // EnsureTracking creates a tracking goroutine for the input URL, if it doesn't
 // exist already. It also handles updating the last accessed time for the URL
-// so the manager knows to keep it alive.
-func (m *Manager) EnsureTracking(url string) (workerStarted bool) {
+// so the supervisor knows to keep it alive.
+func (m *Supervisor) EnsureTracking(url string) (workerStarted bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -183,7 +183,7 @@ func (m *Manager) EnsureTracking(url string) (workerStarted bool) {
 // startReaper is the main function of the reaper goroutine, which runs on a
 // fixed interval and reaps any worker tracking goroutines that have not been
 // accessed for longer than the workerLifespan.
-func (m *Manager) startReaper() {
+func (m *Supervisor) startReaper() {
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 

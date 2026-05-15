@@ -16,16 +16,16 @@ type Tracker interface {
 	EnsureTracking(url string) bool
 }
 
-// Handler holds references to the current store and manager.
+// Handler holds references to the current store and tracker.
 // It contains methods for handling different request types.
 type Handler struct {
 	store   storage.Store
-	manager Tracker
+	tracker Tracker
 }
 
-// NewHandler creates a new Handler struct with references to a store and manager.
-func NewHandler(store storage.Store, manager Tracker) *Handler {
-	return &Handler{store, manager}
+// NewHandler creates a new Handler struct with references to a store and tracker.
+func NewHandler(store storage.Store, tracker Tracker) *Handler {
+	return &Handler{store, tracker}
 }
 
 // GetLiveTiming handles HTTP requests to fetch live timing data.
@@ -39,7 +39,7 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 		return
 	}
 
-	newWorkerSpawned := h.manager.EnsureTracking(url)
+	newWorkerSpawned := h.tracker.EnsureTracking(url)
 
 	model, err := h.store.GetLiveTiming(url)
 	if err != nil {
@@ -66,7 +66,7 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 		return
 	}
 
-	newWorkerSpawned := h.manager.EnsureTracking(url)
+	newWorkerSpawned := h.tracker.EnsureTracking(url)
 
 	heat, _ := strconv.Atoi(c.Param("heat"))
 	round, _ := strconv.Atoi(c.Param("round"))
@@ -96,7 +96,7 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 		return
 	}
 
-	newWorkerSpawned := h.manager.EnsureTracking(url)
+	newWorkerSpawned := h.tracker.EnsureTracking(url)
 
 	heat, _ := strconv.Atoi(c.Param("heat"))
 	round, _ := strconv.Atoi(c.Param("round"))
@@ -128,7 +128,7 @@ func (h *Handler) GetFinalRaceResult(c *gin.Context) {
 		return
 	}
 
-	newWorkerSpawned := h.manager.EnsureTracking(url)
+	newWorkerSpawned := h.tracker.EnsureTracking(url)
 
 	model, err := h.store.GetFinalRaceResult(url, final, round)
 	if err != nil {

@@ -41,8 +41,8 @@ type RaceResultScrape struct {
 	PracticeNumber *int
 	HeatNumber     *int
 	FinalNumber    *int
-	ClassName      *string
 	Round          *int
+	ClassName      *string
 	ElapsedTime    *time.Duration
 	Drivers        []DriverRaceResult
 	BestLap        *RaceBestLap
@@ -59,9 +59,9 @@ type HeatRound struct {
 // RaceResultsIndexScrape represents a full scrape of the results index,
 // containing sets of all the practice, quali and finals that have been run.
 type RaceResultsIndexScrape struct {
-	Title     string
-	Timestamp time.Time
-	Practice  map[HeatRound]struct{}
-	Quali     map[HeatRound]struct{}
-	Finals    map[HeatRound]struct{}
+	Title      string
+	Timestamp  time.Time
+	Practice   map[HeatRound]struct{}
+	Qualifying map[HeatRound]struct{}
+	Finals     map[HeatRound]struct{}
 }

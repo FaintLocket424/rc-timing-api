@@ -144,7 +144,7 @@ func (m *Manager) startWorker(ctx context.Context, url string) {
 
 			// Execute processing with limit
 			process(model.Practice, m.store.GetPracticeRaceResult, s.GetPracticeRaceResult, m.store.SavePracticeRaceResult, "practice")
-			process(model.Quali, m.store.GetQualiRaceResult, s.GetQualiRaceResult, m.store.SaveQualiRaceResult, "quali")
+			process(model.Qualifying, m.store.GetQualiRaceResult, s.GetQualiRaceResult, m.store.SaveQualiRaceResult, "quali")
 			process(model.Finals, m.store.GetFinalRaceResult, s.GetFinalRaceResult, m.store.SaveFinalRaceResult, "final")
 		} else {
 			logger.Warn("results index scrape failed", "err", err)

@@ -25,9 +25,9 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 	}
 
 	scrape := &models.RaceResultsIndexScrape{
-		Practice: make(map[models.HeatRound]struct{}),
-		Quali:    make(map[models.HeatRound]struct{}),
-		Finals:   make(map[models.HeatRound]struct{}),
+		Practice:   make(map[models.HeatRound]struct{}),
+		Qualifying: make(map[models.HeatRound]struct{}),
+		Finals:     make(map[models.HeatRound]struct{}),
 	}
 
 	header := tables.First().Find("td")
@@ -58,7 +58,7 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 				case "p":
 					scrape.Practice[models.HeatRound{Heat: heat, Round: round}] = struct{}{}
 				case "h":
-					scrape.Quali[models.HeatRound{Heat: heat, Round: round}] = struct{}{}
+					scrape.Qualifying[models.HeatRound{Heat: heat, Round: round}] = struct{}{}
 				case "f":
 					scrape.Finals[models.HeatRound{Heat: heat, Round: round}] = struct{}{}
 				}

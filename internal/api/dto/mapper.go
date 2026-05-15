@@ -1,0 +1,117 @@
+// Package dto handles mapping internal data structure to "Data Transfer Objects (DTOs)".
+// The DTOs form the API interface.
+package dto
+
+import (
+	"sort"
+	"time"
+
+	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+)
+
+// durationToMs safely converts a pointer of time.Duration to a pointer of int64 milliseconds.
+func durationToMs(d *time.Duration) *int64 {
+	if d == nil {
+		return nil
+	}
+	ms := d.Milliseconds()
+	return &ms
+}
+
+// ToRaceResultDTO converts the internal RaceResultScrape model to the external DTO.
+func ToRaceResultDTO(m *models.RaceResultScrape) *RaceResultScrapeDTO {
+	if m == nil {
+		return nil
+	}
+
+	drivers := make([]DriverRaceResult, len(m.Drivers))
+	for i, d := range m.Drivers {
+		drivers[i] = DriverRaceResult{
+			CarNumber:     d.CarNumber,
+			Name:          d.Name,
+			Laps:          d.Laps,
+			TimeMs:        durationToMs(d.Time),
+			BestLapMs:     durationToMs(d.BestLapDuration),
+			BestLapNumber: d.BestLapNumber,
+			LastLapMs:     durationToMs(d.LastLapDuration),
+		}
+	}
+
+	var bestLap *RaceBestLap
+	if m.BestLap != nil {
+		bestLap = &RaceBestLap{
+			DriverName: m.BestLap.DriverName,
+			TimeMs:     durationToMs(m.BestLap.Time),
+			LapNumber:  m.BestLap.LapNumber,
+		}
+	}
+
+	var classFT *ClassFT
+	if m.ClassFT != nil {
+		classFT = &ClassFT{
+			DriverName: m.ClassFT.DriverName,
+			Laps:       m.ClassFT.Laps,
+			TimeMs:     durationToMs(m.ClassFT.Time),
+			AvgLapMs:   durationToMs(m.ClassFT.AvgLapDuration),
+			Round:      m.ClassFT.Round,
+		}
+	}
+
+	var classBestLap *ClassBestLap
+	if m.ClassBestLap != nil {
+		classBestLap = &ClassBestLap{
+			DriverName: m.ClassBestLap.DriverName,
+			TimeMs:     durationToMs(m.ClassBestLap.Time),
+		}
+	}
+
+	return &RaceResultScrapeDTO{
+		PracticeNumber: m.PracticeNumber,
+		HeatNumber:     m.HeatNumber,
+		FinalNumber:    m.FinalNumber,
+		ClassName:      m.ClassName,
+		Round:          m.Round,
+		ElapsedTimeMs:  durationToMs(m.ElapsedTime),
+		Drivers:        drivers,
+		BestLap:        bestLap,
+		ClassFT:        classFT,
+		ClassBestLap:   classBestLap,
+	}
+}
+
+// ToRaceResultsIndexDTO converts the internal RaceResultsIndexScrape model to the external DTO.
+func ToRaceResultsIndexDTO(m *models.RaceResultsIndexScrape) *RaceResultsIndexScrapeDTO {
+	if m == nil {
+		return nil
+	}
+
+	return &RaceResultsIndexScrapeDTO{
+		Title:      m.Title,
+		Timestamp:  m.Timestamp.UnixMilli(),
+		Practice:   mapToHeatRoundDTOs(m.Practice),
+		Qualifying: mapToHeatRoundDTOs(m.Qualifying),
+		Finals:     mapToHeatRoundDTOs(m.Finals),
+	}
+}
+
+// mapToHeatRoundDTOs safely converts the internal struct map to a JSON-friendly array.
+func mapToHeatRoundDTOs(m map[models.HeatRound]struct{}) []HeatRoundDTO {
+	if len(m) == 0 {
+		return nil
+	}
+
+	res := make([]HeatRoundDTO, 0, len(m))
+	for k := range m {
+		res = append(res, HeatRoundDTO{Heat: k.Heat, Round: k.Round})
+	}
+
+	sort.Slice(res, func(i, j int) bool {
+		if res[i].Round == res[j].Round {
+			return res[i].Heat < res[j].Heat
+		}
+
+		return res[i].Round < res[j].Round
+	})
+
+	return res
+}

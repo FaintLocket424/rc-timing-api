@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api/middleware"
-	"github.com/FaintLocket424/opengrid-bridge/internal/manager"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +14,7 @@ import (
 // SetupRouter creates the Gin router with a rate limiter middleware from
 // [internal/api/middleware]. It also initialises the Handler struct which
 // contains the methods to process the incoming requests.
-func SetupRouter(store storage.Store, manager *manager.Manager) *gin.Engine {
+func SetupRouter(store storage.Store, manager Tracker) *gin.Engine {
 	r := gin.Default()
 	if err := r.SetTrustedProxies(nil); err != nil {
 		panic(err)

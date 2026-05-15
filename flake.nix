@@ -107,6 +107,14 @@
                 enable = true;
                 package = custom-golangci-lint;
               };
+              nix-build = {
+                enable = true;
+                name = "Nix Build Check";
+                description = "Check that the program builds successfully with Nix";
+                entry = "nix build .#default --no-link";
+                pass_filenames = false;
+                stages = [ "push" ];
+              };
             };
           };
         in

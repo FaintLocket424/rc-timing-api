@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+// ptr creates returns a pointer to the value input.
+func ptr[T any](v T) *T {
+	return &v
+}
+
 var (
 	// Matches "11/34.234" or "11/1'34.234" patterns.
 	resultRegex = regexp.MustCompile(`(?P<laps>-?\d+)/(?:(?P<mins>\d+)')?(?P<secs>\d+\.\d+)`)

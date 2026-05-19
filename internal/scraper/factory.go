@@ -9,21 +9,23 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-// Factory is a scraper factory with a Create method that makes new scrapers.
+// Factory creates the correct Scraper for the input URL.
 // It holds a reference to the programVersion to be used in the scraper's
 // User-Agent http header.
 type Factory struct {
 	client *http.Client
 }
 
-// NewFactory creates a new Scraper Factory with the program version injected.
+// NewFactory creates a Scraper Factory with the program version injected
+// into the singleton HTTP Client used for all networking requests.
 func NewFactory(programVersion string) *Factory {
 	return &Factory{
 		client: NewClient(programVersion),
 	}
 }
 
-// Create makes a new scraper using the factory.
+// Create fetches the index page from the target URL and determines the
+// correct scraper for the live timing software being used.
 func (f *Factory) Create(url string) (scraper Scraper, err error) {
 	client := f.client
 
@@ -47,9 +49,7 @@ func (f *Factory) Create(url string) (scraper Scraper, err error) {
 		return nil, docErr
 	}
 
-	author, exists := doc.Find("meta[name='author']").Attr("content")
-
-	if exists && author == "bbkRClive" {
+	if author, exists := doc.Find("meta[name='author']").Attr("content"); exists && author == "bbkRClive" {
 		return bbk.NewScraper(url, client), nil
 	}
 

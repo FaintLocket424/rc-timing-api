@@ -12,11 +12,6 @@ import (
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
 )
 
-// ptr creates returns a pointer to the value input.
-func ptr[T any](v T) *T {
-	return &v
-}
-
 // Scraper represents a scraper that operates on bbk pages.
 // Holds a reference to its target URL and HTTP Client to use.
 type Scraper struct {

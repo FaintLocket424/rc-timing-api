@@ -12,6 +12,7 @@ type DriverRaceResult struct {
 	BestLapDuration *time.Duration
 	BestLapNumber   *int
 	LastLapDuration *time.Duration
+	WarmupLaps      *int
 }
 
 // RaceBestLap represents the best lap of a race so far.
@@ -43,6 +44,8 @@ type RaceResultScrape struct {
 	Round          *int
 	ClassName      *string
 	ElapsedTime    *time.Duration
+	RemainingTime  *time.Duration
+	FinishTime     *time.Time
 	Drivers        []DriverRaceResult
 	BestLap        *RaceBestLap
 	ClassFT        *ClassFT

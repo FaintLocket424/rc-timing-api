@@ -22,6 +22,7 @@ let
     settings.global.excludes = [
       "**/testdata/**"
       "cmd/experiment/**"
+      ".forgejo/issue_template/**"
     ];
   };
 

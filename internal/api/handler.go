@@ -30,6 +30,7 @@ func NewHandler(store storage.Store, tracker Tracker) *Handler {
 }
 
 // getTargetURL extracts the key set by the ExtractTargetURL middleware.
+// It should be impossible for this to be an invalid URL or missing.
 func getTargetURL(c *gin.Context) string {
 	if val, ok := c.Get("target_url"); ok {
 		return val.(string)

@@ -81,7 +81,16 @@ let
     hooks = {
       treefmt = {
         enable = true;
-        package = treefmtEval.config.build.wrapper;
+        package = pkgs.symlinkJoin {
+          name = "treefmt-wrapped";
+          paths = [ treefmtEval.config.build.wrapper ];
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/treefmt \
+              --set TERM "dumb" \
+              --set NO_COLOR "1"
+          '';
+        };
       };
       golangci-lint = {
         enable = true;

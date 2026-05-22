@@ -39,20 +39,16 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 		return
 	}
 
-	newWorkerSpawned := h.tracker.EnsureTracking(url)
-
-	model, err := h.store.GetLiveTiming(url)
-	if err != nil {
-		if newWorkerSpawned {
-			respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+	if h.tracker.EnsureTracking(url) {
+		respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+	} else {
+		if model, err := h.store.GetLiveTiming(url); err == nil {
+			respondSuccess(c, dto.ToRaceResultDTO(model), "")
 		} else {
 			slog.Error("error getting live timing", "error", err)
 			respondError(c, http.StatusInternalServerError, err.Error())
 		}
-		return
 	}
-
-	respondSuccess(c, dto.ToRaceResultDTO(model), "")
 }
 
 // GetPracticeRaceResult handles HTTP requests to fetch practice results.
@@ -66,23 +62,19 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 		return
 	}
 
-	newWorkerSpawned := h.tracker.EnsureTracking(url)
-
 	heat, _ := strconv.Atoi(c.Param("heat"))
 	round, _ := strconv.Atoi(c.Param("round"))
 
-	model, err := h.store.GetPracticeRaceResult(url, heat, round)
-	if err != nil {
-		slog.Error("error getting practice race result", "heat", heat, "round", round, "error", err)
-		if newWorkerSpawned {
-			respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+	if h.tracker.EnsureTracking(url) {
+		respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+	} else {
+		if model, err := h.store.GetPracticeRaceResult(url, heat, round); err == nil {
+			respondSuccess(c, dto.ToRaceResultDTO(model), "")
 		} else {
+			slog.Error("error getting practice race result", "error", err)
 			respondError(c, http.StatusInternalServerError, err.Error())
 		}
-		return
 	}
-
-	respondSuccess(c, dto.ToRaceResultDTO(model), "")
 }
 
 // GetQualiRaceResult handles HTTP requests to fetch practice results.
@@ -96,23 +88,19 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 		return
 	}
 
-	newWorkerSpawned := h.tracker.EnsureTracking(url)
-
 	heat, _ := strconv.Atoi(c.Param("heat"))
 	round, _ := strconv.Atoi(c.Param("round"))
 
-	model, err := h.store.GetQualiRaceResult(url, heat, round)
-	if err != nil {
-		slog.Error("error getting qualifying race result", "heat", heat, "round", round, "error", err)
-		if newWorkerSpawned {
-			respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+	if h.tracker.EnsureTracking(url) {
+		respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+	} else {
+		if model, err := h.store.GetQualiRaceResult(url, heat, round); err == nil {
+			respondSuccess(c, dto.ToRaceResultDTO(model), "")
 		} else {
+			slog.Error("error getting qualifying race result", "error", err)
 			respondError(c, http.StatusInternalServerError, err.Error())
 		}
-		return
 	}
-
-	respondSuccess(c, dto.ToRaceResultDTO(model), "")
 }
 
 // GetFinalRaceResult handles HTTP requests to fetch practice results.
@@ -128,18 +116,14 @@ func (h *Handler) GetFinalRaceResult(c *gin.Context) {
 		return
 	}
 
-	newWorkerSpawned := h.tracker.EnsureTracking(url)
-
-	model, err := h.store.GetFinalRaceResult(url, final, round)
-	if err != nil {
-		slog.Error("error getting final race result", "final", final, "round", round, "error", err)
-		if newWorkerSpawned {
-			respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+	if h.tracker.EnsureTracking(url) {
+		respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+	} else {
+		if model, err := h.store.GetFinalRaceResult(url, final, round); err == nil {
+			respondSuccess(c, dto.ToRaceResultDTO(model), "")
 		} else {
+			slog.Error("error getting final race result", "error", err)
 			respondError(c, http.StatusInternalServerError, err.Error())
 		}
-		return
 	}
-
-	respondSuccess(c, dto.ToRaceResultDTO(model), "")
 }

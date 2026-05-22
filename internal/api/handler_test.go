@@ -149,7 +149,6 @@ func (suite *HandlerTestSuite) TestLive_MissingURL() {
 // returns true and the cache returns an error.
 func (suite *HandlerTestSuite) TestLive_TrackerInitializing() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
-	suite.mockStore.On("GetLiveTiming", targetURL).Return(nil, errors.New("not found")).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/live?target_url="+targetURL, nil)
@@ -205,7 +204,6 @@ func (suite *HandlerTestSuite) TestPractice_MissingURL() {
 // returns true and the cache returns an error.
 func (suite *HandlerTestSuite) TestPractice_TrackerInitializing() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
-	suite.mockStore.On("GetPracticeRaceResult", targetURL, 2, 1).Return(nil, errors.New("not found")).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/practice/round/1/heat/2?target_url="+targetURL, nil)
@@ -268,7 +266,6 @@ func (suite *HandlerTestSuite) TestQuali_MissingURL() {
 
 func (suite *HandlerTestSuite) TestQuali_TrackerInitializing() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
-	suite.mockStore.On("GetQualiRaceResult", targetURL, 4, 3).Return(nil, errors.New("not ready")).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/qualifying/round/3/heat/4?target_url="+targetURL, nil)
@@ -327,7 +324,6 @@ func (suite *HandlerTestSuite) TestFinal_MissingURL() {
 
 func (suite *HandlerTestSuite) TestFinal_TrackerInitializing() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
-	suite.mockStore.On("GetFinalRaceResult", targetURL, 1, 5).Return(nil, errors.New("not ready")).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/finals/round/5/final/1?target_url="+targetURL, nil)

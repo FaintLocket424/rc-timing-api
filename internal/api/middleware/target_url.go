@@ -8,20 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// isValidURL checks if a string is a well-formed absolute HTTP/HTTPS URL.
 func isValidURL(toTest string) bool {
 	u, err := url.ParseRequestURI(toTest)
 	if err != nil {
 		return false
 	}
-
 	if u.Scheme != "http" && u.Scheme != "https" {
 		return false
 	}
-
 	if u.Host == "" {
 		return false
 	}
-
 	return true
 }
 
@@ -31,7 +29,7 @@ func ExtractTargetURL(c *gin.Context) {
 	target := c.Query("target_url")
 
 	if !isValidURL(target) {
-		responses.RespondError(c, http.StatusBadRequest, "invalid or missing 'target_url' query parameter")
+		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
 		return
 	}
 

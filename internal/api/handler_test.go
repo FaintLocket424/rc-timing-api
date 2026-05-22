@@ -110,13 +110,7 @@ func (suite *HandlerTestSuite) SetupTest() {
 	suite.mockStore = new(MockStore)
 	suite.mockTracker = new(MockTracker)
 
-	handler := NewHandler(suite.mockStore, suite.mockTracker)
-
-	suite.router = gin.New()
-	suite.router.GET("/live", handler.GetLiveTiming)
-	suite.router.GET("/practice/round/:round/heat/:heat", handler.GetPracticeRaceResult)
-	suite.router.GET("/qualifying/round/:round/heat/:heat", handler.GetQualiRaceResult)
-	suite.router.GET("/finals/round/:round/final/:final", handler.GetFinalRaceResult)
+	suite.router = SetupRouter(suite.mockStore, suite.mockTracker, "test")
 }
 
 // TearDownTest asserts that the mock store and tracker returned all
@@ -134,7 +128,7 @@ func (suite *HandlerTestSuite) TearDownTest() {
 // if no target_url query param is passed in.
 func (suite *HandlerTestSuite) TestLive_MissingURL() {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/live", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/live", nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusBadRequest, w.Code)
@@ -151,7 +145,7 @@ func (suite *HandlerTestSuite) TestLive_TrackerInitializing() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/live?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/live?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusAccepted, w.Code)
@@ -169,7 +163,7 @@ func (suite *HandlerTestSuite) TestLive_Success() {
 	suite.mockStore.On("GetLiveTiming", targetURL).Return(dummyData, nil).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/live?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/live?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusOK, w.Code)
@@ -189,7 +183,7 @@ func (suite *HandlerTestSuite) TestLive_Success() {
 // if no target_url query param is passed in.
 func (suite *HandlerTestSuite) TestPractice_MissingURL() {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/practice/round/1/heat/2", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/practice/round/1/heat/2", nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusBadRequest, w.Code)
@@ -206,7 +200,7 @@ func (suite *HandlerTestSuite) TestPractice_TrackerInitializing() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/practice/round/1/heat/2?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/practice/round/1/heat/2?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusAccepted, w.Code)
@@ -223,7 +217,7 @@ func (suite *HandlerTestSuite) TestPractice_StoreError() {
 	suite.mockStore.On("GetPracticeRaceResult", targetURL, 2, 1).Return(nil, errors.New("db error")).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/practice/round/1/heat/2?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/practice/round/1/heat/2?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusInternalServerError, w.Code)
@@ -241,7 +235,7 @@ func (suite *HandlerTestSuite) TestPractice_Success() {
 	suite.mockStore.On("GetPracticeRaceResult", targetURL, 2, 1).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/practice/round/1/heat/2?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/practice/round/1/heat/2?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Equal(http.StatusOK, w.Code)
@@ -254,7 +248,7 @@ func (suite *HandlerTestSuite) TestPractice_Success() {
 
 func (suite *HandlerTestSuite) TestQuali_MissingURL() {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/qualifying/round/3/heat/4", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/qualifying/round/3/heat/4", nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Equal(http.StatusBadRequest, w.Code)
@@ -268,7 +262,7 @@ func (suite *HandlerTestSuite) TestQuali_TrackerInitializing() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/qualifying/round/3/heat/4?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/qualifying/round/3/heat/4?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusAccepted, w.Code)
@@ -283,7 +277,7 @@ func (suite *HandlerTestSuite) TestQuali_StoreError() {
 	suite.mockStore.On("GetQualiRaceResult", targetURL, 4, 3).Return(nil, errors.New("timeout")).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/qualifying/round/3/heat/4?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/qualifying/round/3/heat/4?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusInternalServerError, w.Code)
@@ -299,7 +293,7 @@ func (suite *HandlerTestSuite) TestQuali_Success() {
 	suite.mockStore.On("GetQualiRaceResult", targetURL, 4, 3).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/qualifying/round/3/heat/4?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/qualifying/round/3/heat/4?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Equal(http.StatusOK, w.Code)
@@ -312,7 +306,7 @@ func (suite *HandlerTestSuite) TestQuali_Success() {
 
 func (suite *HandlerTestSuite) TestFinal_MissingURL() {
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/finals/round/5/final/1", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/finals/round/5/final/1", nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Equal(http.StatusBadRequest, w.Code)
@@ -326,7 +320,7 @@ func (suite *HandlerTestSuite) TestFinal_TrackerInitializing() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/finals/round/5/final/1?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/finals/round/5/final/1?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusAccepted, w.Code)
@@ -341,7 +335,7 @@ func (suite *HandlerTestSuite) TestFinal_StoreError() {
 	suite.mockStore.On("GetFinalRaceResult", targetURL, 1, 5).Return(nil, errors.New("db disconnect")).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/finals/round/5/final/1?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/finals/round/5/final/1?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Require().Equal(http.StatusInternalServerError, w.Code)
@@ -357,7 +351,7 @@ func (suite *HandlerTestSuite) TestFinal_Success() {
 	suite.mockStore.On("GetFinalRaceResult", targetURL, 1, 5).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/finals/round/5/final/1?target_url="+targetURL, nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/finals/round/5/final/1?target_url="+targetURL, nil)
 	suite.router.ServeHTTP(w, req)
 
 	suite.Equal(http.StatusOK, w.Code)

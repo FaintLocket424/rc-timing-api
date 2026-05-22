@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api/dto"
+	"github.com/FaintLocket424/opengrid-bridge/internal/api/responses"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 	"github.com/gin-gonic/gin"
 )
@@ -35,18 +36,18 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 	url := c.Query("target_url")
 
 	if url == "" {
-		respondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
+		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
 		return
 	}
 
 	if h.tracker.EnsureTracking(url) {
-		respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+		responses.RespondAccepted(c, "Starting tracking event, please poll again in a few seconds")
 	} else {
 		if model, err := h.store.GetLiveTiming(url); err == nil {
-			respondSuccess(c, dto.ToRaceResultDTO(model), "")
+			responses.RespondSuccess(c, dto.ToRaceResultDTO(model), "")
 		} else {
 			slog.Error("error getting live timing", "error", err)
-			respondError(c, http.StatusInternalServerError, err.Error())
+			responses.RespondError(c, http.StatusInternalServerError, err.Error())
 		}
 	}
 }
@@ -58,7 +59,7 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 	url := c.Query("target_url")
 
 	if url == "" {
-		respondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
+		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
 		return
 	}
 
@@ -66,13 +67,13 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 	round, _ := strconv.Atoi(c.Param("round"))
 
 	if h.tracker.EnsureTracking(url) {
-		respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+		responses.RespondAccepted(c, "Starting tracking event, please poll again in a few seconds")
 	} else {
 		if model, err := h.store.GetPracticeRaceResult(url, heat, round); err == nil {
-			respondSuccess(c, dto.ToRaceResultDTO(model), "")
+			responses.RespondSuccess(c, dto.ToRaceResultDTO(model), "")
 		} else {
 			slog.Error("error getting practice race result", "error", err)
-			respondError(c, http.StatusInternalServerError, err.Error())
+			responses.RespondError(c, http.StatusInternalServerError, err.Error())
 		}
 	}
 }
@@ -84,7 +85,7 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 	url := c.Query("target_url")
 
 	if url == "" {
-		respondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
+		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
 		return
 	}
 
@@ -92,13 +93,13 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 	round, _ := strconv.Atoi(c.Param("round"))
 
 	if h.tracker.EnsureTracking(url) {
-		respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+		responses.RespondAccepted(c, "Starting tracking event, please poll again in a few seconds")
 	} else {
 		if model, err := h.store.GetQualiRaceResult(url, heat, round); err == nil {
-			respondSuccess(c, dto.ToRaceResultDTO(model), "")
+			responses.RespondSuccess(c, dto.ToRaceResultDTO(model), "")
 		} else {
 			slog.Error("error getting qualifying race result", "error", err)
-			respondError(c, http.StatusInternalServerError, err.Error())
+			responses.RespondError(c, http.StatusInternalServerError, err.Error())
 		}
 	}
 }
@@ -112,18 +113,18 @@ func (h *Handler) GetFinalRaceResult(c *gin.Context) {
 	round, _ := strconv.Atoi(c.Param("round"))
 
 	if url == "" {
-		respondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
+		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
 		return
 	}
 
 	if h.tracker.EnsureTracking(url) {
-		respondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+		responses.RespondAccepted(c, "Starting tracking event, please poll again in a few seconds")
 	} else {
 		if model, err := h.store.GetFinalRaceResult(url, final, round); err == nil {
-			respondSuccess(c, dto.ToRaceResultDTO(model), "")
+			responses.RespondSuccess(c, dto.ToRaceResultDTO(model), "")
 		} else {
 			slog.Error("error getting final race result", "error", err)
-			respondError(c, http.StatusInternalServerError, err.Error())
+			responses.RespondError(c, http.StatusInternalServerError, err.Error())
 		}
 	}
 }

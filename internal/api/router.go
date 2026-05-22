@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api/middleware"
+	"github.com/FaintLocket424/opengrid-bridge/internal/api/responses"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 	"github.com/gin-gonic/gin"
 )
@@ -25,43 +26,48 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion string) *g
 
 	handler := NewHandler(store, tracker)
 
-	v1 := r.Group("/api/v1")
+	api := r.Group("/api")
 	{
-		v1.GET("/ping", func(c *gin.Context) {
+		api.GET("/ping", func(c *gin.Context) {
 			c.String(http.StatusOK, "pong")
 		})
 
-		v1.GET("/info", func(c *gin.Context) {
-			respondSuccess(c, nil,
+		api.GET("/info", func(c *gin.Context) {
+			responses.RespondSuccess(c, nil,
 				fmt.Sprintf("API powered by OpenGrid Timing Bridge %s, licensed under the AGPL-3.0 license. Source available at https://codeberg.org/OpenGrid-RC/bridge", programVersion),
 			)
 		})
 
-		v1.GET("/live", handler.GetLiveTiming)
-
-		results := v1.Group("/results")
+		v1 := api.Group("/v1")
 		{
-			practice := results.Group("/practice")
-			{
-				round := practice.Group("/round/:round")
-				{
-					round.GET("/heat/:heat", handler.GetPracticeRaceResult)
-				}
-			}
+			v1.Use(middleware.ExtractTargetURL)
 
-			quali := results.Group("/qualifying")
-			{
-				round := quali.Group("/round/:round")
-				{
-					round.GET("/heat/:heat", handler.GetQualiRaceResult)
-				}
-			}
+			v1.GET("/live", handler.GetLiveTiming)
 
-			finals := results.Group("/finals")
+			results := v1.Group("/results")
 			{
-				round := finals.Group("/round/:round")
+				practice := results.Group("/practice")
 				{
-					round.GET("/final/:final", handler.GetFinalRaceResult)
+					round := practice.Group("/round/:round")
+					{
+						round.GET("/heat/:heat", handler.GetPracticeRaceResult)
+					}
+				}
+
+				quali := results.Group("/qualifying")
+				{
+					round := quali.Group("/round/:round")
+					{
+						round.GET("/heat/:heat", handler.GetQualiRaceResult)
+					}
+				}
+
+				finals := results.Group("/finals")
+				{
+					round := finals.Group("/round/:round")
+					{
+						round.GET("/final/:final", handler.GetFinalRaceResult)
+					}
 				}
 			}
 		}

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/api/middleware"
 	"github.com/FaintLocket424/opengrid-bridge/internal/api/responses"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,7 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion string) *g
 		panic(err)
 	}
 
-	r.Use(middleware.RateLimiter(5, 10))
+	r.Use(RateLimiter(5, 10))
 
 	handler := NewHandler(store, tracker)
 
@@ -40,7 +39,7 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion string) *g
 
 		v1 := api.Group("/v1")
 		{
-			v1.Use(middleware.ExtractTargetURL)
+			v1.Use(ExtractTargetURL(handler))
 
 			v1.GET("/live", handler.GetLiveTiming)
 

@@ -1,6 +1,4 @@
-// Package middleware contains Gin middleware functions to be used
-// by [internal/api] when creating the router.
-package middleware
+package api
 
 import (
 	"net/http"

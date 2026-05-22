@@ -1,4 +1,4 @@
-package middleware
+package api
 
 import (
 	"net/http"
@@ -25,15 +25,22 @@ func isValidURL(toTest string) bool {
 
 // ExtractTargetURL is a Gin middleware that enfoces the presence of the `target_url`
 // query parameter, and checks it's a valid URL and returns an error if it's not.
-func ExtractTargetURL(c *gin.Context) {
-	target := c.Query("target_url")
+func ExtractTargetURL(h *Handler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		target := c.Query("target_url")
 
-	if !isValidURL(target) {
-		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
-		return
+		if !isValidURL(target) {
+			responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
+			return
+		}
+
+		if h.tracker.EnsureTracking(target) {
+			responses.RespondAccepted(c, "Starting tracking event, please poll again in a few seconds")
+			return
+		}
+
+		c.Set("target_url", target)
+
+		c.Next()
 	}
-
-	c.Set("target_url", target)
-
-	c.Next()
 }

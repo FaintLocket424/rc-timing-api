@@ -29,16 +29,19 @@ func NewHandler(store storage.Store, tracker Tracker) *Handler {
 	return &Handler{store, tracker}
 }
 
+// getTargetURL extracts the key set by the ExtractTargetURL middleware.
+func getTargetURL(c *gin.Context) string {
+	if val, ok := c.Get("target_url"); ok {
+		return val.(string)
+	}
+	return ""
+}
+
 // GetLiveTiming handles HTTP requests to fetch live timing data.
 // It ensures a tracking goroutine is running for the provided URL, then
 // checks the cache. If tracking is initialising, it prompts the client to poll again.
 func (h *Handler) GetLiveTiming(c *gin.Context) {
-	url := c.Query("target_url")
-
-	if url == "" {
-		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
-		return
-	}
+	url := getTargetURL(c)
 
 	if h.tracker.EnsureTracking(url) {
 		responses.RespondAccepted(c, "Starting tracking event, please poll again in a few seconds")
@@ -56,12 +59,7 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 // It ensures a tracking goroutine is running for the provided URL, then
 // checks the cache. If tracking is initialising, it prompts the client to poll again.
 func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
-	url := c.Query("target_url")
-
-	if url == "" {
-		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
-		return
-	}
+	url := getTargetURL(c)
 
 	heat, _ := strconv.Atoi(c.Param("heat"))
 	round, _ := strconv.Atoi(c.Param("round"))
@@ -82,12 +80,7 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 // It ensures a tracking goroutine is running for the provided URL, then
 // checks the cache. If tracking is initialising, it prompts the client to poll again.
 func (h *Handler) GetQualiRaceResult(c *gin.Context) {
-	url := c.Query("target_url")
-
-	if url == "" {
-		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
-		return
-	}
+	url := getTargetURL(c)
 
 	heat, _ := strconv.Atoi(c.Param("heat"))
 	round, _ := strconv.Atoi(c.Param("round"))
@@ -108,14 +101,9 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 // It ensures a tracking goroutine is running for the provided URL, then
 // checks the cache. If tracking is initialising, it prompts the client to poll again.
 func (h *Handler) GetFinalRaceResult(c *gin.Context) {
-	url := c.Query("target_url")
+	url := getTargetURL(c)
 	final, _ := strconv.Atoi(c.Param("final"))
 	round, _ := strconv.Atoi(c.Param("round"))
-
-	if url == "" {
-		responses.RespondError(c, http.StatusBadRequest, "Missing required query parameter: target_url")
-		return
-	}
 
 	if h.tracker.EnsureTracking(url) {
 		responses.RespondAccepted(c, "Starting tracking event, please poll again in a few seconds")

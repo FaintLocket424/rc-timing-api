@@ -69,6 +69,7 @@ func ToRaceResultDTO(m *models.RaceResultScrape) *RaceResultScrapeDTO {
 		HeatNumber:     m.HeatNumber,
 		FinalNumber:    m.FinalNumber,
 		ClassName:      m.ClassName,
+		RaceStatus:     m.RaceStatus,
 		Round:          m.Round,
 		ElapsedTimeMs:  durationToMs(m.ElapsedTime),
 		Drivers:        drivers,

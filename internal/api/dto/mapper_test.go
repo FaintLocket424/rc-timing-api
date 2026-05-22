@@ -17,6 +17,7 @@ func TestToRaceResultDTO_FullPracticeResultScrape(t *testing.T) {
 		PracticeNumber: ptr(3),
 		Round:          ptr(2),
 		ClassName:      ptr("4 Wheel Drive"),
+		RaceStatus:     ptr("In Progress"),
 		ElapsedTime:    ptr(2*time.Minute + 12_345*time.Millisecond),
 		Drivers: []models.DriverRaceResult{
 			{
@@ -58,6 +59,7 @@ func TestToRaceResultDTO_FullPracticeResultScrape(t *testing.T) {
 		"practice_number": 3,
 		"round": 2,
 		"class_name": "4 Wheel Drive",
+		"race_status": "In Progress",
 		"elapsed_ms": 132345,
 		"drivers": [
 			{
@@ -151,6 +153,7 @@ func TestToRaceResultDTO_FullQualifyingResultScrape(t *testing.T) {
 		HeatNumber:  ptr(3),
 		Round:       ptr(2),
 		ClassName:   ptr("4 Wheel Drive"),
+		RaceStatus:  ptr("In Progress"),
 		ElapsedTime: ptr(2*time.Minute + 12_345*time.Millisecond),
 		Drivers: []models.DriverRaceResult{
 			{
@@ -192,6 +195,7 @@ func TestToRaceResultDTO_FullQualifyingResultScrape(t *testing.T) {
 		"heat_number": 3,
 		"round": 2,
 		"class_name": "4 Wheel Drive",
+		"race_status": "In Progress",
 		"elapsed_ms": 132345,
 		"drivers": [
 			{
@@ -285,6 +289,7 @@ func TestToRaceResultDTO_FullFinalResultScrape(t *testing.T) {
 		FinalNumber: ptr(3),
 		Round:       ptr(2),
 		ClassName:   ptr("4 Wheel Drive"),
+		RaceStatus:  ptr("In Progress"),
 		ElapsedTime: ptr(2*time.Minute + 12_345*time.Millisecond),
 		Drivers: []models.DriverRaceResult{
 			{
@@ -326,6 +331,7 @@ func TestToRaceResultDTO_FullFinalResultScrape(t *testing.T) {
 		"final_number": 3,
 		"round": 2,
 		"class_name": "4 Wheel Drive",
+		"race_status": "In Progress",
 		"elapsed_ms": 132345,
 		"drivers": [
 			{

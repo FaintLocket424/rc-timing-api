@@ -43,6 +43,7 @@ type RaceResultScrape struct {
 	FinalNumber    *int
 	Round          *int
 	ClassName      *string
+	RaceStatus     *string
 	ElapsedTime    *time.Duration
 	RemainingTime  *time.Duration
 	FinishTime     *time.Time

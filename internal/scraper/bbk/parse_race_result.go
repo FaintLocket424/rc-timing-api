@@ -99,6 +99,7 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 			lt.FinishTime = ptr(t)
 			slog.Info("timerText", "ltFinishTime", ptr(t))
 		}
+		lt.RaceStatus = ptr("Finished")
 	}
 
 	if durMatch := NamedCapture(elapsedTimeHeaderRegex, timerText); durMatch != nil {
@@ -112,6 +113,7 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 		if remaining, err := time.ParseDuration(remainingRaw); err == nil {
 			lt.RemainingTime = ptr(remaining)
 		}
+		lt.RaceStatus = ptr("In Progress")
 	}
 }
 

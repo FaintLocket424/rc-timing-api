@@ -39,6 +39,7 @@ type RaceResultScrapeDTO struct {
 	HeatNumber     *int               `json:"heat_number,omitempty"`
 	FinalNumber    *int               `json:"final_number,omitempty"`
 	ClassName      *string            `json:"class_name,omitempty"`
+	RaceStatus     *string            `json:"race_status,omitempty"`
 	Round          *int               `json:"round,omitempty"`
 	ElapsedTimeMs  *int64             `json:"elapsed_ms,omitempty"`
 	Drivers        []DriverRaceResult `json:"drivers,omitempty"`

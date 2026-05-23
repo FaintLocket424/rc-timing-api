@@ -28,13 +28,13 @@
 
 | Feature | BBK Scraper |
 | :--- | :---: |
-| The meeting name | ❌ |
-| The timestamp | ❌ |
-| Practice heat results | ❌ |
+| The meeting name | ✅ |
+| The timestamp | ✅ |
+| Practice heat results | ✅ |
 | Practice overall lists | ❌ |
-| Qualifying heat results | ❌ |
+| Qualifying heat results | ✅ |
 | Qualifying overall lists | ❌ |
-| Final race results | ❌ |
+| Final race results | ✅ |
 | Finals overall lists | ❌ |
 
 ## `/liveschedule.htm`

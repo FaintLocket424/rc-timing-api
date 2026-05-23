@@ -31,11 +31,11 @@
 | The meeting name | ✅ |
 | The timestamp | ✅ |
 | Practice heat results | ✅ |
-| Practice overall lists | ❌ |
+| Practice overall lists | ✅ |
 | Qualifying heat results | ✅ |
-| Qualifying overall lists | ❌ |
+| Qualifying overall lists | ✅ |
 | Final race results | ✅ |
-| Finals overall lists | ❌ |
+| Finals overall lists | ✅ |
 
 ## `/liveschedule.htm`
 

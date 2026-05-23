@@ -20,8 +20,8 @@
       { "Heat": 2, "Round": 2 },
       { "Heat": 3, "Round": 2 }
     ],
-    "Overalls": [],
-    "Overall": false
+    "Overalls": [1, 2, 3],
+    "Overall": true
   },
   "Finals": {
     "Results": [],

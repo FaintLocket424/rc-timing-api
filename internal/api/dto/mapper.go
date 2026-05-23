@@ -97,7 +97,7 @@ func ToRaceResultsIndexDTO(m *models.RaceResultsIndexScrape) *RaceResultsIndexSc
 func mapToResultStatusDTO(r models.ResultStatus) ResultStatusDTO {
 	return ResultStatusDTO{
 		Results:       mapToHeatRoundDTOs(r.Results),
-		RoundOveralls: r.Overalls,
+		RoundOveralls: r.RoundOveralls,
 		Overall:       r.Overall,
 	}
 }

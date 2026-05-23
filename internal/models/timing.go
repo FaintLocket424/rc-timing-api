@@ -61,9 +61,9 @@ type HeatRound struct {
 
 // ResultStatus represents the races, round overalls and total overalls.
 type ResultStatus struct {
-	Results  []HeatRound
-	Overalls []int
-	Overall  bool
+	Results       []HeatRound
+	RoundOveralls []int
+	Overall       bool
 }
 
 // RaceResultsIndexScrape represents a full scrape of the results index,

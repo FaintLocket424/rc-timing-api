@@ -13,7 +13,10 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-var resultsLinkRegex = regexp.MustCompile(`^(?P<type>[phf])(?P<heat>\d+)r(?P<round>\d+)res\.htm$`)
+var (
+	resultsLinkRegex       = regexp.MustCompile(`^(?P<type>[phf])(?P<heat>\d+)r(?P<round>\d+)res\.htm$`)
+	roundOverallsLinkRegex = regexp.MustCompile(`^(?P<type>[phf])eor(?P<round>\d+)\.htm$`)
+)
 
 func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
@@ -28,16 +31,16 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 
 	scrape := &models.RaceResultsIndexScrape{
 		Practice: models.ResultStatus{
-			Results:  []models.HeatRound{},
-			Overalls: []int{},
+			Results:       []models.HeatRound{},
+			RoundOveralls: []int{},
 		},
 		Qualifying: models.ResultStatus{
-			Results:  []models.HeatRound{},
-			Overalls: []int{},
+			Results:       []models.HeatRound{},
+			RoundOveralls: []int{},
 		},
 		Finals: models.ResultStatus{
-			Results:  []models.HeatRound{},
-			Overalls: []int{},
+			Results:       []models.HeatRound{},
+			RoundOveralls: []int{},
 		},
 	}
 
@@ -74,6 +77,32 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 					scrape.Qualifying.Results = append(scrape.Qualifying.Results, hr)
 				case "f":
 					scrape.Finals.Results = append(scrape.Finals.Results, hr)
+				}
+			} else if data := NamedCapture(roundOverallsLinkRegex, attr); data != nil {
+				round, err := strconv.Atoi(data["round"])
+				if err != nil {
+					return
+				}
+
+				switch data["type"] {
+				case "p":
+					if round > 0 {
+						scrape.Practice.RoundOveralls = append(scrape.Practice.RoundOveralls, round)
+					} else {
+						scrape.Practice.Overall = true
+					}
+				case "h":
+					if round > 0 {
+						scrape.Qualifying.RoundOveralls = append(scrape.Qualifying.RoundOveralls, round)
+					} else {
+						scrape.Qualifying.Overall = true
+					}
+				case "f":
+					if round > 0 {
+						scrape.Finals.RoundOveralls = append(scrape.Finals.RoundOveralls, round)
+					} else {
+						scrape.Finals.Overall = true
+					}
 				}
 			}
 		}

@@ -90,14 +90,11 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 	}
 
 	timerText := tds.Last().Text()
-	slog.Info("timerText", "timerText", timerText)
 
 	if finishMatch := NamedCapture(finishedTimeHeaderRegex, timerText); finishMatch != nil {
-		slog.Info("timerText", "finishTime", finishMatch["finishTime"])
 		t, err := time.Parse("15:04", finishMatch["finishTime"])
 		if err == nil {
 			lt.FinishTime = ptr(t)
-			slog.Info("timerText", "ltFinishTime", ptr(t))
 		}
 		lt.RaceStatus = ptr("Finished")
 	}

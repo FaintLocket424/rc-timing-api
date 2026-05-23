@@ -16,6 +16,7 @@ var errNotFound = errors.New("event data not found")
 // EventData holds all the data which has been scraped from an event so far.
 type EventData struct {
 	Live            *models.RaceResultScrape
+	ResultsIndex    *models.RaceResultsIndexScrape
 	PracticeResults map[models.HeatRound]*models.RaceResultScrape
 	QualiResults    map[models.HeatRound]*models.RaceResultScrape
 	FinalResults    map[models.HeatRound]*models.RaceResultScrape
@@ -205,4 +206,30 @@ func (c *Cache) GetFinalRaceResult(url string, final, round int) (*models.RaceRe
 	}
 
 	return ed.FinalResults[key], nil
+}
+
+// SaveRaceResultsIndex saves a scraped results index for a URL into the cache.
+func (c *Cache) SaveRaceResultsIndex(url string, model *models.RaceResultsIndexScrape) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	ed := c.getOrCreateEvent(url)
+	ed.ResultsIndex = model
+
+	slog.Debug("Saved results index to cache", "url", url)
+
+	return nil
+}
+
+// GetRaceResultsIndex retrieves the currently stored results index for a URL in the cache.
+func (c *Cache) GetRaceResultsIndex(url string) (*models.RaceResultsIndexScrape, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	ed, ok := c.data[url]
+	if !ok || ed.Live == nil {
+		return nil, errNotFound
+	}
+
+	return ed.ResultsIndex, nil
 }

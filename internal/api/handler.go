@@ -39,8 +39,8 @@ func getTargetURL(c *gin.Context) string {
 }
 
 // GetLiveTiming handles HTTP requests to fetch live timing data.
-// It ensures a tracking goroutine is running for the provided URL, then
-// checks the cache. If tracking is initialising, it prompts the client to poll again.
+// It checks the cache to see if a value is available, and returns what it finds,
+// or an error if it finds nothing.
 func (h *Handler) GetLiveTiming(c *gin.Context) {
 	url := getTargetURL(c)
 
@@ -53,8 +53,8 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 }
 
 // GetPracticeRaceResult handles HTTP requests to fetch practice results.
-// It ensures a tracking goroutine is running for the provided URL, then
-// checks the cache. If tracking is initialising, it prompts the client to poll again.
+// It checks the cache to see if a value is available, and returns what it finds,
+// or an error if it finds nothing.
 func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 	url := getTargetURL(c)
 
@@ -70,8 +70,8 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 }
 
 // GetQualiRaceResult handles HTTP requests to fetch practice results.
-// It ensures a tracking goroutine is running for the provided URL, then
-// checks the cache. If tracking is initialising, it prompts the client to poll again.
+// It checks the cache to see if a value is available, and returns what it finds,
+// or an error if it finds nothing.
 func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 	url := getTargetURL(c)
 	heat, _ := strconv.Atoi(c.Param("heat"))
@@ -86,8 +86,8 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 }
 
 // GetFinalRaceResult handles HTTP requests to fetch practice results.
-// It ensures a tracking goroutine is running for the provided URL, then
-// checks the cache. If tracking is initialising, it prompts the client to poll again.
+// It checks the cache to see if a value is available, and returns what it finds,
+// or an error if it finds nothing.
 func (h *Handler) GetFinalRaceResult(c *gin.Context) {
 	url := getTargetURL(c)
 	final, _ := strconv.Atoi(c.Param("final"))
@@ -97,6 +97,20 @@ func (h *Handler) GetFinalRaceResult(c *gin.Context) {
 		responses.RespondSuccess(c, dto.ToRaceResultDTO(model), "")
 	} else {
 		slog.Error("error getting final race result", "error", err)
+		responses.RespondError(c, http.StatusInternalServerError, err.Error())
+	}
+}
+
+// GetRaceResultsIndex handles HTTP requests to fetch the race result index.
+// It checks the cache to see if a value is available, and returns what it finds,
+// or an error if it finds nothing.
+func (h *Handler) GetRaceResultsIndex(c *gin.Context) {
+	url := getTargetURL(c)
+
+	if model, err := h.store.GetRaceResultsIndex(url); err == nil {
+		responses.RespondSuccess(c, dto.ToRaceResultsIndexDTO(model), "")
+	} else {
+		slog.Error("error getting race results index", "error", err)
 		responses.RespondError(c, http.StatusInternalServerError, err.Error())
 	}
 }

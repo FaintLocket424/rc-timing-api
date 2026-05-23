@@ -33,7 +33,7 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 	header := tables.First().Find("td")
 	scrape.Title = header.First().Text()
 
-	if t, err := time.Parse("15:04", header.Last().Text()); err != nil {
+	if t, err := time.Parse("15:04", header.Last().Text()); err == nil {
 		now := time.Now()
 
 		scrape.Timestamp = time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location())

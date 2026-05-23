@@ -45,6 +45,8 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion string) *g
 
 			results := v1.Group("/results")
 			{
+				results.GET("/", handler.GetRaceResultsIndex)
+
 				practice := results.Group("/practice")
 				{
 					round := practice.Group("/round/:round")

@@ -99,6 +99,11 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 
 		if model, err := s.GetRaceResultsIndex(); err == nil {
 			logger.Debug("Scraped race results index successfully")
+
+			if err := m.store.SaveRaceResultsIndex(url, model); err != nil {
+				logger.Error("race result index storage failed", "err", err)
+			}
+
 			process := func(
 				results map[models.HeatRound]struct{},
 				checker func(string, int, int) (*models.RaceResultScrape, error),

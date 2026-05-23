@@ -17,4 +17,7 @@ type Store interface {
 
 	SaveFinalRaceResult(url string, model *models.RaceResultScrape) error
 	GetFinalRaceResult(url string, final, round int) (*models.RaceResultScrape, error)
+
+	SaveRaceResultsIndex(url string, model *models.RaceResultsIndexScrape) error
+	GetRaceResultsIndex(url string) (*models.RaceResultsIndexScrape, error)
 }

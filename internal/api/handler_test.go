@@ -84,6 +84,22 @@ func (m *MockStore) GetFinalRaceResult(url string, final, round int) (*models.Ra
 	return res, args.Error(1)
 }
 
+// SaveRaceResultsIndex is a mock method.
+func (m *MockStore) SaveRaceResultsIndex(url string, model *models.RaceResultsIndexScrape) error {
+	args := m.Called(url, model)
+	return args.Error(0)
+}
+
+// GetRaceResultsIndex is a mock method.
+func (m *MockStore) GetRaceResultsIndex(url string) (*models.RaceResultsIndexScrape, error) {
+	args := m.Called(url)
+	var res *models.RaceResultsIndexScrape
+	if args.Get(0) != nil {
+		res = args.Get(0).(*models.RaceResultsIndexScrape)
+	}
+	return res, args.Error(1)
+}
+
 // MockTracker represents a fake tracker.
 type MockTracker struct {
 	mock.Mock

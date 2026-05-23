@@ -94,7 +94,8 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 	if finishMatch := NamedCapture(finishedTimeHeaderRegex, timerText); finishMatch != nil {
 		t, err := time.Parse("15:04", finishMatch["finishTime"])
 		if err == nil {
-			lt.FinishTime = ptr(t)
+			now := time.Now()
+			lt.FinishTime = ptr(time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location()))
 		}
 		lt.RaceStatus = ptr("Finished")
 	}

@@ -1,9 +1,11 @@
 package bbk
 
 import (
+	"cmp"
 	"fmt"
 	"io"
 	"regexp"
+	"slices"
 	"strconv"
 	"time"
 
@@ -25,9 +27,9 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 	}
 
 	scrape := &models.RaceResultsIndexScrape{
-		Practice:   make(map[models.HeatRound]struct{}),
-		Qualifying: make(map[models.HeatRound]struct{}),
-		Finals:     make(map[models.HeatRound]struct{}),
+		Practice:   []models.HeatRound{},
+		Qualifying: []models.HeatRound{},
+		Finals:     []models.HeatRound{},
 	}
 
 	header := tables.First().Find("td")
@@ -54,17 +56,31 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 					return
 				}
 
+				hr := models.HeatRound{Heat: heat, Round: round}
+
 				switch data["type"] {
 				case "p":
-					scrape.Practice[models.HeatRound{Heat: heat, Round: round}] = struct{}{}
+					scrape.Practice = append(scrape.Practice, hr)
 				case "h":
-					scrape.Qualifying[models.HeatRound{Heat: heat, Round: round}] = struct{}{}
+					scrape.Qualifying = append(scrape.Qualifying, hr)
 				case "f":
-					scrape.Finals[models.HeatRound{Heat: heat, Round: round}] = struct{}{}
+					scrape.Finals = append(scrape.Finals, hr)
 				}
 			}
 		}
 	})
+
+	// Sorts by Round ascending, then Heat ascending
+	sortFunc := func(a, b models.HeatRound) int {
+		if a.Round != b.Round {
+			return cmp.Compare(a.Round, b.Round)
+		}
+		return cmp.Compare(a.Heat, b.Heat)
+	}
+
+	slices.SortFunc(scrape.Practice, sortFunc)
+	slices.SortFunc(scrape.Qualifying, sortFunc)
+	slices.SortFunc(scrape.Finals, sortFunc)
 
 	return scrape, nil
 }

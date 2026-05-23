@@ -426,10 +426,10 @@ func TestToRaceResultDTO_NilHandling(t *testing.T) {
 
 func TestMapToHeatRoundDTOs_Sorting(t *testing.T) {
 	// Test the sorting logic for heat/round maps
-	input := map[models.HeatRound]struct{}{
-		{Round: 2, Heat: 1}: {},
-		{Round: 1, Heat: 2}: {},
-		{Round: 1, Heat: 1}: {},
+	input := []models.HeatRound{
+		{Round: 2, Heat: 1},
+		{Round: 1, Heat: 2},
+		{Round: 1, Heat: 1},
 	}
 
 	result := mapToHeatRoundDTOs(input)

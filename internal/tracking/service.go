@@ -5,7 +5,6 @@ package tracking
 import (
 	"context"
 	"log/slog"
-	"sort"
 	"sync"
 	"time"
 
@@ -105,29 +104,19 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 			}
 
 			process := func(
-				results map[models.HeatRound]struct{},
+				results []models.HeatRound,
 				checker func(string, int, int) (*models.RaceResultScrape, error),
 				fetcher func(int, int) (*models.RaceResultScrape, error),
 				save func(string, *models.RaceResultScrape) error,
 				kind string,
 			) {
-				type item struct{ heat, round int }
-				var list []item
-				for key := range results {
-					list = append(list, item{heat: key.Heat, round: key.Round})
+				if len(results) == 0 {
+					return
 				}
 
-				// Sort by Round then Heat
-				sort.Slice(list, func(i, j int) bool {
-					if list[i].round != list[j].round {
-						return list[i].round < list[j].round
-					}
-					return list[i].heat < list[j].heat
-				})
-
-				for _, entry := range list {
+				for _, entry := range results {
 					// Check cache first
-					if _, err := checker(url, entry.heat, entry.round); err != nil {
+					if _, err := checker(url, entry.Heat, entry.Round); err != nil {
 						// Check rate limit before network call
 						if !canRequest() {
 							return
@@ -135,9 +124,9 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 
 						time.Sleep(500 * time.Millisecond)
 
-						res, err := fetcher(entry.heat, entry.round)
+						res, err := fetcher(entry.Heat, entry.Round)
 						if err != nil {
-							logger.Warn(kind+" scrape failed", "heat", entry.heat, "round", entry.round, "err", err)
+							logger.Warn(kind+" scrape failed", "heat", entry.Heat, "round", entry.Round, "err", err)
 							continue
 						}
 						if err := save(url, res); err != nil {

@@ -64,7 +64,7 @@ type HeatRound struct {
 type RaceResultsIndexScrape struct {
 	Title      string
 	Timestamp  time.Time
-	Practice   map[HeatRound]struct{}
-	Qualifying map[HeatRound]struct{}
-	Finals     map[HeatRound]struct{}
+	Practice   []HeatRound
+	Qualifying []HeatRound
+	Finals     []HeatRound
 }

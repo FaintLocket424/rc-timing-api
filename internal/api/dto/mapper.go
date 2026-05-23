@@ -3,7 +3,6 @@
 package dto
 
 import (
-	"sort"
 	"time"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
@@ -95,23 +94,15 @@ func ToRaceResultsIndexDTO(m *models.RaceResultsIndexScrape) *RaceResultsIndexSc
 }
 
 // mapToHeatRoundDTOs safely converts the internal struct map to a JSON-friendly array.
-func mapToHeatRoundDTOs(m map[models.HeatRound]struct{}) []HeatRoundDTO {
+func mapToHeatRoundDTOs(m []models.HeatRound) []HeatRoundDTO {
 	if len(m) == 0 {
 		return nil
 	}
 
 	res := make([]HeatRoundDTO, 0, len(m))
-	for k := range m {
-		res = append(res, HeatRoundDTO{Heat: k.Heat, Round: k.Round})
+	for i, k := range m {
+		res[i] = HeatRoundDTO{Heat: k.Heat, Round: k.Round}
 	}
-
-	sort.Slice(res, func(i, j int) bool {
-		if res[i].Round == res[j].Round {
-			return res[i].Heat < res[j].Heat
-		}
-
-		return res[i].Round < res[j].Round
-	})
 
 	return res
 }

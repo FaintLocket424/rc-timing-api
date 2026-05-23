@@ -87,9 +87,18 @@ func ToRaceResultsIndexDTO(m *models.RaceResultsIndexScrape) *RaceResultsIndexSc
 	return &RaceResultsIndexScrapeDTO{
 		Title:      m.Title,
 		Timestamp:  m.Timestamp.UnixMilli(),
-		Practice:   mapToHeatRoundDTOs(m.Practice),
-		Qualifying: mapToHeatRoundDTOs(m.Qualifying),
-		Finals:     mapToHeatRoundDTOs(m.Finals),
+		Practice:   mapToResultStatusDTO(m.Practice),
+		Qualifying: mapToResultStatusDTO(m.Qualifying),
+		Finals:     mapToResultStatusDTO(m.Finals),
+	}
+}
+
+// mapToResultStatusDTO is a helper to convert a models.ResultStatus to a ResultStatusDTO.
+func mapToResultStatusDTO(r models.ResultStatus) ResultStatusDTO {
+	return ResultStatusDTO{
+		Results:       mapToHeatRoundDTOs(r.Results),
+		RoundOveralls: r.Overalls,
+		Overall:       r.Overall,
 	}
 }
 

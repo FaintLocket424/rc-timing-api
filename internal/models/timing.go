@@ -59,12 +59,19 @@ type HeatRound struct {
 	Round int
 }
 
+// ResultStatus represents the races, round overalls and total overalls.
+type ResultStatus struct {
+	Results  []HeatRound
+	Overalls []int
+	Overall  bool
+}
+
 // RaceResultsIndexScrape represents a full scrape of the results index,
 // containing sets of all the practice, quali and finals that have been run.
 type RaceResultsIndexScrape struct {
 	Title      string
 	Timestamp  time.Time
-	Practice   []HeatRound
-	Qualifying []HeatRound
-	Finals     []HeatRound
+	Practice   ResultStatus
+	Qualifying ResultStatus
+	Finals     ResultStatus
 }

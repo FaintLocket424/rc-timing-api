@@ -1,19 +1,31 @@
 {
   "Title": "Week 14",
   "Timestamp": "0000-01-01T20:42:00Z",
-  "Practice": [],
-  "Qualifying": [
-    { "Heat": 1, "Round": 1 },
-    { "Heat": 2, "Round": 1 },
-    { "Heat": 3, "Round": 1 },
-    { "Heat": 4, "Round": 1 },
-    { "Heat": 5, "Round": 1 },
-    { "Heat": 6, "Round": 1 },
-    { "Heat": 7, "Round": 1 },
-    { "Heat": 8, "Round": 1 },
-    { "Heat": 1, "Round": 2 },
-    { "Heat": 2, "Round": 2 },
-    { "Heat": 3, "Round": 2 }
-  ],
-  "Finals": []
+  "Practice": {
+    "Results": [],
+    "Overalls": [],
+    "Overall": false
+  },
+  "Qualifying": {
+    "Results": [
+      { "Heat": 1, "Round": 1 },
+      { "Heat": 2, "Round": 1 },
+      { "Heat": 3, "Round": 1 },
+      { "Heat": 4, "Round": 1 },
+      { "Heat": 5, "Round": 1 },
+      { "Heat": 6, "Round": 1 },
+      { "Heat": 7, "Round": 1 },
+      { "Heat": 8, "Round": 1 },
+      { "Heat": 1, "Round": 2 },
+      { "Heat": 2, "Round": 2 },
+      { "Heat": 3, "Round": 2 }
+    ],
+    "Overalls": [],
+    "Overall": false
+  },
+  "Finals": {
+    "Results": [],
+    "Overalls": [],
+    "Overall": false
+  }
 }

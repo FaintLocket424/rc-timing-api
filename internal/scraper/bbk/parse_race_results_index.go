@@ -27,9 +27,18 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 	}
 
 	scrape := &models.RaceResultsIndexScrape{
-		Practice:   []models.HeatRound{},
-		Qualifying: []models.HeatRound{},
-		Finals:     []models.HeatRound{},
+		Practice: models.ResultStatus{
+			Results:  []models.HeatRound{},
+			Overalls: []int{},
+		},
+		Qualifying: models.ResultStatus{
+			Results:  []models.HeatRound{},
+			Overalls: []int{},
+		},
+		Finals: models.ResultStatus{
+			Results:  []models.HeatRound{},
+			Overalls: []int{},
+		},
 	}
 
 	header := tables.First().Find("td")
@@ -60,11 +69,11 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 
 				switch data["type"] {
 				case "p":
-					scrape.Practice = append(scrape.Practice, hr)
+					scrape.Practice.Results = append(scrape.Practice.Results, hr)
 				case "h":
-					scrape.Qualifying = append(scrape.Qualifying, hr)
+					scrape.Qualifying.Results = append(scrape.Qualifying.Results, hr)
 				case "f":
-					scrape.Finals = append(scrape.Finals, hr)
+					scrape.Finals.Results = append(scrape.Finals.Results, hr)
 				}
 			}
 		}
@@ -78,9 +87,9 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 		return cmp.Compare(a.Heat, b.Heat)
 	}
 
-	slices.SortFunc(scrape.Practice, sortFunc)
-	slices.SortFunc(scrape.Qualifying, sortFunc)
-	slices.SortFunc(scrape.Finals, sortFunc)
+	slices.SortFunc(scrape.Practice.Results, sortFunc)
+	slices.SortFunc(scrape.Qualifying.Results, sortFunc)
+	slices.SortFunc(scrape.Finals.Results, sortFunc)
 
 	return scrape, nil
 }

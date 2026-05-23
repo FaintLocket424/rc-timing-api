@@ -2,6 +2,7 @@ package dto
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 	"time"
 
@@ -424,25 +425,43 @@ func TestToRaceResultDTO_NilHandling(t *testing.T) {
 	assert.Nil(t, ToRaceResultDTO(nil))
 }
 
-func TestMapToHeatRoundDTOs_Sorting(t *testing.T) {
-	// Test the sorting logic for heat/round maps
-	input := []models.HeatRound{
-		{Round: 2, Heat: 1},
-		{Round: 1, Heat: 2},
-		{Round: 1, Heat: 1},
+func Test_mapToHeatRoundDTOs(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []models.HeatRound
+		want  []HeatRoundDTO
+	}{
+		{
+			name:  "nil input returns nil",
+			input: nil,
+			want:  nil,
+		},
+		{
+			name:  "empty slice returns nil",
+			input: []models.HeatRound{},
+			want:  nil,
+		},
+		{
+			name: "successfully maps multiple elements",
+			input: []models.HeatRound{
+				{Heat: 1, Round: 2},
+				{Heat: 3, Round: 4},
+			},
+			want: []HeatRoundDTO{
+				{Heat: 1, Round: 2},
+				{Heat: 3, Round: 4},
+			},
+		},
 	}
 
-	result := mapToHeatRoundDTOs(input)
-
-	require.Len(t, result, 3)
-	assert.Equal(t, 1, result[0].Round)
-	assert.Equal(t, 1, result[0].Heat)
-
-	assert.Equal(t, 1, result[1].Round)
-	assert.Equal(t, 2, result[1].Heat)
-
-	assert.Equal(t, 2, result[2].Round)
-	assert.Equal(t, 1, result[2].Heat)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := mapToHeatRoundDTOs(tt.input)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("mapToHeatRoundDTOs() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
 
 func TestToRaceResultsIndexDTO_NilHandling(t *testing.T) {

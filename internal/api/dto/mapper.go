@@ -99,7 +99,7 @@ func mapToHeatRoundDTOs(m []models.HeatRound) []HeatRoundDTO {
 		return nil
 	}
 
-	res := make([]HeatRoundDTO, 0, len(m))
+	res := make([]HeatRoundDTO, len(m))
 	for i, k := range m {
 		res[i] = HeatRoundDTO{Heat: k.Heat, Round: k.Round}
 	}

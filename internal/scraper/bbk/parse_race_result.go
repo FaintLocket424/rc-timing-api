@@ -5,7 +5,6 @@ import (
 	"io"
 	"log/slog"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -85,23 +84,23 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 	s.Find("td").Each(func(_ int, td *goquery.Selection) {
 		text := strings.TrimSpace(td.Text())
 
-		if data := NamedCapture(practiceRegex, text); data != nil {
-			if v, err := strconv.Atoi(data["practice"]); err == nil {
-				lt.PracticeNumber = ptr(v)
+		if data := namedCapture(practiceRegex, text); data != nil {
+			if v := atoiPtr(data["practice"]); v != nil {
+				lt.PracticeNumber = v
 			}
 			lt.ClassName = ptr(data["class"])
-			if v, err := strconv.Atoi(data["round"]); err == nil {
-				lt.Round = ptr(v)
+			if v := atoiPtr(data["round"]); v != nil {
+				lt.Round = v
 			}
-		} else if data := NamedCapture(heatRegex, text); data != nil {
-			if v, err := strconv.Atoi(data["heat"]); err == nil {
-				lt.HeatNumber = ptr(v)
+		} else if data := namedCapture(heatRegex, text); data != nil {
+			if v := atoiPtr(data["heat"]); v != nil {
+				lt.HeatNumber = v
 			}
 			lt.ClassName = ptr(data["class"])
-			if v, err := strconv.Atoi(data["round"]); err == nil {
-				lt.Round = ptr(v)
+			if v := atoiPtr(data["round"]); v != nil {
+				lt.Round = v
 			}
-		} else if data := NamedCapture(finalRegex, text); data != nil {
+		} else if data := namedCapture(finalRegex, text); data != nil {
 			final := data["final"]
 
 			if len(final) == 1 {
@@ -113,24 +112,22 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 			lt.ClassName = ptr(data["class"])
 
 			if data["leg"] != "" {
-				if v, err := strconv.Atoi(data["leg"]); err == nil {
-					lt.Round = ptr(v)
+				if v := atoiPtr(data["leg"]); v != nil {
+					lt.Round = v
 				}
 			} else {
 				lt.Round = ptr(1)
 			}
 		}
 
-		if finishMatch := NamedCapture(finishedTimeHeaderRegex, text); finishMatch != nil {
-			t, err := time.Parse("15:04", finishMatch["finishTime"])
-			if err == nil {
-				now := time.Now()
-				lt.FinishTime = ptr(time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location()))
+		if finishMatch := namedCapture(finishedTimeHeaderRegex, text); finishMatch != nil {
+			if t, err := parseTimeToday(finishMatch["finishTime"]); err == nil {
+				lt.FinishTime = t
 			}
 			lt.RaceStatus = ptr("Finished")
 		}
 
-		if durMatch := NamedCapture(elapsedTimeHeaderRegex, text); durMatch != nil {
+		if durMatch := namedCapture(elapsedTimeHeaderRegex, text); durMatch != nil {
 			elapsedRaw := strings.Replace(durMatch["elapsed"], "'", "m", 1)
 			remainingRaw := durMatch["remaining"]
 
@@ -208,8 +205,8 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 
 		// Car Number
 		if carIdx, ok := idx["car"]; ok && carIdx < cols.Length() {
-			if v, err := strconv.Atoi(strings.TrimSpace(cols.Eq(carIdx).Text())); err == nil {
-				dr.CarNumber = ptr(v)
+			if v := atoiPtr(cols.Eq(carIdx).Text()); v != nil {
+				dr.CarNumber = v
 			}
 		}
 
@@ -229,9 +226,8 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 					dr.Time = ptr(*lt.Drivers[0].Time + *gap)
 				}
 			} else if numStr, ok := strings.CutPrefix(resText, "W-"); ok {
-				i, err := strconv.Atoi(numStr)
-				if err == nil {
-					dr.WarmupLaps = ptr(i)
+				if v := atoiPtr(numStr); v != nil {
+					dr.WarmupLaps = v
 				}
 			} else if resText != "" {
 				slog.Warn("unparseable result", "row", i+1, "result", resText)
@@ -265,7 +261,7 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 
 		switch {
 		case strings.HasPrefix(text, "Best Lap:"):
-			if data := NamedCapture(bestLapRegex, text); data != nil {
+			if data := namedCapture(bestLapRegex, text); data != nil {
 				lt.BestLap = &models.RaceBestLap{DriverName: ptr(data["name"])}
 				dur, ln, _ := parseLapStr(fmt.Sprintf("%s[%s]", data["time"], data["lap"]))
 				lt.BestLap.Time, lt.BestLap.LapNumber = dur, ln
@@ -273,18 +269,18 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 				slog.Warn("failed to parse Best Lap meta", "raw", text)
 			}
 		case strings.HasPrefix(text, "Class FT:"):
-			if data := NamedCapture(classFTRegex, text); data != nil {
+			if data := namedCapture(classFTRegex, text); data != nil {
 				lt.ClassFT = &models.ClassFT{DriverName: ptr(data["name"])}
 				laps, dur, _ := parseRaceResultStr(data["res"])
 				lt.ClassFT.Laps, lt.ClassFT.Time = laps, dur
-				if r, err := strconv.Atoi(data["round"]); err == nil {
-					lt.ClassFT.Round = ptr(r)
+				if r := atoiPtr(data["round"]); r != nil {
+					lt.ClassFT.Round = r
 				}
 			} else {
 				slog.Warn("failed to parse Class FT meta", "raw", text)
 			}
 		case strings.HasPrefix(text, "Class Best Lap:"):
-			if data := NamedCapture(classBestLapRegex, text); data != nil {
+			if data := namedCapture(classBestLapRegex, text); data != nil {
 				lt.ClassBestLap = &models.ClassBestLap{DriverName: ptr(data["name"])}
 				dur, _, _ := parseLapStr(data["time"])
 				lt.ClassBestLap.Time = dur

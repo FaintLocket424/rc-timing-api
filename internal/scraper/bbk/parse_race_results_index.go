@@ -1,13 +1,10 @@
 package bbk
 
 import (
-	"cmp"
 	"fmt"
 	"io"
 	"regexp"
-	"slices"
 	"strconv"
-	"time"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
 	"github.com/PuerkitoBio/goquery"
@@ -17,13 +14,6 @@ var (
 	resultsLinkRegex       = regexp.MustCompile(`^(?P<type>[phf])(?P<heat>\d+)r(?P<round>\d+)res\.htm$`)
 	roundOverallsLinkRegex = regexp.MustCompile(`^(?P<type>[phf])eor(?P<round>\d+)\.htm$`)
 )
-
-func newResultStatus() *models.ResultStatus {
-	return &models.ResultStatus{
-		Results:       []models.HeatRound{},
-		RoundOveralls: []int{},
-	}
-}
 
 func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
@@ -42,10 +32,8 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 				scrape.Title = ptr(text)
 			}
 
-			if t, err := time.Parse("15:04", header.Last().Text()); err == nil {
-				now := time.Now()
-				date := time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location())
-				scrape.Timestamp = &date
+			if t, err := parseTimeToday(header.Last().Text()); err == nil {
+				scrape.Timestamp = t
 			}
 		}
 	}
@@ -55,7 +43,7 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 
 	links.Each(func(_ int, s *goquery.Selection) {
 		if attr, exists := s.Attr("href"); exists {
-			if data := NamedCapture(resultsLinkRegex, attr); data != nil {
+			if data := namedCapture(resultsLinkRegex, attr); data != nil {
 				heat, err := strconv.Atoi(data["heat"])
 				if err != nil {
 					return // Skip silently if it fails to parse
@@ -85,7 +73,7 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 					}
 					scrape.Finals.Results = append(scrape.Finals.Results, hr)
 				}
-			} else if data := NamedCapture(roundOverallsLinkRegex, attr); data != nil {
+			} else if data := namedCapture(roundOverallsLinkRegex, attr); data != nil {
 				round, err := strconv.Atoi(data["round"])
 				if err != nil {
 					return
@@ -124,22 +112,14 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 		}
 	})
 
-	// Sorts by Round ascending, then Heat ascending
-	sortFunc := func(a, b models.HeatRound) int {
-		if a.Round != b.Round {
-			return cmp.Compare(a.Round, b.Round)
-		}
-		return cmp.Compare(a.Heat, b.Heat)
-	}
-
 	if scrape.Practice != nil {
-		slices.SortFunc(scrape.Practice.Results, sortFunc)
+		sortHeatRounds(scrape.Practice.Results)
 	}
 	if scrape.Qualifying != nil {
-		slices.SortFunc(scrape.Qualifying.Results, sortFunc)
+		sortHeatRounds(scrape.Qualifying.Results)
 	}
 	if scrape.Finals != nil {
-		slices.SortFunc(scrape.Finals.Results, sortFunc)
+		sortHeatRounds(scrape.Finals.Results)
 	}
 
 	return scrape, nil

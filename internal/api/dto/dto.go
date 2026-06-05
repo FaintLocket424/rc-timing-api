@@ -10,6 +10,7 @@ type DriverRaceResult struct {
 	BestLapMs     *int64  `json:"best_lap_ms,omitempty"`
 	BestLapNumber *int    `json:"best_lap_number,omitempty"`
 	LastLapMs     *int64  `json:"last_lap_ms,omitempty"`
+	WarmupLaps    *int    `json:"warmup_laps,omitempty"`
 }
 
 // RaceBestLap represents the best lap of a race so far.
@@ -58,15 +59,15 @@ type HeatRoundDTO struct {
 type ResultStatusDTO struct {
 	Results       []HeatRoundDTO `json:"results,omitempty"`
 	RoundOveralls []int          `json:"round_overalls,omitempty"`
-	Overall       bool           `json:"overall,omitempty"`
+	Overall       *bool          `json:"overall,omitempty"`
 }
 
 // RaceResultsIndexScrapeDTO represents a full scrape of the results index,
 // containing sets of all the practice, quali and finals that have been run.
 type RaceResultsIndexScrapeDTO struct {
-	Title      *string         `json:"title"`
-	Timestamp  int64           `json:"timestamp"`
-	Practice   ResultStatusDTO `json:"practice"`
-	Qualifying ResultStatusDTO `json:"qualifying"`
-	Finals     ResultStatusDTO `json:"finals"`
+	Title      *string          `json:"title"`
+	Timestamp  *int64           `json:"timestamp"`
+	Practice   *ResultStatusDTO `json:"practice"`
+	Qualifying *ResultStatusDTO `json:"qualifying"`
+	Finals     *ResultStatusDTO `json:"finals"`
 }

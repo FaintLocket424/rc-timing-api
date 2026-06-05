@@ -23,16 +23,20 @@ func ToRaceResultDTO(m *models.RaceResultScrape) *RaceResultScrapeDTO {
 		return nil
 	}
 
-	drivers := make([]DriverRaceResult, len(m.Drivers))
-	for i, d := range m.Drivers {
-		drivers[i] = DriverRaceResult{
-			CarNumber:     d.CarNumber,
-			Name:          d.Name,
-			Laps:          d.Laps,
-			TimeMs:        durationToMs(d.Time),
-			BestLapMs:     durationToMs(d.BestLapDuration),
-			BestLapNumber: d.BestLapNumber,
-			LastLapMs:     durationToMs(d.LastLapDuration),
+	var drivers []DriverRaceResult
+	if len(m.Drivers) > 0 {
+		drivers = make([]DriverRaceResult, len(m.Drivers))
+		for i, d := range m.Drivers {
+			drivers[i] = DriverRaceResult{
+				CarNumber:     d.CarNumber,
+				Name:          d.Name,
+				Laps:          d.Laps,
+				TimeMs:        durationToMs(d.Time),
+				BestLapMs:     durationToMs(d.BestLapDuration),
+				BestLapNumber: d.BestLapNumber,
+				LastLapMs:     durationToMs(d.LastLapDuration),
+				WarmupLaps:    d.WarmupLaps,
+			}
 		}
 	}
 
@@ -84,20 +88,35 @@ func ToRaceResultsIndexDTO(m *models.RaceResultsIndexScrape) *RaceResultsIndexSc
 		return nil
 	}
 
-	return &RaceResultsIndexScrapeDTO{
+	data := &RaceResultsIndexScrapeDTO{
 		Title:      m.Title,
-		Timestamp:  m.Timestamp.UnixMilli(),
 		Practice:   mapToResultStatusDTO(m.Practice),
 		Qualifying: mapToResultStatusDTO(m.Qualifying),
 		Finals:     mapToResultStatusDTO(m.Finals),
 	}
+
+	if m.Timestamp != nil {
+		ts := m.Timestamp.UnixMilli()
+		data.Timestamp = &ts
+	}
+
+	return data
 }
 
 // mapToResultStatusDTO is a helper to convert a models.ResultStatus to a ResultStatusDTO.
-func mapToResultStatusDTO(r models.ResultStatus) ResultStatusDTO {
-	return ResultStatusDTO{
+func mapToResultStatusDTO(r *models.ResultStatus) *ResultStatusDTO {
+	if r == nil {
+		return nil
+	}
+
+	var roundOveralls []int
+	if len(r.RoundOveralls) > 0 {
+		roundOveralls = r.RoundOveralls
+	}
+
+	return &ResultStatusDTO{
 		Results:       mapToHeatRoundDTOs(r.Results),
-		RoundOveralls: r.RoundOveralls,
+		RoundOveralls: roundOveralls,
 		Overall:       r.Overall,
 	}
 }

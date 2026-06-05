@@ -29,20 +29,7 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 		return nil, fmt.Errorf("expected at least 2 tables, found %d", l)
 	}
 
-	scrape := &models.RaceResultsIndexScrape{
-		Practice: models.ResultStatus{
-			Results:       []models.HeatRound{},
-			RoundOveralls: []int{},
-		},
-		Qualifying: models.ResultStatus{
-			Results:       []models.HeatRound{},
-			RoundOveralls: []int{},
-		},
-		Finals: models.ResultStatus{
-			Results:       []models.HeatRound{},
-			RoundOveralls: []int{},
-		},
-	}
+	scrape := &models.RaceResultsIndexScrape{}
 
 	header := tables.First().Find("td")
 
@@ -54,8 +41,8 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 
 	if t, err := time.Parse("15:04", header.Last().Text()); err == nil {
 		now := time.Now()
-
-		scrape.Timestamp = time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location())
+		date := time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location())
+		scrape.Timestamp = &date
 	}
 
 	links := tables.Find("a")
@@ -77,10 +64,19 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 
 				switch data["type"] {
 				case "p":
+					if scrape.Practice == nil {
+						scrape.Practice = &models.ResultStatus{}
+					}
 					scrape.Practice.Results = append(scrape.Practice.Results, hr)
 				case "h":
+					if scrape.Qualifying == nil {
+						scrape.Qualifying = &models.ResultStatus{}
+					}
 					scrape.Qualifying.Results = append(scrape.Qualifying.Results, hr)
 				case "f":
+					if scrape.Finals == nil {
+						scrape.Finals = &models.ResultStatus{}
+					}
 					scrape.Finals.Results = append(scrape.Finals.Results, hr)
 				}
 			} else if data := NamedCapture(roundOverallsLinkRegex, attr); data != nil {
@@ -89,24 +85,35 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 					return
 				}
 
+				overallTrue := true
+
 				switch data["type"] {
 				case "p":
+					if scrape.Practice == nil {
+						scrape.Practice = &models.ResultStatus{}
+					}
 					if round > 0 {
 						scrape.Practice.RoundOveralls = append(scrape.Practice.RoundOveralls, round)
 					} else {
-						scrape.Practice.Overall = true
+						scrape.Practice.Overall = &overallTrue
 					}
 				case "h":
+					if scrape.Qualifying == nil {
+						scrape.Qualifying = &models.ResultStatus{}
+					}
 					if round > 0 {
 						scrape.Qualifying.RoundOveralls = append(scrape.Qualifying.RoundOveralls, round)
 					} else {
-						scrape.Qualifying.Overall = true
+						scrape.Qualifying.Overall = &overallTrue
 					}
 				case "f":
+					if scrape.Finals == nil {
+						scrape.Finals = &models.ResultStatus{}
+					}
 					if round > 0 {
 						scrape.Finals.RoundOveralls = append(scrape.Finals.RoundOveralls, round)
 					} else {
-						scrape.Finals.Overall = true
+						scrape.Finals.Overall = &overallTrue
 					}
 				}
 			}
@@ -121,9 +128,15 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 		return cmp.Compare(a.Heat, b.Heat)
 	}
 
-	slices.SortFunc(scrape.Practice.Results, sortFunc)
-	slices.SortFunc(scrape.Qualifying.Results, sortFunc)
-	slices.SortFunc(scrape.Finals.Results, sortFunc)
+	if scrape.Practice != nil {
+		slices.SortFunc(scrape.Practice.Results, sortFunc)
+	}
+	if scrape.Qualifying != nil {
+		slices.SortFunc(scrape.Qualifying.Results, sortFunc)
+	}
+	if scrape.Finals != nil {
+		slices.SortFunc(scrape.Finals.Results, sortFunc)
+	}
 
 	return scrape, nil
 }

@@ -105,8 +105,8 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 
 			process := func(
 				results []models.HeatRound,
-				checker func(string, int, int) (*models.RaceResultScrape, error),
-				fetcher func(int, int) (*models.RaceResultScrape, error),
+				checker func(url string, heat, round int) (*models.RaceResultScrape, error),
+				fetcher func(hr models.HeatRound) (*models.RaceResultScrape, error),
 				save func(string, *models.RaceResultScrape) error,
 				kind string,
 			) {
@@ -124,7 +124,7 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 
 						time.Sleep(500 * time.Millisecond)
 
-						res, err := fetcher(entry.Heat, entry.Round)
+						res, err := fetcher(entry)
 						if err != nil {
 							logger.Warn(kind+" scrape failed", "heat", entry.Heat, "round", entry.Round, "err", err)
 							continue

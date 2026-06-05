@@ -65,12 +65,15 @@ func (s *Scraper) GetLiveTiming() (res *models.RaceResultScrape, err error) {
 
 // GetPracticeRaceResult calls the scraper to fetch the `pxryres.htm` for a given
 // practice heat x and round y.
-func (s *Scraper) GetPracticeRaceResult(practice, round int) (res *models.RaceResultScrape, err error) {
-	if practice < 1 || round < 1 {
-		return nil, fmt.Errorf("practice and round must be >= 1 (got %d, %d)", practice, round)
+func (s *Scraper) GetPracticeRaceResult(hr models.HeatRound) (res *models.RaceResultScrape, err error) {
+	practiceHeat := hr.Heat
+	round := hr.Round
+
+	if practiceHeat < 1 || round < 1 {
+		return nil, fmt.Errorf("practice and round must be >= 1 (got %d, %d)", practiceHeat, round)
 	}
 
-	url := fmt.Sprintf("%s/p%dr%dres.htm", s.target, practice, round)
+	url := fmt.Sprintf("%s/p%dr%dres.htm", s.target, practiceHeat, round)
 	body, fetchErr := s.fetchPage(url)
 	if fetchErr != nil {
 		return nil, fetchErr
@@ -86,12 +89,15 @@ func (s *Scraper) GetPracticeRaceResult(practice, round int) (res *models.RaceRe
 
 // GetQualiRaceResult calls the scraper to fetch the `hxryres.htm` for a given
 // qualifying heat x and round y.
-func (s *Scraper) GetQualiRaceResult(heat, round int) (res *models.RaceResultScrape, err error) {
-	if heat < 1 || round < 1 {
-		return nil, fmt.Errorf("heat and round must be >= 1 (got %d, %d)", heat, round)
+func (s *Scraper) GetQualiRaceResult(hr models.HeatRound) (res *models.RaceResultScrape, err error) {
+	qualiHeat := hr.Heat
+	round := hr.Round
+
+	if qualiHeat < 1 || round < 1 {
+		return nil, fmt.Errorf("heat and round must be >= 1 (got %d, %d)", qualiHeat, round)
 	}
 
-	url := fmt.Sprintf("%s/h%dr%dres.htm", s.target, heat, round)
+	url := fmt.Sprintf("%s/h%dr%dres.htm", s.target, qualiHeat, round)
 	body, fetchErr := s.fetchPage(url)
 	if fetchErr != nil {
 		return nil, fetchErr
@@ -107,12 +113,15 @@ func (s *Scraper) GetQualiRaceResult(heat, round int) (res *models.RaceResultScr
 
 // GetFinalRaceResult calls the scraper to fetch the `fxryres.htm` for a given
 // final number x and round y.
-func (s *Scraper) GetFinalRaceResult(final, leg int) (res *models.RaceResultScrape, err error) {
-	if final < 1 || leg < 1 {
-		return nil, fmt.Errorf("final and leg must be >= 1 (got %d, %d)", final, leg)
+func (s *Scraper) GetFinalRaceResult(hr models.HeatRound) (res *models.RaceResultScrape, err error) {
+	finalNumber := hr.Heat
+	leg := hr.Round
+
+	if finalNumber < 1 || leg < 1 {
+		return nil, fmt.Errorf("final and leg must be >= 1 (got %d, %d)", finalNumber, leg)
 	}
 
-	url := fmt.Sprintf("%s/f%dr%dres.htm", s.target, final, leg)
+	url := fmt.Sprintf("%s/f%dr%dres.htm", s.target, finalNumber, leg)
 	body, fetchErr := s.fetchPage(url)
 	if fetchErr != nil {
 		return nil, fetchErr

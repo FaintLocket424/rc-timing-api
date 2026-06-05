@@ -31,41 +31,39 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 		return nil, fmt.Errorf("failed to parse HTML body: %w", err)
 	}
 
-	tables := doc.Find("table.NBT")
-	if l := tables.Length(); l < 2 {
-		return nil, fmt.Errorf("expected at least 2 tables, found %d", l)
-	}
-
-	// We start with nil pointers; they will be initialized on-demand.
 	scrape := &models.RaceResultsIndexScrape{}
 
-	header := tables.First().Find("td")
+	// Attempt to extract title and timestamp from the first NBT table, if it exists.
+	firstTable := doc.Find("table.NBT").First()
+	if firstTable.Length() > 0 {
+		header := firstTable.Find("td")
+		if header.Length() > 1 {
+			if text := header.First().Text(); text != "" {
+				scrape.Title = ptr(text)
+			}
 
-	if header.Length() > 1 {
-		if text := header.First().Text(); text != "" {
-			scrape.Title = ptr(text)
+			if t, err := time.Parse("15:04", header.Last().Text()); err == nil {
+				now := time.Now()
+				date := time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location())
+				scrape.Timestamp = &date
+			}
 		}
 	}
 
-	if t, err := time.Parse("15:04", header.Last().Text()); err == nil {
-		now := time.Now()
-		date := time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location())
-		scrape.Timestamp = &date
-	}
-
-	links := tables.Find("a")
+	// Search the entire document for links.
+	links := doc.Find("a")
 
 	links.Each(func(_ int, s *goquery.Selection) {
 		if attr, exists := s.Attr("href"); exists {
 			if data := NamedCapture(resultsLinkRegex, attr); data != nil {
 				heat, err := strconv.Atoi(data["heat"])
 				if err != nil {
-					return
+					return // Skip silently if it fails to parse
 				}
 
 				round, err := strconv.Atoi(data["round"])
 				if err != nil {
-					return
+					return // Skip silently if it fails to parse
 				}
 
 				hr := models.HeatRound{Heat: heat, Round: round}

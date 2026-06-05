@@ -14,15 +14,17 @@ import (
 )
 
 var (
-	practiceRegex           = regexp.MustCompile(`Practice (?P<practice>\d+) \((?P<class>.*?)\)(?: R(?P<round>\d+))?`)
-	heatRegex               = regexp.MustCompile(`Heat (?P<heat>\d+) \((?P<class>.*?)\)(?: R(?P<round>\d+))?`)
-	finalRegex              = regexp.MustCompile(`(?P<final>[A-Z])\. Final \((?P<class>.*?)\)(?: L(?P<leg>\d+))?`)
-	bestLapRegex            = regexp.MustCompile(`Best Lap: (?P<name>.*?) (?P<time>[\d\.]+) L:(?P<lap>\d+)`)
-	classFTRegex            = regexp.MustCompile(`Class FT: (?P<name>.*?) (?P<res>[\d\/'\.]+) Av Lap (?P<avg>[\d\.]+)(?: R:(?P<round>\d+))?`)
-	classBestLapRegex       = regexp.MustCompile(`Class Best Lap: (?P<name>.*?) (?P<time>\d+\.\d+)`)
-	finishedTimeHeaderRegex = regexp.MustCompile(`Finished (?P<finishTime>\d{2}:\d{2})`)
-	elapsedTimeHeaderRegex  = regexp.MustCompile(`(?P<elapsed>\d+'\d+s) \((?P<remaining>\d+s)\)`)
+	practiceRegex           = regexp.MustCompile(`Practice\s+(?P<practice>\d+)\s+\((?P<class>.*?)\)(?:\s+R(?P<round>\d+))?`)
+	heatRegex               = regexp.MustCompile(`Heat\s+(?P<heat>\d+)\s+\((?P<class>.*?)\)(?:\s+R(?P<round>\d+))?`)
+	finalRegex              = regexp.MustCompile(`(?P<final>[A-Z])\.\s+Final\s+\((?P<class>.*?)\)(?:\s+L(?P<leg>\d+))?`)
+	bestLapRegex            = regexp.MustCompile(`Best Lap:\s*(?P<name>.*?)\s+(?P<time>[\d\.]+)\s+L\s*:\s*(?P<lap>\d+)`)
+	classFTRegex            = regexp.MustCompile(`Class FT:\s*(?P<name>.*?)\s+(?P<res>[\d\/'\.]+)\s+Av Lap\s+(?P<avg>[\d\.]+)(?:\s+R\s*:\s*(?P<round>\d+))?`)
+	classBestLapRegex       = regexp.MustCompile(`Class Best Lap:\s*(?P<name>.*?)\s+(?P<time>\d+\.\d+)`)
+	finishedTimeHeaderRegex = regexp.MustCompile(`Finished\s+(?P<finishTime>\d{2}:\d{2})`)
+	elapsedTimeHeaderRegex  = regexp.MustCompile(`(?P<elapsed>\d+'\d+s)\s*\((?P<remaining>\d+s)\)`)
 )
+
+const driverColName = "Driver"
 
 func parseRaceResultHTML(body io.Reader) (*models.RaceResultScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
@@ -30,106 +32,155 @@ func parseRaceResultHTML(body io.Reader) (*models.RaceResultScrape, error) {
 		return nil, fmt.Errorf("failed to parse HTML body: %w", err)
 	}
 
-	tables := doc.Find("table.NBT")
-	if tables.Length() < 3 {
-		return nil, fmt.Errorf("critical structure change: expected 3 tables, found %d", tables.Length())
-	}
-
 	scrape := &models.RaceResultScrape{}
 
-	parseHeader(tables.Eq(0), scrape)
-	parseDrivers(tables.Eq(1), scrape)
-	parseMeta(tables.Eq(2), scrape)
+	tables := doc.Find("table")
+
+	var headerTable, driversTable, metaTable *goquery.Selection
+
+	// Dynamically identify tables based on structural signatures
+	tables.Each(func(_ int, t *goquery.Selection) {
+		hasHeaderPattern := false
+		hasDriverHeaders := false
+		hasMetaPattern := false
+
+		t.Find("td").Each(func(_ int, td *goquery.Selection) {
+			txt := strings.TrimSpace(td.Text())
+			if practiceRegex.MatchString(txt) || heatRegex.MatchString(txt) || finalRegex.MatchString(txt) {
+				hasHeaderPattern = true
+			}
+			if txt == driverColName {
+				hasDriverHeaders = true
+			}
+			if strings.HasPrefix(txt, "Best Lap:") || strings.HasPrefix(txt, "Class FT:") || strings.HasPrefix(txt, "Class Best Lap:") || td.HasClass("fastest-lap") {
+				hasMetaPattern = true
+			}
+		})
+
+		switch {
+		case hasHeaderPattern:
+			headerTable = t
+		case hasDriverHeaders:
+			driversTable = t
+		case hasMetaPattern:
+			metaTable = t
+		}
+	})
+
+	// Safely execute parsing steps if the corresponding structures exist
+	if headerTable != nil {
+		parseHeader(headerTable, scrape)
+	}
+	if driversTable != nil {
+		parseDrivers(driversTable, scrape)
+	}
+	if metaTable != nil {
+		parseMeta(metaTable, scrape)
+	}
 
 	return scrape, nil
 }
 
 func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
-	tds := s.Find("td.livehtml-text")
-	if tds.Length() < 2 {
-		slog.Warn("header table malformed, skipping header details")
-		return
-	}
+	s.Find("td").Each(func(_ int, td *goquery.Selection) {
+		text := strings.TrimSpace(td.Text())
 
-	text := tds.First().Text()
-
-	if data := NamedCapture(practiceRegex, text); data != nil {
-		if v, err := strconv.Atoi(data["practice"]); err == nil {
-			lt.PracticeNumber = ptr(v)
-		}
-		lt.ClassName = ptr(data["class"])
-		if v, err := strconv.Atoi(data["round"]); err == nil {
-			lt.Round = ptr(v)
-		}
-	} else if data := NamedCapture(heatRegex, text); data != nil {
-		if v, err := strconv.Atoi(data["heat"]); err == nil {
-			lt.HeatNumber = ptr(v)
-		}
-		lt.ClassName = ptr(data["class"])
-		if v, err := strconv.Atoi(data["round"]); err == nil {
-			lt.Round = ptr(v)
-		}
-	} else if data := NamedCapture(finalRegex, text); data != nil {
-		final := data["final"]
-
-		if len(final) == 1 {
-			r := strings.ToUpper(final)[0]
-			v := int(r - 'A' + 1)
-			lt.FinalNumber = ptr(v)
-		}
-
-		lt.ClassName = ptr(data["class"])
-
-		if data["leg"] != "" {
-			if v, err := strconv.Atoi(data["leg"]); err == nil {
+		if data := NamedCapture(practiceRegex, text); data != nil {
+			if v, err := strconv.Atoi(data["practice"]); err == nil {
+				lt.PracticeNumber = ptr(v)
+			}
+			lt.ClassName = ptr(data["class"])
+			if v, err := strconv.Atoi(data["round"]); err == nil {
 				lt.Round = ptr(v)
 			}
-		} else {
-			lt.Round = ptr(1)
+		} else if data := NamedCapture(heatRegex, text); data != nil {
+			if v, err := strconv.Atoi(data["heat"]); err == nil {
+				lt.HeatNumber = ptr(v)
+			}
+			lt.ClassName = ptr(data["class"])
+			if v, err := strconv.Atoi(data["round"]); err == nil {
+				lt.Round = ptr(v)
+			}
+		} else if data := NamedCapture(finalRegex, text); data != nil {
+			final := data["final"]
+
+			if len(final) == 1 {
+				r := strings.ToUpper(final)[0]
+				v := int(r - 'A' + 1)
+				lt.FinalNumber = ptr(v)
+			}
+
+			lt.ClassName = ptr(data["class"])
+
+			if data["leg"] != "" {
+				if v, err := strconv.Atoi(data["leg"]); err == nil {
+					lt.Round = ptr(v)
+				}
+			} else {
+				lt.Round = ptr(1)
+			}
 		}
-	}
 
-	timerText := tds.Last().Text()
-
-	if finishMatch := NamedCapture(finishedTimeHeaderRegex, timerText); finishMatch != nil {
-		t, err := time.Parse("15:04", finishMatch["finishTime"])
-		if err == nil {
-			now := time.Now()
-			lt.FinishTime = ptr(time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location()))
-		}
-		lt.RaceStatus = ptr("Finished")
-	}
-
-	if durMatch := NamedCapture(elapsedTimeHeaderRegex, timerText); durMatch != nil {
-		elapsedRaw := strings.Replace(durMatch["elapsed"], "'", "m", 1)
-		remainingRaw := durMatch["remaining"]
-
-		if elapsed, err := time.ParseDuration(elapsedRaw); err == nil {
-			lt.ElapsedTime = ptr(elapsed)
+		if finishMatch := NamedCapture(finishedTimeHeaderRegex, text); finishMatch != nil {
+			t, err := time.Parse("15:04", finishMatch["finishTime"])
+			if err == nil {
+				now := time.Now()
+				lt.FinishTime = ptr(time.Date(now.Year(), now.Month(), now.Day(), t.Hour(), t.Minute(), 0, 0, now.Location()))
+			}
+			lt.RaceStatus = ptr("Finished")
 		}
 
-		if remaining, err := time.ParseDuration(remainingRaw); err == nil {
-			lt.RemainingTime = ptr(remaining)
+		if durMatch := NamedCapture(elapsedTimeHeaderRegex, text); durMatch != nil {
+			elapsedRaw := strings.Replace(durMatch["elapsed"], "'", "m", 1)
+			remainingRaw := durMatch["remaining"]
+
+			if elapsed, err := time.ParseDuration(elapsedRaw); err == nil {
+				lt.ElapsedTime = ptr(elapsed)
+			}
+
+			if remaining, err := time.ParseDuration(remainingRaw); err == nil {
+				lt.RemainingTime = ptr(remaining)
+			}
+			lt.RaceStatus = ptr("In Progress")
 		}
-		lt.RaceStatus = ptr("In Progress")
-	}
+	})
 }
 
 func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
-	rows := drivers.Find("tbody tr")
+	rows := drivers.Find("tr")
 	if rows.Length() < 2 {
 		slog.Error("drivers table missing data rows")
 		return
 	}
 
-	// Map headers once
+	// Dynamically scan for the column headers row (which contains "Driver")
+	var headerRow *goquery.Selection
+	var headerIdx int
+	rows.Each(func(i int, r *goquery.Selection) {
+		if headerRow != nil {
+			return
+		}
+		r.Children().Each(func(_ int, c *goquery.Selection) {
+			if strings.TrimSpace(c.Text()) == driverColName {
+				headerRow = r
+				headerIdx = i
+			}
+		})
+	})
+
+	if headerRow == nil {
+		slog.Error("drivers table missing column headers")
+		return
+	}
+
+	// Map headers
 	idx := make(map[string]int)
-	rows.First().Find("td").Each(func(i int, s *goquery.Selection) {
-		text := s.Text()
+	headerRow.Children().Each(func(i int, s *goquery.Selection) {
+		text := strings.TrimSpace(s.Text())
 		switch text {
 		case "C":
 			idx["car"] = i
-		case "Driver":
+		case driverColName:
 			idx["name"] = i
 		case "Result":
 			idx["res"] = i
@@ -141,50 +192,67 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 	})
 
 	// Process rows
-	rows.Slice(1, rows.Length()).Each(func(i int, s *goquery.Selection) {
-		cols := s.Find("td")
+	rows.Slice(headerIdx+1, rows.Length()).Each(func(i int, s *goquery.Selection) {
+		cols := s.Children()
 		dr := models.DriverRaceResult{}
 
-		dr.Name = ptr(cols.Eq(idx["name"]).Text())
-		if v, err := strconv.Atoi(cols.Eq(idx["car"]).Text()); err == nil {
-			dr.CarNumber = ptr(v)
+		// Driver name
+		if nameIdx, ok := idx["name"]; ok && nameIdx < cols.Length() {
+			dr.Name = ptr(strings.TrimSpace(cols.Eq(nameIdx).Text()))
 		}
 
-		// Result Parsing
-		resText := cols.Eq(idx["res"]).Text()
-
-		if laps, dur, err := parseRaceResultStr(resText); err == nil {
-			dr.Laps = laps
-			if *dr.Laps < 0 && len(lt.Drivers) > 0 && lt.Drivers[0].Laps != nil {
-				*dr.Laps += *lt.Drivers[0].Laps
-			}
-			dr.Time = dur
-		} else if gap, err := parseGapStr(resText); err == nil {
-			if len(lt.Drivers) > 0 && lt.Drivers[0].Laps != nil && lt.Drivers[0].Time != nil {
-				dr.Laps = ptr(*lt.Drivers[0].Laps)
-				dr.Time = ptr(*lt.Drivers[0].Time + *gap)
-			}
-		} else if numStr, ok := strings.CutPrefix(resText, "W-"); ok {
-			// warm up laps
-			i, err := strconv.Atoi(numStr)
-			if err == nil {
-				dr.WarmupLaps = ptr(i)
-			}
-			// } else if resText == "" {
-			// 	// empty string may mean DNS
-			// } else if resText == "DNS" {
-			// 	// Did not start
-		} else {
-			slog.Warn("unparseable result", "row", i+1, "result", resText)
+		// Skip empty spacer/filler rows to keep data clean
+		if dr.Name == nil || *dr.Name == "" {
+			return
 		}
 
-		if dur, ln, err := parseLapStr(cols.Eq(idx["best"]).Text()); err == nil {
-			dr.BestLapDuration = dur
-			dr.BestLapNumber = ln
+		// Car Number
+		if carIdx, ok := idx["car"]; ok && carIdx < cols.Length() {
+			if v, err := strconv.Atoi(strings.TrimSpace(cols.Eq(carIdx).Text())); err == nil {
+				dr.CarNumber = ptr(v)
+			}
 		}
 
-		if dur, _, err := parseLapStr(cols.Eq(idx["last"]).Text()); err == nil {
-			dr.LastLapDuration = dur
+		// Result
+		if resIdx, ok := idx["res"]; ok && resIdx < cols.Length() {
+			resText := strings.TrimSpace(cols.Eq(resIdx).Text())
+
+			if laps, dur, err := parseRaceResultStr(resText); err == nil {
+				dr.Laps = laps
+				if dr.Laps != nil && *dr.Laps < 0 && len(lt.Drivers) > 0 && lt.Drivers[0].Laps != nil {
+					*dr.Laps += *lt.Drivers[0].Laps
+				}
+				dr.Time = dur
+			} else if gap, err := parseGapStr(resText); err == nil {
+				if len(lt.Drivers) > 0 && lt.Drivers[0].Laps != nil && lt.Drivers[0].Time != nil {
+					dr.Laps = ptr(*lt.Drivers[0].Laps)
+					dr.Time = ptr(*lt.Drivers[0].Time + *gap)
+				}
+			} else if numStr, ok := strings.CutPrefix(resText, "W-"); ok {
+				i, err := strconv.Atoi(numStr)
+				if err == nil {
+					dr.WarmupLaps = ptr(i)
+				}
+			} else if resText != "" {
+				slog.Warn("unparseable result", "row", i+1, "result", resText)
+			}
+		}
+
+		// Best Lap duration
+		if bestIdx, ok := idx["best"]; ok && bestIdx < cols.Length() {
+			bestText := strings.TrimSpace(cols.Eq(bestIdx).Text())
+			if dur, ln, err := parseLapStr(bestText); err == nil {
+				dr.BestLapDuration = dur
+				dr.BestLapNumber = ln
+			}
+		}
+
+		// Last Lap duration
+		if lastIdx, ok := idx["last"]; ok && lastIdx < cols.Length() {
+			lastText := strings.TrimSpace(cols.Eq(lastIdx).Text())
+			if dur, _, err := parseLapStr(lastText); err == nil {
+				dr.LastLapDuration = dur
+			}
 		}
 
 		lt.Drivers = append(lt.Drivers, dr)
@@ -193,11 +261,10 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 
 func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 	meta.Find("tr td").Each(func(_ int, s *goquery.Selection) {
-		font := s.Find("font").First().Text()
-		text := s.Text()
+		text := strings.TrimSpace(s.Text())
 
-		switch font {
-		case "Best Lap:":
+		switch {
+		case strings.HasPrefix(text, "Best Lap:"):
 			if data := NamedCapture(bestLapRegex, text); data != nil {
 				lt.BestLap = &models.RaceBestLap{DriverName: ptr(data["name"])}
 				dur, ln, _ := parseLapStr(fmt.Sprintf("%s[%s]", data["time"], data["lap"]))
@@ -205,7 +272,7 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 			} else {
 				slog.Warn("failed to parse Best Lap meta", "raw", text)
 			}
-		case "Class FT:":
+		case strings.HasPrefix(text, "Class FT:"):
 			if data := NamedCapture(classFTRegex, text); data != nil {
 				lt.ClassFT = &models.ClassFT{DriverName: ptr(data["name"])}
 				laps, dur, _ := parseRaceResultStr(data["res"])
@@ -216,7 +283,7 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 			} else {
 				slog.Warn("failed to parse Class FT meta", "raw", text)
 			}
-		case "Class Best Lap:":
+		case strings.HasPrefix(text, "Class Best Lap:"):
 			if data := NamedCapture(classBestLapRegex, text); data != nil {
 				lt.ClassBestLap = &models.ClassBestLap{DriverName: ptr(data["name"])}
 				dur, _, _ := parseLapStr(data["time"])

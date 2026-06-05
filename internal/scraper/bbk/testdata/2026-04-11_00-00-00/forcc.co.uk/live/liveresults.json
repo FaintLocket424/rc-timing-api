@@ -3,7 +3,7 @@
   "Timestamp": "0000-01-01T20:42:00Z",
   "Practice": {
     "Results": [],
-    "Overalls": [],
+    "RoundOveralls": [],
     "Overall": false
   },
   "Qualifying": {
@@ -20,12 +20,12 @@
       { "Heat": 2, "Round": 2 },
       { "Heat": 3, "Round": 2 }
     ],
-    "Overalls": [1, 2, 3],
+    "RoundOveralls": [1, 2, 3],
     "Overall": true
   },
   "Finals": {
     "Results": [],
-    "Overalls": [],
+    "RoundOveralls": [],
     "Overall": false
   }
 }

@@ -230,7 +230,7 @@ func (suite *HandlerTestSuite) TestPractice_TrackerInitializing() {
 // StatusInternalServerError if the store fails to retrieve the data.
 func (suite *HandlerTestSuite) TestPractice_StoreError() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
-	suite.mockStore.On("GetPracticeRaceResult", targetURL, 2, 1).Return(nil, errors.New("db error")).Once()
+	suite.mockStore.On("GetPracticeRaceResult", targetURL, models.HeatRound{Heat: 2, Round: 1}).Return(nil, errors.New("db error")).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/practice/round/1/heat/2?target_url="+targetURL, nil)
@@ -248,7 +248,7 @@ func (suite *HandlerTestSuite) TestPractice_StoreError() {
 func (suite *HandlerTestSuite) TestPractice_Success() {
 	className := "LMP2"
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
-	suite.mockStore.On("GetPracticeRaceResult", targetURL, 2, 1).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
+	suite.mockStore.On("GetPracticeRaceResult", targetURL, models.HeatRound{Heat: 2, Round: 1}).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/practice/round/1/heat/2?target_url="+targetURL, nil)
@@ -290,7 +290,7 @@ func (suite *HandlerTestSuite) TestQuali_TrackerInitializing() {
 
 func (suite *HandlerTestSuite) TestQuali_StoreError() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
-	suite.mockStore.On("GetQualiRaceResult", targetURL, 4, 3).Return(nil, errors.New("timeout")).Once()
+	suite.mockStore.On("GetQualiRaceResult", targetURL, models.HeatRound{Heat: 4, Round: 3}).Return(nil, errors.New("timeout")).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/qualifying/round/3/heat/4?target_url="+targetURL, nil)
@@ -306,7 +306,7 @@ func (suite *HandlerTestSuite) TestQuali_StoreError() {
 func (suite *HandlerTestSuite) TestQuali_Success() {
 	className := "GT4"
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
-	suite.mockStore.On("GetQualiRaceResult", targetURL, 4, 3).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
+	suite.mockStore.On("GetQualiRaceResult", targetURL, models.HeatRound{Heat: 4, Round: 3}).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/qualifying/round/3/heat/4?target_url="+targetURL, nil)
@@ -348,7 +348,7 @@ func (suite *HandlerTestSuite) TestFinal_TrackerInitializing() {
 
 func (suite *HandlerTestSuite) TestFinal_StoreError() {
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
-	suite.mockStore.On("GetFinalRaceResult", targetURL, 1, 5).Return(nil, errors.New("db disconnect")).Once()
+	suite.mockStore.On("GetFinalRaceResult", targetURL, models.HeatRound{Heat: 1, Round: 5}).Return(nil, errors.New("db disconnect")).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/finals/round/5/final/1?target_url="+targetURL, nil)
@@ -364,7 +364,7 @@ func (suite *HandlerTestSuite) TestFinal_StoreError() {
 func (suite *HandlerTestSuite) TestFinal_Success() {
 	className := "Hypercar"
 	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
-	suite.mockStore.On("GetFinalRaceResult", targetURL, 1, 5).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
+	suite.mockStore.On("GetFinalRaceResult", targetURL, models.HeatRound{Heat: 1, Round: 5}).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/finals/round/5/final/1?target_url="+targetURL, nil)

@@ -10,13 +10,13 @@ type Store interface {
 	GetLiveTiming(url string) (*models.RaceResultScrape, error)
 
 	SavePracticeRaceResult(url string, model *models.RaceResultScrape) error
-	GetPracticeRaceResult(url string, heat, round int) (*models.RaceResultScrape, error)
+	GetPracticeRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error)
 
 	SaveQualiRaceResult(url string, model *models.RaceResultScrape) error
-	GetQualiRaceResult(url string, heat, round int) (*models.RaceResultScrape, error)
+	GetQualiRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error)
 
 	SaveFinalRaceResult(url string, model *models.RaceResultScrape) error
-	GetFinalRaceResult(url string, final, round int) (*models.RaceResultScrape, error)
+	GetFinalRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error)
 
 	SaveRaceResultsIndex(url string, model *models.RaceResultsIndexScrape) error
 	GetRaceResultsIndex(url string) (*models.RaceResultsIndexScrape, error)

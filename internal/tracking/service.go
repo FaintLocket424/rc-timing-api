@@ -105,7 +105,7 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 
 			process := func(
 				results []models.HeatRound,
-				checker func(url string, heat, round int) (*models.RaceResultScrape, error),
+				checker func(url string, hr models.HeatRound) (*models.RaceResultScrape, error),
 				fetcher func(hr models.HeatRound) (*models.RaceResultScrape, error),
 				save func(string, *models.RaceResultScrape) error,
 				kind string,
@@ -116,7 +116,7 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 
 				for _, entry := range results {
 					// Check cache first
-					if _, err := checker(url, entry.Heat, entry.Round); err != nil {
+					if _, err := checker(url, entry); err != nil {
 						// Check rate limit before network call
 						if !canRequest() {
 							return

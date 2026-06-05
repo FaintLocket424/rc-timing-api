@@ -42,8 +42,8 @@ func (m *MockStore) SavePracticeRaceResult(url string, model *models.RaceResultS
 }
 
 // GetPracticeRaceResult is a mock method.
-func (m *MockStore) GetPracticeRaceResult(url string, heat, round int) (*models.RaceResultScrape, error) {
-	args := m.Called(url, heat, round)
+func (m *MockStore) GetPracticeRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error) {
+	args := m.Called(url, hr)
 
 	var res *models.RaceResultScrape
 	if args.Get(0) != nil {
@@ -59,8 +59,8 @@ func (m *MockStore) SaveQualiRaceResult(url string, model *models.RaceResultScra
 }
 
 // GetQualiRaceResult is a mock method.
-func (m *MockStore) GetQualiRaceResult(url string, heat, round int) (*models.RaceResultScrape, error) {
-	args := m.Called(url, heat, round)
+func (m *MockStore) GetQualiRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error) {
+	args := m.Called(url, hr)
 	var res *models.RaceResultScrape
 	if args.Get(0) != nil {
 		res = args.Get(0).(*models.RaceResultScrape)
@@ -75,8 +75,8 @@ func (m *MockStore) SaveFinalRaceResult(url string, model *models.RaceResultScra
 }
 
 // GetFinalRaceResult is a mock method.
-func (m *MockStore) GetFinalRaceResult(url string, final, round int) (*models.RaceResultScrape, error) {
-	args := m.Called(url, final, round)
+func (m *MockStore) GetFinalRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error) {
+	args := m.Called(url, hr)
 	var res *models.RaceResultScrape
 	if args.Get(0) != nil {
 		res = args.Get(0).(*models.RaceResultScrape)

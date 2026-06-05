@@ -7,6 +7,7 @@ import (
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api/dto"
 	"github.com/FaintLocket424/opengrid-bridge/internal/api/responses"
+	"github.com/FaintLocket424/opengrid-bridge/internal/models"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 	"github.com/gin-gonic/gin"
 )
@@ -61,7 +62,7 @@ func (h *Handler) GetPracticeRaceResult(c *gin.Context) {
 	heat, _ := strconv.Atoi(c.Param("heat"))
 	round, _ := strconv.Atoi(c.Param("round"))
 
-	if model, err := h.store.GetPracticeRaceResult(url, heat, round); err == nil {
+	if model, err := h.store.GetPracticeRaceResult(url, models.HeatRound{Heat: heat, Round: round}); err == nil {
 		responses.RespondSuccess(c, dto.ToRaceResultDTO(model), "")
 	} else {
 		slog.Error("error getting practice race result", "error", err)
@@ -77,7 +78,7 @@ func (h *Handler) GetQualiRaceResult(c *gin.Context) {
 	heat, _ := strconv.Atoi(c.Param("heat"))
 	round, _ := strconv.Atoi(c.Param("round"))
 
-	if model, err := h.store.GetQualiRaceResult(url, heat, round); err == nil {
+	if model, err := h.store.GetQualiRaceResult(url, models.HeatRound{Heat: heat, Round: round}); err == nil {
 		responses.RespondSuccess(c, dto.ToRaceResultDTO(model), "")
 	} else {
 		slog.Error("error getting qualifying race result", "error", err)
@@ -93,7 +94,7 @@ func (h *Handler) GetFinalRaceResult(c *gin.Context) {
 	final, _ := strconv.Atoi(c.Param("final"))
 	round, _ := strconv.Atoi(c.Param("round"))
 
-	if model, err := h.store.GetFinalRaceResult(url, final, round); err == nil {
+	if model, err := h.store.GetFinalRaceResult(url, models.HeatRound{Heat: final, Round: round}); err == nil {
 		responses.RespondSuccess(c, dto.ToRaceResultDTO(model), "")
 	} else {
 		slog.Error("error getting final race result", "error", err)

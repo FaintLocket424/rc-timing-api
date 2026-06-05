@@ -126,18 +126,16 @@ func (c *Cache) SavePracticeRaceResult(url string, model *models.RaceResultScrap
 
 // GetPracticeRaceResult retrieves the currently stored practice race result from a given heat/round
 // for a URL in the cache.
-func (c *Cache) GetPracticeRaceResult(url string, heat, round int) (*models.RaceResultScrape, error) {
+func (c *Cache) GetPracticeRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	key := models.HeatRound{Heat: heat, Round: round}
-
 	ed, ok := c.data[url]
-	if !ok || ed.PracticeResults[key] == nil {
+	if !ok || ed.PracticeResults[hr] == nil {
 		return nil, errNotFound
 	}
 
-	return ed.PracticeResults[key], nil
+	return ed.PracticeResults[hr], nil
 }
 
 // SaveQualiRaceResult saves a scraped qualifying result for a URL into the cache.
@@ -160,18 +158,16 @@ func (c *Cache) SaveQualiRaceResult(url string, model *models.RaceResultScrape) 
 
 // GetQualiRaceResult retrieves the currently stored qualifying race result from a given heat/round
 // for a URL in the cache.
-func (c *Cache) GetQualiRaceResult(url string, heat, round int) (*models.RaceResultScrape, error) {
+func (c *Cache) GetQualiRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	key := models.HeatRound{Heat: heat, Round: round}
-
 	ed, ok := c.data[url]
-	if !ok || ed.QualiResults[key] == nil {
+	if !ok || ed.QualiResults[hr] == nil {
 		return nil, errNotFound
 	}
 
-	return ed.QualiResults[key], nil
+	return ed.QualiResults[hr], nil
 }
 
 // SaveFinalRaceResult saves a scraped final result for a URL into the cache.
@@ -194,18 +190,16 @@ func (c *Cache) SaveFinalRaceResult(url string, model *models.RaceResultScrape) 
 
 // GetFinalRaceResult retrieves the currently stored final race result from a given final/round
 // for a URL in the cache.
-func (c *Cache) GetFinalRaceResult(url string, final, round int) (*models.RaceResultScrape, error) {
+func (c *Cache) GetFinalRaceResult(url string, hr models.HeatRound) (*models.RaceResultScrape, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	key := models.HeatRound{Heat: final, Round: round}
-
 	ed, ok := c.data[url]
-	if !ok || ed.FinalResults[key] == nil {
+	if !ok || ed.FinalResults[hr] == nil {
 		return nil, errNotFound
 	}
 
-	return ed.FinalResults[key], nil
+	return ed.FinalResults[hr], nil
 }
 
 // SaveRaceResultsIndex saves a scraped results index for a URL into the cache.

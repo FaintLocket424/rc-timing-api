@@ -18,6 +18,13 @@ var (
 	roundOverallsLinkRegex = regexp.MustCompile(`^(?P<type>[phf])eor(?P<round>\d+)\.htm$`)
 )
 
+func newResultStatus() *models.ResultStatus {
+	return &models.ResultStatus{
+		Results:       []models.HeatRound{},
+		RoundOveralls: []int{},
+	}
+}
+
 func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, error) {
 	doc, err := goquery.NewDocumentFromReader(body)
 	if err != nil {
@@ -29,6 +36,7 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 		return nil, fmt.Errorf("expected at least 2 tables, found %d", l)
 	}
 
+	// We start with nil pointers; they will be initialized on-demand.
 	scrape := &models.RaceResultsIndexScrape{}
 
 	header := tables.First().Find("td")
@@ -65,17 +73,17 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 				switch data["type"] {
 				case "p":
 					if scrape.Practice == nil {
-						scrape.Practice = &models.ResultStatus{}
+						scrape.Practice = newResultStatus()
 					}
 					scrape.Practice.Results = append(scrape.Practice.Results, hr)
 				case "h":
 					if scrape.Qualifying == nil {
-						scrape.Qualifying = &models.ResultStatus{}
+						scrape.Qualifying = newResultStatus()
 					}
 					scrape.Qualifying.Results = append(scrape.Qualifying.Results, hr)
 				case "f":
 					if scrape.Finals == nil {
-						scrape.Finals = &models.ResultStatus{}
+						scrape.Finals = newResultStatus()
 					}
 					scrape.Finals.Results = append(scrape.Finals.Results, hr)
 				}
@@ -85,35 +93,33 @@ func parseRaceResultsIndexHTML(body io.Reader) (*models.RaceResultsIndexScrape, 
 					return
 				}
 
-				overallTrue := true
-
 				switch data["type"] {
 				case "p":
 					if scrape.Practice == nil {
-						scrape.Practice = &models.ResultStatus{}
+						scrape.Practice = newResultStatus()
 					}
 					if round > 0 {
 						scrape.Practice.RoundOveralls = append(scrape.Practice.RoundOveralls, round)
 					} else {
-						scrape.Practice.Overall = &overallTrue
+						scrape.Practice.Overall = true
 					}
 				case "h":
 					if scrape.Qualifying == nil {
-						scrape.Qualifying = &models.ResultStatus{}
+						scrape.Qualifying = newResultStatus()
 					}
 					if round > 0 {
 						scrape.Qualifying.RoundOveralls = append(scrape.Qualifying.RoundOveralls, round)
 					} else {
-						scrape.Qualifying.Overall = &overallTrue
+						scrape.Qualifying.Overall = true
 					}
 				case "f":
 					if scrape.Finals == nil {
-						scrape.Finals = &models.ResultStatus{}
+						scrape.Finals = newResultStatus()
 					}
 					if round > 0 {
 						scrape.Finals.RoundOveralls = append(scrape.Finals.RoundOveralls, round)
 					} else {
-						scrape.Finals.Overall = &overallTrue
+						scrape.Finals.Overall = true
 					}
 				}
 			}

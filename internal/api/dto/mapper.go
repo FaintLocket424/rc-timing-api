@@ -109,9 +109,9 @@ func mapToResultStatusDTO(r *models.ResultStatus) *ResultStatusDTO {
 		return nil
 	}
 
-	var roundOveralls []int
-	if len(r.RoundOveralls) > 0 {
-		roundOveralls = r.RoundOveralls
+	roundOveralls := r.RoundOveralls
+	if roundOveralls == nil {
+		roundOveralls = []int{}
 	}
 
 	return &ResultStatusDTO{
@@ -124,7 +124,7 @@ func mapToResultStatusDTO(r *models.ResultStatus) *ResultStatusDTO {
 // mapToHeatRoundDTOs safely converts the internal struct map to a JSON-friendly array.
 func mapToHeatRoundDTOs(m []models.HeatRound) []HeatRoundDTO {
 	if len(m) == 0 {
-		return nil
+		return []HeatRoundDTO{}
 	}
 
 	res := make([]HeatRoundDTO, len(m))

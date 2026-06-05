@@ -63,7 +63,7 @@ type HeatRound struct {
 type ResultStatus struct {
 	Results       []HeatRound
 	RoundOveralls []int
-	Overall       *bool
+	Overall       bool
 }
 
 // RaceResultsIndexScrape represents a full scrape of the results index,

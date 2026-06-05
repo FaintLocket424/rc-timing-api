@@ -57,17 +57,17 @@ type HeatRoundDTO struct {
 
 // ResultStatusDTO represents the races, round overalls and total overalls.
 type ResultStatusDTO struct {
-	Results       []HeatRoundDTO `json:"results,omitempty"`
-	RoundOveralls []int          `json:"round_overalls,omitempty"`
-	Overall       *bool          `json:"overall,omitempty"`
+	Results       []HeatRoundDTO `json:"results"`
+	RoundOveralls []int          `json:"round_overalls"`
+	Overall       bool           `json:"overall"`
 }
 
 // RaceResultsIndexScrapeDTO represents a full scrape of the results index,
 // containing sets of all the practice, quali and finals that have been run.
 type RaceResultsIndexScrapeDTO struct {
-	Title      *string          `json:"title"`
-	Timestamp  *int64           `json:"timestamp"`
-	Practice   *ResultStatusDTO `json:"practice"`
-	Qualifying *ResultStatusDTO `json:"qualifying"`
-	Finals     *ResultStatusDTO `json:"finals"`
+	Title      *string          `json:"title,omitempty"`
+	Timestamp  *int64           `json:"timestamp,omitempty"`
+	Practice   *ResultStatusDTO `json:"practice,omitempty"`
+	Qualifying *ResultStatusDTO `json:"qualifying,omitempty"`
+	Finals     *ResultStatusDTO `json:"finals,omitempty"`
 }

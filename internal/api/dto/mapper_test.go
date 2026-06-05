@@ -26,6 +26,7 @@ func TestToRaceResultDTO_FullPracticeResultScrape(t *testing.T) {
 				Name:            ptr("Dipper Pines"),
 				Time:            ptr(2*time.Minute + 10_162*time.Millisecond),
 				BestLapDuration: ptr(19_391 * time.Millisecond),
+				WarmupLaps:      ptr(2),
 			},
 			{
 				CarNumber:       ptr(1),
@@ -67,7 +68,8 @@ func TestToRaceResultDTO_FullPracticeResultScrape(t *testing.T) {
 				"car_number": 2,
 				"name": "Dipper Pines",
 				"time_ms": 130162,
-				"best_lap_ms": 19391
+				"best_lap_ms": 19391,
+				"warmup_laps": 2
 			},
 			{
 				"car_number": 1,
@@ -432,14 +434,14 @@ func Test_mapToHeatRoundDTOs(t *testing.T) {
 		want  []HeatRoundDTO
 	}{
 		{
-			name:  "nil input returns nil",
+			name:  "nil input returns empty slice",
 			input: nil,
-			want:  nil,
+			want:  []HeatRoundDTO{},
 		},
 		{
-			name:  "empty slice returns nil",
+			name:  "empty slice returns empty slice",
 			input: []models.HeatRound{},
-			want:  nil,
+			want:  []HeatRoundDTO{},
 		},
 		{
 			name: "successfully maps multiple elements",
@@ -466,4 +468,46 @@ func Test_mapToHeatRoundDTOs(t *testing.T) {
 
 func TestToRaceResultsIndexDTO_NilHandling(t *testing.T) {
 	assert.Nil(t, ToRaceResultsIndexDTO(nil))
+}
+
+func TestToRaceResultsIndexDTO_ScrapeOmissions(t *testing.T) {
+	ts := time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)
+	model := &models.RaceResultsIndexScrape{
+		Title:     ptr("Event Title"),
+		Timestamp: &ts,
+		Practice: &models.ResultStatus{
+			Results: []models.HeatRound{
+				{Heat: 1, Round: 1},
+			},
+			RoundOveralls: []int{1},
+			Overall:       true,
+		},
+		Qualifying: nil, // Should omit entirely
+		Finals: &models.ResultStatus{
+			Results:       nil, // Should map to empty arrays
+			RoundOveralls: nil,
+			Overall:       false,
+		},
+	}
+
+	dtoResult := ToRaceResultsIndexDTO(model)
+
+	bytes, err := json.Marshal(dtoResult)
+	require.NoError(t, err)
+
+	expectedJSON := `{
+		"title": "Event Title",
+		"timestamp": 1672574400000,
+		"practice": {
+			"results": [{"h": 1, "r": 1}],
+			"round_overalls": [1],
+			"overall": true
+		},
+		"finals": {
+			"results": [],
+			"round_overalls": [],
+			"overall": false
+		}
+	}`
+	assert.JSONEq(t, expectedJSON, string(bytes), "API Contract for RaceResultsIndex has been broken!")
 }

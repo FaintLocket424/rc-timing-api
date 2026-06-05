@@ -64,7 +64,7 @@ type ResultStatusDTO struct {
 // RaceResultsIndexScrapeDTO represents a full scrape of the results index,
 // containing sets of all the practice, quali and finals that have been run.
 type RaceResultsIndexScrapeDTO struct {
-	Title      string          `json:"title"`
+	Title      *string         `json:"title"`
 	Timestamp  int64           `json:"timestamp"`
 	Practice   ResultStatusDTO `json:"practice"`
 	Qualifying ResultStatusDTO `json:"qualifying"`

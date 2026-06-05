@@ -69,7 +69,7 @@ type ResultStatus struct {
 // RaceResultsIndexScrape represents a full scrape of the results index,
 // containing sets of all the practice, quali and finals that have been run.
 type RaceResultsIndexScrape struct {
-	Title      string
+	Title      *string
 	Timestamp  time.Time
 	Practice   ResultStatus
 	Qualifying ResultStatus

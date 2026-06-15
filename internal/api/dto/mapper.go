@@ -36,6 +36,7 @@ func ToRaceResultDTO(m *models.RaceResultScrape) *RaceResultScrapeDTO {
 				BestLapNumber: d.BestLapNumber,
 				LastLapMs:     durationToMs(d.LastLapDuration),
 				WarmupLaps:    d.WarmupLaps,
+				DNS:           d.DNS,
 			}
 		}
 	}

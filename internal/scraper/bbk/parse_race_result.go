@@ -72,7 +72,8 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 	s.Find("td").Each(func(_ int, td *goquery.Selection) {
 		text := strings.TrimSpace(td.Text())
 
-		if p, h, f, r, c, matched := parseRaceTitleText(text); matched {
+		p, h, f, r, c, matched := parseRaceTitleText(text)
+		if matched {
 			lt.PracticeNumber = p
 			lt.HeatNumber = h
 			lt.FinalNumber = f
@@ -117,7 +118,7 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 	}
 
 	idx := mapColumnHeaders(headerRow, map[string][]string{
-		"car":  {"C"},
+		"car":  {"C", "B"}, // Supports 'C' (Car) or 'B' (Box/Transponder) headers
 		"name": {driverColName},
 		"res":  {"Result"},
 		"best": {"B-Lap", "B-Lp"},
@@ -165,7 +166,9 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 				if v := atoiPtr(numStr); v != nil {
 					dr.WarmupLaps = v
 				}
-			} else if resText != "" {
+			} else if resText == "DNS" {
+				dr.DNS = ptr(true) // Set DNS to true using the package-level helper
+			} else if resText != "" && resText != "DNS" && resText != "DNF" && resText != "DSQ" {
 				slog.Warn("unparseable result", "row", i+1, "result", resText)
 			}
 		}

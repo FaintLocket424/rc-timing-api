@@ -1,0 +1,17 @@
+{
+  "PracticeNumber": 1,
+  "ClassName": "Buggies (Mixed)",
+  "Round": 1,
+  "Drivers": [
+    {
+      "CarNumber": 1,
+      "Name": "Roger Blyth",
+      "DNS": true
+    },
+    {
+      "CarNumber": 2,
+      "Name": "Richard Miller",
+      "DNS": true
+    }
+  ]
+}

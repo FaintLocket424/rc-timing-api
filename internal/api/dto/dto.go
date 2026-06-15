@@ -13,6 +13,7 @@ type DriverRaceResult struct {
 	BestLapNumber *int    `json:"best_lap_number,omitempty"`
 	LastLapMs     *int64  `json:"last_lap_ms,omitempty"`
 	WarmupLaps    *int    `json:"warmup_laps,omitempty"`
+	DNS           *bool   `json:"dns,omitempty"`
 }
 
 // RaceBestLap represents the best lap of a race so far.

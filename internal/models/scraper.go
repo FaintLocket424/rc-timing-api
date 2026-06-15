@@ -13,6 +13,7 @@ type DriverRaceResult struct {
 	BestLapNumber   *int
 	LastLapDuration *time.Duration
 	WarmupLaps      *int
+	DNS             *bool
 }
 
 // RaceBestLap represents the best lap of a race so far.

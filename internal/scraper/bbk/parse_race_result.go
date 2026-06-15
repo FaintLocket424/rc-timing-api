@@ -4,23 +4,11 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"regexp"
 	"strings"
 	"time"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
 	"github.com/PuerkitoBio/goquery"
-)
-
-var (
-	practiceRegex           = regexp.MustCompile(`Practice\s+(?P<practice>\d+)\s+\((?P<class>.*?)\)(?:\s+R(?P<round>\d+))?`)
-	heatRegex               = regexp.MustCompile(`Heat\s+(?P<heat>\d+)\s+\((?P<class>.*?)\)(?:\s+R(?P<round>\d+))?`)
-	finalRegex              = regexp.MustCompile(`(?P<final>[A-Z])\.\s+Final\s+\((?P<class>.*?)\)(?:\s+L(?P<leg>\d+))?`)
-	bestLapRegex            = regexp.MustCompile(`Best Lap:\s*(?P<name>.*?)\s+(?P<time>[\d\.]+)\s+L\s*:\s*(?P<lap>\d+)`)
-	classFTRegex            = regexp.MustCompile(`Class FT:\s*(?P<name>.*?)\s+(?P<res>[\d\/'\.]+)\s+Av Lap\s+(?P<avg>[\d\.]+)(?:\s+R\s*:\s*(?P<round>\d+))?`)
-	classBestLapRegex       = regexp.MustCompile(`Class Best Lap:\s*(?P<name>.*?)\s+(?P<time>\d+\.\d+)`)
-	finishedTimeHeaderRegex = regexp.MustCompile(`Finished\s+(?P<finishTime>\d{2}:\d{2})`)
-	elapsedTimeHeaderRegex  = regexp.MustCompile(`(?P<elapsed>\d+'\d+s)\s*\((?P<remaining>\d+s)\)`)
 )
 
 const driverColName = "Driver"
@@ -84,40 +72,12 @@ func parseHeader(s *goquery.Selection, lt *models.RaceResultScrape) {
 	s.Find("td").Each(func(_ int, td *goquery.Selection) {
 		text := strings.TrimSpace(td.Text())
 
-		if data := namedCapture(practiceRegex, text); data != nil {
-			if v := atoiPtr(data["practice"]); v != nil {
-				lt.PracticeNumber = v
-			}
-			lt.ClassName = ptr(data["class"])
-			if v := atoiPtr(data["round"]); v != nil {
-				lt.Round = v
-			}
-		} else if data := namedCapture(heatRegex, text); data != nil {
-			if v := atoiPtr(data["heat"]); v != nil {
-				lt.HeatNumber = v
-			}
-			lt.ClassName = ptr(data["class"])
-			if v := atoiPtr(data["round"]); v != nil {
-				lt.Round = v
-			}
-		} else if data := namedCapture(finalRegex, text); data != nil {
-			final := data["final"]
-
-			if len(final) == 1 {
-				r := strings.ToUpper(final)[0]
-				v := int(r - 'A' + 1)
-				lt.FinalNumber = ptr(v)
-			}
-
-			lt.ClassName = ptr(data["class"])
-
-			if data["leg"] != "" {
-				if v := atoiPtr(data["leg"]); v != nil {
-					lt.Round = v
-				}
-			} else {
-				lt.Round = ptr(1)
-			}
+		if p, h, f, r, c, matched := parseRaceTitleText(text); matched {
+			lt.PracticeNumber = p
+			lt.HeatNumber = h
+			lt.FinalNumber = f
+			lt.Round = r
+			lt.ClassName = c
 		}
 
 		if finishMatch := namedCapture(finishedTimeHeaderRegex, text); finishMatch != nil {
@@ -150,42 +110,18 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 		return
 	}
 
-	// Dynamically scan for the column headers row (which contains "Driver")
-	var headerRow *goquery.Selection
-	var headerIdx int
-	rows.Each(func(i int, r *goquery.Selection) {
-		if headerRow != nil {
-			return
-		}
-		r.Children().Each(func(_ int, c *goquery.Selection) {
-			if strings.TrimSpace(c.Text()) == driverColName {
-				headerRow = r
-				headerIdx = i
-			}
-		})
-	})
-
-	if headerRow == nil {
+	headerRow, headerIdx, found := findHeaderRow(rows, driverColName)
+	if !found {
 		slog.Error("drivers table missing column headers")
 		return
 	}
 
-	// Map headers
-	idx := make(map[string]int)
-	headerRow.Children().Each(func(i int, s *goquery.Selection) {
-		text := strings.TrimSpace(s.Text())
-		switch text {
-		case "C":
-			idx["car"] = i
-		case driverColName:
-			idx["name"] = i
-		case "Result":
-			idx["res"] = i
-		case "B-Lap", "B-Lp":
-			idx["best"] = i
-		case "L-Lap", "L-Lp":
-			idx["last"] = i
-		}
+	idx := mapColumnHeaders(headerRow, map[string][]string{
+		"car":  {"C"},
+		"name": {driverColName},
+		"res":  {"Result"},
+		"best": {"B-Lap", "B-Lp"},
+		"last": {"L-Lap", "L-Lp"},
 	})
 
 	// Process rows

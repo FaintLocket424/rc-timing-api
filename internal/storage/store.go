@@ -20,4 +20,7 @@ type Store interface {
 
 	SaveRaceResultsIndex(url string, model *models.RaceResultsIndexScrape) error
 	GetRaceResultsIndex(url string) (*models.RaceResultsIndexScrape, error)
+
+	SaveRaceSchedule(url string, model *models.RaceScheduleScrape) error
+	GetRaceSchedule(url string) (*models.RaceScheduleScrape, error)
 }

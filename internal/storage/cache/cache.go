@@ -17,6 +17,7 @@ var errNotFound = errors.New("event data not found")
 type EventData struct {
 	Live            *models.RaceResultScrape
 	ResultsIndex    *models.RaceResultsIndexScrape
+	RaceSchedule    *models.RaceScheduleScrape
 	PracticeResults map[models.HeatRound]*models.RaceResultScrape
 	QualiResults    map[models.HeatRound]*models.RaceResultScrape
 	FinalResults    map[models.HeatRound]*models.RaceResultScrape
@@ -221,9 +222,35 @@ func (c *Cache) GetRaceResultsIndex(url string) (*models.RaceResultsIndexScrape,
 	defer c.mu.RUnlock()
 
 	ed, ok := c.data[url]
-	if !ok || ed.Live == nil {
+	if !ok || ed.ResultsIndex == nil {
 		return nil, errNotFound
 	}
 
 	return ed.ResultsIndex, nil
+}
+
+// SaveRaceSchedule saves a scraped race schedule for a URL into the cache.
+func (c *Cache) SaveRaceSchedule(url string, model *models.RaceScheduleScrape) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	ed := c.getOrCreateEvent(url)
+	ed.RaceSchedule = model
+
+	slog.Debug("Saved race schedule to cache", "url", url)
+
+	return nil
+}
+
+// GetRaceSchedule retrieves the currently stored race schedule for a URL in the cache.
+func (c *Cache) GetRaceSchedule(url string) (*models.RaceScheduleScrape, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	ed, ok := c.data[url]
+	if !ok || ed.RaceSchedule == nil {
+		return nil, errNotFound
+	}
+
+	return ed.RaceSchedule, nil
 }

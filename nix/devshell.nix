@@ -12,17 +12,31 @@ let
     '';
   };
 
-  mirrorBBKScript = pkgs.writeShellApplication {
-    name = "mirror-bbk";
-    runtimeInputs = [ pkgs.wget ];
+  downloadBBKTestDataScript = pkgs.writeShellApplication {
+    name = "download-bbk-test-data";
+    runtimeInputs = [ pkgs.wget pkgs.git ];
     text = ''
-      if [ "$#" -ne 2 ]; then
-        echo "Usage: $0 <base_url> <output_path>" >&2
+      if [ "$#" -ne 1 ]; then
+        echo "Usage: $0 <base_url>" >&2
         exit 1
       fi
 
       BASE_URL="$1"
-      OUTPUT_PATH="$2"
+
+      # Attempt to dynamically locate the repository/project root
+      if [ -d "internal/scraper/bbk" ]; then
+        PROJECT_ROOT="."
+      elif git rev-parse --show-toplevel >/dev/null 2>&1; then
+        PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+      else
+        echo "Error: Could not locate the project root directory. Please run this script from within the repository." >&2
+        exit 1
+      fi
+
+      TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
+      OUTPUT_PATH="$PROJECT_ROOT/internal/scraper/bbk/testdata/$TIMESTAMP"
+
+      mkdir -p "$OUTPUT_PATH"
 
       {
         echo "$BASE_URL/"
@@ -81,12 +95,12 @@ let
 
   commandBinaries = [
     runDevServerScript
-    mirrorBBKScript
+    downloadBBKTestDataScript
     lineCounterScript
     listFunctions
   ];
 
-  commandNames = builtins.concatStringsSep ", " (builtins.map (p: p.name) commandBinaries);
+  commandNames = builtins.concatStringsSep ", " (map (p: p.name) commandBinaries);
 in
 {
   default = pkgs.mkShell {

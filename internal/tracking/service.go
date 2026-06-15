@@ -13,7 +13,18 @@ import (
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
 )
 
-var workerLifespan = 30 * time.Minute
+// ScraperFactory represents a struct that can create the correct scraper
+// for a given URL.
+type ScraperFactory interface {
+	Create(url string) (scraper.Scraper, error)
+}
+
+var (
+	workerLifespan      = 30 * time.Minute
+	reaperInterval      = 1 * time.Minute
+	workerInterval      = 10 * time.Second
+	resultFetchInterval = 500 * time.Millisecond
+)
 
 type workerState struct {
 	lastAccessed time.Time
@@ -27,7 +38,7 @@ type workerState struct {
 // new worker goroutine etc.
 type Supervisor struct {
 	store          storage.Store
-	scraperFactory *scraper.Factory
+	scraperFactory ScraperFactory
 	activeWorkers  map[string]*workerState // Set of URLs which have an active worker
 	mu             sync.Mutex
 	logger         *slog.Logger
@@ -36,7 +47,7 @@ type Supervisor struct {
 // NewSupervisor creates a new supervisor object with a reference to the input store and
 // factory scraper. It then starts the reaper goroutine, whose job it is to kill
 // inactive worker goroutines.
-func NewSupervisor(store storage.Store, scraperFactory *scraper.Factory) *Supervisor {
+func NewSupervisor(store storage.Store, scraperFactory ScraperFactory) *Supervisor {
 	m := &Supervisor{
 		store:          store,
 		scraperFactory: scraperFactory,
@@ -60,8 +71,6 @@ func (m *Supervisor) reapWorker(url string) {
 }
 
 // startWorker is the main function of the tracking goroutines.
-// It handles creating the scraper for the URL and using it to
-// scrape the url on a fixed interval.
 func (m *Supervisor) startWorker(ctx context.Context, url string) {
 	logger := m.logger.With("url", url)
 	s, err := m.scraperFactory.Create(url)
@@ -73,7 +82,7 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 		return
 	}
 
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(workerInterval)
 	defer ticker.Stop()
 
 	for {
@@ -90,9 +99,21 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 
 		if canRequest() {
 			if model, err := s.GetLiveTiming(); err != nil {
-				logger.Warn("live timing scrape failed", "err", err)
+				logger.Error("live timing scrape failed", "err", err)
 			} else if err := m.store.SaveLiveTiming(url, model); err != nil {
 				logger.Error("live timing storage failed", "err", err)
+			} else {
+				logger.Debug("Scraped live timing successfully")
+			}
+		}
+
+		if canRequest() {
+			if model, err := s.GetRaceSchedule(); err != nil {
+				logger.Error("race schedule scrape failed", "err", err)
+			} else if err := m.store.SaveRaceSchedule(url, model); err != nil {
+				logger.Error("race schedule storage failed", "err", err)
+			} else {
+				logger.Debug("Scraped race schedule successfully")
 			}
 		}
 
@@ -122,7 +143,7 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 							return
 						}
 
-						time.Sleep(500 * time.Millisecond)
+						time.Sleep(resultFetchInterval)
 
 						res, err := fetcher(entry)
 						if err != nil {
@@ -136,10 +157,26 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 				}
 			}
 
-			// Execute processing with limit
-			process(model.Practice.Results, m.store.GetPracticeRaceResult, s.GetPracticeRaceResult, m.store.SavePracticeRaceResult, "practice")
-			process(model.Qualifying.Results, m.store.GetQualiRaceResult, s.GetQualiRaceResult, m.store.SaveQualiRaceResult, "quali")
-			process(model.Finals.Results, m.store.GetFinalRaceResult, s.GetFinalRaceResult, m.store.SaveFinalRaceResult, "final")
+			// Safe pointer extraction to prevent nil pointer panics
+			var practiceResults []models.HeatRound
+			if model.Practice != nil {
+				practiceResults = model.Practice.Results
+			}
+
+			var qualifyingResults []models.HeatRound
+			if model.Qualifying != nil {
+				qualifyingResults = model.Qualifying.Results
+			}
+
+			var finalsResults []models.HeatRound
+			if model.Finals != nil {
+				finalsResults = model.Finals.Results
+			}
+
+			// Execute processing safely
+			process(practiceResults, m.store.GetPracticeRaceResult, s.GetPracticeRaceResult, m.store.SavePracticeRaceResult, "practice")
+			process(qualifyingResults, m.store.GetQualiRaceResult, s.GetQualiRaceResult, m.store.SaveQualiRaceResult, "quali")
+			process(finalsResults, m.store.GetFinalRaceResult, s.GetFinalRaceResult, m.store.SaveFinalRaceResult, "final")
 		} else {
 			logger.Warn("results index scrape failed", "err", err)
 		}
@@ -178,7 +215,7 @@ func (m *Supervisor) EnsureTracking(url string) (workerStarted bool) {
 // fixed interval and reaps any worker tracking goroutines that have not been
 // accessed for longer than the workerLifespan.
 func (m *Supervisor) startReaper() {
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(reaperInterval)
 	defer ticker.Stop()
 
 	for range ticker.C {

@@ -1,0 +1,239 @@
+BODY { background-color: black; /*font-family: Verdana, sans-serif; font-size: 10pt; */ color: cyan; text-align: justify;
+       font: 0.8em/1.25 Verdana, sans-serif;
+       border: 0; padding: 0; border-collapse: 0;
+       font-size: 10pt;  } 
+td {font: 0.8em/1.25;
+    font-size: 10pt; };
+
+
+a, a:link, a:visited, a:active, a:hover {
+ text-decoration: none; font-weight: bold; color: white;
+ }
+
+
+.livehtml-heading-link { color: white; font-weight: bold; text-decoration: none; background-color: Blue; padding: 2px; border-color: white; border-width : 1px;}
+.livehtml-heading-link a:link { text-decoration: none; font-weight: bold;  color: white; }
+.livehtml-heading-link a:visited { text-decoration: none; font-weight: bold;  color: white; }
+.livehtml-heading-link a:active { text-decoration: none; font-weight: bold;  color: white; }
+.livehtml-heading-link a:hover { color: red; }
+
+
+
+
+.statichtml-heading-link {color: white; font-weight: bold; background-color: red; padding: 2px; }
+
+.statichtml-heading-link a:link {text-decoration: none; font-weight: bold;  color: white; }
+
+.statichtml-heading-link a:visited {text-decoration: none; font-weight: bold;  color: white; }
+
+.statichtml-heading-link a:hover {text-decoration: none; font-weight: bold;  color: lime; }
+
+.statichtml-heading-link a:active {text-decoration: none; font-weight: bold;  color: white; }
+
+
+
+/*
+
+.livehtml-link { font-size: 10pt; color: lime; font-weight: bold; padding: 2px; background-color: gray; border-color: white; border-width : 1px; }
+
+*/
+
+.livehtml-link {color: lime; font-weight: bold; padding: 2px; background-color: black; }
+
+.livehtml-link a:link {text-decoration: none; font-weight: bold; color: lime;}
+
+.livehtml-link a:hover {text-decoration: none; font-weight: bold;  color: red; }
+
+.livehtml-link a:active {text-decoration: none; font-weight: bold;  color: lime;}
+
+.livehtml-link a:visited {text-decoration: none; font-weight: bold;  color: lime;}
+
+
+
+.livehtml-urllink {color: White; font-weight: bold; background-color: Lime; padding: 2px; }
+
+
+
+.LHH { font-size: 8pt; color: white; font-weight: bold;  background-color: black; padding: 2px; }
+.WLHH { font-size: 8pt; color: white; font-weight: bold;  background-color: black; padding: 2px; }  
+.LHLH { font-size: 8pt; color: white; padding: 0 10 0 0; text-align: right; font-weight: bold;  background-color: black; }
+
+
+
+/*
+
+.livehtml-text { font-size: 10pt; font-weight: bold; }
+
+*/
+
+.livehtml-text {font-size : 11pt;}
+.wide-livehtml-text {font-size : 11pt;}
+
+
+
+/*
+
+.livehtml-raceblackresult { font-size: 10pt; color: #000000; font-weight: bold; background-color: Yellow;  }
+
+*/
+
+/*
+
+.livehtml-raceblackresult { font-size: 10pt; color: black; background-color: Yellow; padding : 0 10 0 0; }
+
+*/
+
+.livehtml-raceblackresult {color: magenta; }
+
+
+
+/*
+
+.livehtml-racebettertime { font-family: Verdana, sans-serif; font-size: 10pt; color: black; font-weight: bold; background-color: Silver;  }
+
+*/
+
+.livehtml-racebettertime {color: lime; }
+
+.livehtml-racestarted { color: yellow; }
+.livehtml-racemissing {  color: gray; }
+
+
+
+.livehtml-racenumber { color: yellow; font-size: 10pt; }
+
+.fastest-lap { color: magenta; font-size: 10pt; }
+
+.cyan { color: cyan}
+
+.yellow { color: yellow}
+
+.green {color:lime}
+
+.magenta {color: magenta}
+
+.gray {color:gray}
+
+
+
+/*
+
+.livehtml-racefinished { font-size: 10pt; color: red; font-weight: bold; background-color: Black;  }
+
+*/
+
+.livehtml-racefinished {color: red; font-weight: bold; }
+
+
+
+.livehtml-racenormal {color: Yellow; }
+.wide-livehtml-racenormal {color: Yellow;}
+.wide-livehtml-racebettertime {color: Lime;}
+.wide-livehtml-racebesttime {color: Magenta;}
+
+.LLN {color: Yellow; padding: 0 10 0 0; text-align: right;}
+.LLH {color: cyan; padding: 0 10 0 0; text-align: right;}
+
+
+
+.livehtml-racenotstarted {color: #008000;   }
+
+
+
+.eor-results-even {background-color: #404040; color: lime; border-collapse: collapse; border-bottom-color: #404040;}
+
+.eor-results-odd {background-color: #202020; color: lime; border-collapse: collapse; border-color: #202020;}
+
+
+
+.race-results-even {background-color: #404040; color: lime; border-collapse: collapse;}
+
+.race-results-odd {background-color: #202020; color: lime; border-collapse: collapse;}
+
+
+
+.LpRE {background-color: #404040; color: lime; border-collapse: collapse;}
+
+.LpRO {background-color: #202020; color: lime; border-collapse: collapse;}
+
+
+
+.compet-list-even {background-color: #404040; color: lime; border-collapse: collapse;}
+
+.compet-list-odd {background-color: #202020; color: lime; border-collapse: collapse;}
+
+
+
+.race-schedule-even {background-color: #404040; color: lime; border-collapse: collapse;}
+
+.race-schedule-odd {background-color: #202020; color: lime; border-collapse: collapse;}
+
+
+
+.live-race-even {background-color: #404040; color: lime; border-collapse: collapse;}
+
+.live-race-odd {background-color: #202020; color: lime; border-collapse: collapse;}
+
+
+
+
+
+/* Internet Explorer can not understand @media command */
+
+
+
+.NBT { width: 100%; border: 0; padding: 0;  border-collapse: collapse; }
+
+.BT { width: 100%; border: 1; padding: 0; }
+
+
+
+
+.buttonicon {width:25px; height:25px; margin-bottom : 5px; margin-top : 5px; border-color: transparent;}
+.icon {border-width :5; border-color: transparent; }
+
+
+
+/*
+
+this will get back borders for buttons but messes up with IE
+
+td {border-width : inherit; border-color: inherit; border-style: solid; border-collapse: collapse; 
+
+
+
+safe to use inside @media}    
+
+*/
+
+
+
+
+
+
+
+@media only screen and (max-width: 320px) {
+/* iPhone, Android in portrait rules here
+   narrow screen 320 
+*/
+ 
+
+/* iPhone, Android in portrait rules here
+   narrow screen 320 
+*/
+ 
+ .WLHH {visibility: hidden; display: none;} 
+ .wide-livehtml-racenormal {visibility: hidden; display: none;} 
+ .wide-livehtml-racebettertime {visibility: hidden; display: none;} 
+ .wide-livehtml-racebesttime {visibility: hidden; display: none;} 
+ .wide-livehtml-text {visibility: hidden; display: none;}
+ .LHH { font-size: 10pt;}
+
+}
+
+
+
+
+
+
+

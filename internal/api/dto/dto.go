@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 // DriverRaceResult represents an individual driver's current or final result
 // in a race.
 type DriverRaceResult struct {
@@ -70,4 +72,22 @@ type RaceResultsIndexScrapeDTO struct {
 	Practice   *ResultStatusDTO `json:"practice,omitempty"`
 	Qualifying *ResultStatusDTO `json:"qualifying,omitempty"`
 	Finals     *ResultStatusDTO `json:"finals,omitempty"`
+}
+
+// ScheduledRaceDTO represents a race that is scheduled to happen.
+type ScheduledRaceDTO struct {
+	Heat      *int       `json:"heat,omitempty"`
+	Round     *int       `json:"round,omitempty"`
+	ClassName *string    `json:"class_name,omitempty"`
+	StartTime *time.Time `json:"start_time,omitempty"`
+}
+
+// RaceScheduleScrapeDTO represents a full scrape of the race schedule,
+// containing sets of all the practice, quali and finals that have been run.
+type RaceScheduleScrapeDTO struct {
+	Title      *string            `json:"title,omitempty"`
+	Timestamp  *int64             `json:"timestamp,omitempty"`
+	Practice   []ScheduledRaceDTO `json:"practice"`
+	Qualifying []ScheduledRaceDTO `json:"qualifying"`
+	Finals     []ScheduledRaceDTO `json:"finals"`
 }

@@ -11,8 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func ptr[T any](v T) *T { return &v }
-
 func TestToRaceResultDTO_FullPracticeResultScrape(t *testing.T) {
 	model := &models.RaceResultScrape{
 		PracticeNumber: ptr(3),
@@ -510,4 +508,88 @@ func TestToRaceResultsIndexDTO_ScrapeOmissions(t *testing.T) {
 		}
 	}`
 	assert.JSONEq(t, expectedJSON, string(bytes), "API Contract for RaceResultsIndex has been broken!")
+}
+
+// =========================
+// Race Schedule Tests
+// =========================
+
+func TestToRaceScheduleDTO_Success(t *testing.T) {
+	ts := time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)
+	startTime1 := time.Date(2023, 1, 1, 13, 0, 0, 0, time.UTC)
+	startTime2 := time.Date(2023, 1, 1, 13, 30, 0, 0, time.UTC)
+
+	model := &models.RaceScheduleScrape{
+		Title:     ptr("Event Schedule"),
+		Timestamp: &ts,
+		Practice: []models.ScheduledRace{
+			{
+				HeatRound: &models.HeatRound{Heat: 1, Round: 1},
+				ClassName: ptr("2 Wheel Drive"),
+				StartTime: &startTime1,
+			},
+		},
+		Qualifying: []models.ScheduledRace{
+			{
+				HeatRound: &models.HeatRound{Heat: 2, Round: 1},
+				ClassName: ptr("4 Wheel Drive"),
+				StartTime: &startTime2,
+			},
+		},
+		Finals: []models.ScheduledRace{},
+	}
+
+	dtoResult := ToRaceScheduleDTO(model)
+
+	bytes, err := json.Marshal(dtoResult)
+	require.NoError(t, err)
+
+	expectedJSON := `{
+		"title": "Event Schedule",
+		"timestamp": 1672574400000,
+		"practice": [
+			{
+				"heat": 1,
+				"round": 1,
+				"class_name": "2 Wheel Drive",
+				"start_time": "2023-01-01T13:00:00Z"
+			}
+		],
+		"qualifying": [
+			{
+				"heat": 2,
+				"round": 1,
+				"class_name": "4 Wheel Drive",
+				"start_time": "2023-01-01T13:30:00Z"
+			}
+		],
+		"finals": []
+	}`
+	assert.JSONEq(t, expectedJSON, string(bytes), "API Contract for RaceSchedule has been broken!")
+}
+
+func TestToRaceScheduleDTO_NilHandling(t *testing.T) {
+	assert.Nil(t, ToRaceScheduleDTO(nil))
+}
+
+func TestToRaceScheduleDTO_EmptyRaces(t *testing.T) {
+	model := &models.RaceScheduleScrape{
+		Title:      ptr("Empty Schedule"),
+		Practice:   nil,
+		Qualifying: nil,
+		Finals:     nil,
+	}
+
+	dtoResult := ToRaceScheduleDTO(model)
+
+	bytes, err := json.Marshal(dtoResult)
+	require.NoError(t, err)
+
+	expectedJSON := `{
+		"title": "Empty Schedule",
+		"practice": [],
+		"qualifying": [],
+		"finals": []
+	}`
+	assert.JSONEq(t, expectedJSON, string(bytes), "API Contract for empty RaceSchedule has been broken!")
 }

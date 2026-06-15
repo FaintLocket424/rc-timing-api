@@ -134,3 +134,54 @@ func mapToHeatRoundDTOs(m []models.HeatRound) []HeatRoundDTO {
 
 	return res
 }
+
+// ToRaceScheduleDTO converts the internal RaceScheduleScrape model to the external DTO.
+func ToRaceScheduleDTO(m *models.RaceScheduleScrape) *RaceScheduleScrapeDTO {
+	if m == nil {
+		return nil
+	}
+
+	data := &RaceScheduleScrapeDTO{
+		Title:      m.Title,
+		Practice:   mapToScheduledRaceDTOs(m.Practice),
+		Qualifying: mapToScheduledRaceDTOs(m.Qualifying),
+		Finals:     mapToScheduledRaceDTOs(m.Finals),
+	}
+
+	if m.Timestamp != nil {
+		ts := m.Timestamp.UnixMilli()
+		data.Timestamp = &ts
+	}
+
+	return data
+}
+
+// mapToScheduledRaceDTOs safely converts internal ScheduledRace models to their DTO equivalents.
+func mapToScheduledRaceDTOs(races []models.ScheduledRace) []ScheduledRaceDTO {
+	if len(races) == 0 {
+		return []ScheduledRaceDTO{}
+	}
+
+	res := make([]ScheduledRaceDTO, len(races))
+	for i, r := range races {
+		var heat, round *int
+		if r.HeatRound != nil {
+			heat = ptr(r.HeatRound.Heat)
+			round = ptr(r.HeatRound.Round)
+		}
+
+		res[i] = ScheduledRaceDTO{
+			Heat:      heat,
+			Round:     round,
+			ClassName: r.ClassName,
+			StartTime: r.StartTime,
+		}
+	}
+
+	return res
+}
+
+// ptr returns a pointer to the value input.
+func ptr[T any](v T) *T {
+	return &v
+}

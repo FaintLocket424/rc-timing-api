@@ -75,3 +75,20 @@ type RaceResultsIndexScrape struct {
 	Qualifying *ResultStatus
 	Finals     *ResultStatus
 }
+
+// ScheduledRace represents a single race that is scheduled to be run.
+type ScheduledRace struct {
+	HeatRound *HeatRound
+	ClassName *string
+	StartTime *time.Time
+}
+
+// RaceScheduleScrape represents a full scrape of the race schedule,
+// containing all future scheduled races and when they will be run.
+type RaceScheduleScrape struct {
+	Title      *string
+	Timestamp  *time.Time
+	Practice   []ScheduledRace
+	Qualifying []ScheduledRace
+	Finals     []ScheduledRace
+}

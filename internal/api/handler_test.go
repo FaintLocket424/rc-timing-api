@@ -35,6 +35,22 @@ func (m *MockStore) GetLiveTiming(url string) (*models.RaceResultScrape, error) 
 	return res, args.Error(1)
 }
 
+// SaveRaceSchedule is a mock method.
+func (m *MockStore) SaveRaceSchedule(url string, model *models.RaceScheduleScrape) error {
+	args := m.Called(url, model)
+	return args.Error(0)
+}
+
+// GetRaceSchedule is a mock method.
+func (m *MockStore) GetRaceSchedule(url string) (*models.RaceScheduleScrape, error) {
+	args := m.Called(url)
+	var res *models.RaceScheduleScrape
+	if args.Get(0) != nil {
+		res = args.Get(0).(*models.RaceScheduleScrape)
+	}
+	return res, args.Error(1)
+}
+
 // SavePracticeRaceResult is a mock method.
 func (m *MockStore) SavePracticeRaceResult(url string, model *models.RaceResultScrape) error {
 	args := m.Called(url, model)
@@ -189,6 +205,66 @@ func (suite *HandlerTestSuite) TestLive_Success() {
 			"class_name": "2 Wheel Drive"
 		}
 	}`, w.Body.String())
+}
+
+// =========================
+// Race Schedule Tests
+// =========================
+
+func (suite *HandlerTestSuite) TestSchedule_MissingURL() {
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/schedule", nil)
+	suite.router.ServeHTTP(w, req)
+
+	suite.Require().Equal(http.StatusBadRequest, w.Code)
+	suite.JSONEq(`{
+		"status": "error",
+		"message": "Missing required query parameter: target_url"
+	}`, w.Body.String())
+}
+
+func (suite *HandlerTestSuite) TestSchedule_TrackerInitializing() {
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/schedule?target_url="+targetURL, nil)
+	suite.router.ServeHTTP(w, req)
+
+	suite.Require().Equal(http.StatusAccepted, w.Code)
+	suite.JSONEq(`{
+		"status": "success",
+		"message": "Starting tracking event, please poll again in a few seconds"
+	}`, w.Body.String())
+}
+
+func (suite *HandlerTestSuite) TestSchedule_StoreError() {
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockStore.On("GetRaceSchedule", targetURL).Return(nil, errors.New("database failure")).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/schedule?target_url="+targetURL, nil)
+	suite.router.ServeHTTP(w, req)
+
+	suite.Require().Equal(http.StatusInternalServerError, w.Code)
+	suite.JSONEq(`{
+		"status": "error",
+		"message": "database failure"
+	}`, w.Body.String())
+}
+
+func (suite *HandlerTestSuite) TestSchedule_Success() {
+	title := "Weekend Schedule"
+	dummyData := &models.RaceScheduleScrape{Title: &title}
+
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockStore.On("GetRaceSchedule", targetURL).Return(dummyData, nil).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/schedule?target_url="+targetURL, nil)
+	suite.router.ServeHTTP(w, req)
+
+	suite.Require().Equal(http.StatusOK, w.Code)
+	suite.Contains(w.Body.String(), "Weekend Schedule")
 }
 
 // =========================

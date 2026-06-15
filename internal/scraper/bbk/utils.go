@@ -10,6 +10,29 @@ import (
 	"time"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"github.com/PuerkitoBio/goquery"
+)
+
+var (
+	// Race details regex patterns.
+	practiceRegex = regexp.MustCompile(`Practice\s+(?P<practice>\d+)\s+\((?P<class>.*)\)(?:\s+R(?P<round>\d+))?`)
+	heatRegex     = regexp.MustCompile(`Heat\s+(?P<heat>\d+)\s+\((?P<class>.*)\)(?:\s+R(?P<round>\d+))?`)
+	finalRegex    = regexp.MustCompile(`(?P<final>[A-Z])\.\s+Final\s+\((?P<class>.*)\)(?:\s+L(?P<leg>\d+))?`)
+
+	// Meta and telemetry regex patterns.
+	bestLapRegex            = regexp.MustCompile(`Best Lap:\s*(?P<name>.*?)\s+(?P<time>[\d\.]+)\s+L\s*:\s*(?P<lap>\d+)`)
+	classFTRegex            = regexp.MustCompile(`Class FT:\s*(?P<name>.*?)\s+(?P<res>[\d\/'\.]+)\s+Av Lap\s+(?P<avg>[\d\.]+)(?:\s+R\s*:\s*(?P<round>\d+))?`)
+	classBestLapRegex       = regexp.MustCompile(`Class Best Lap:\s*(?P<name>.*?)\s+(?P<time>\d+\.\d+)`)
+	finishedTimeHeaderRegex = regexp.MustCompile(`Finished\s+(?P<finishTime>\d{2}:\d{2})`)
+	elapsedTimeHeaderRegex  = regexp.MustCompile(`(?P<elapsed>\d+'\d+s)\s*\((?P<remaining>\d+s)\)`)
+
+	// Index parsing regex patterns.
+	resultsLinkRegex       = regexp.MustCompile(`^(?P<type>[phf])(?P<heat>\d+)r(?P<round>\d+)res\.htm$`)
+	roundOverallsLinkRegex = regexp.MustCompile(`^(?P<type>[phf])eor(?P<round>\d+)\.htm$`)
+
+	// Utility result/duration parser regex patterns.
+	resultRegex = regexp.MustCompile(`(?P<laps>-?\d+)/(?:(?P<mins>\d+)')?(?P<secs>\d+\.\d+)`)
+	lapRegex    = regexp.MustCompile(`(?P<time>\d+\.\d+)(?:\[(?P<lap>\d+)\])?`)
 )
 
 // ptr returns a pointer to the value input.
@@ -58,13 +81,6 @@ func sortHeatRounds(rounds []models.HeatRound) {
 		return cmp.Compare(a.Heat, b.Heat)
 	})
 }
-
-var (
-	// Matches "11/34.234" or "11/1'34.234" patterns.
-	resultRegex = regexp.MustCompile(`(?P<laps>-?\d+)/(?:(?P<mins>\d+)')?(?P<secs>\d+\.\d+)`)
-	// Matches "11.345" or "11.345[9]" patterns.
-	lapRegex = regexp.MustCompile(`(?P<time>\d+\.\d+)(?:\[(?P<lap>\d+)\])?`)
-)
 
 // namedCapture extracts named groups from regular expressions and returns them as a map.
 func namedCapture(re *regexp.Regexp, input string) map[string]string {
@@ -141,4 +157,108 @@ func parseLapStr(lapStr string) (*time.Duration, *int, error) {
 	}
 
 	return &duration, nil, nil
+}
+
+// findTitleTable searches for the table containing the document's metadata (title and timestamp).
+func findTitleTable(doc *goquery.Document) *goquery.Selection {
+	var titleTable *goquery.Selection
+	doc.Find("table").Each(func(_ int, t *goquery.Selection) {
+		if titleTable != nil {
+			return
+		}
+		tds := t.Find("td")
+		// Typically Title/Timestamp is in a table with exactly 2 cells where the last is a 24-hour timestamp
+		if tds.Length() == 2 {
+			timeText := strings.TrimSpace(tds.Last().Text())
+			if _, err := parseTimeToday(timeText); err == nil {
+				titleTable = t
+			}
+		}
+	})
+	return titleTable
+}
+
+// parseTitleAndTimestamp extracts Title and Timestamp from the dynamically discovered title table, if it exists.
+func parseTitleAndTimestamp(doc *goquery.Document) (*string, *time.Time) {
+	titleTable := findTitleTable(doc)
+	if titleTable != nil {
+		header := titleTable.Find("td")
+		if header.Length() > 1 {
+			var title *string
+			var timestamp *time.Time
+
+			if text := strings.TrimSpace(header.First().Text()); text != "" {
+				title = ptr(text)
+			}
+
+			if t, err := parseTimeToday(header.Last().Text()); err == nil {
+				timestamp = t
+			}
+			return title, timestamp
+		}
+	}
+	return nil, nil
+}
+
+// parseRaceTitleText parses race session type (practice, heat, final), round, and class from a text string.
+func parseRaceTitleText(text string) (practice, heat, final, round *int, class *string, matched bool) {
+	text = strings.TrimSpace(text)
+
+	if data := namedCapture(practiceRegex, text); data != nil {
+		matched = true
+		practice = atoiPtr(data["practice"])
+		class = ptr(data["class"])
+		round = atoiPtr(data["round"])
+	} else if data := namedCapture(heatRegex, text); data != nil {
+		matched = true
+		heat = atoiPtr(data["heat"])
+		class = ptr(data["class"])
+		round = atoiPtr(data["round"])
+	} else if data := namedCapture(finalRegex, text); data != nil {
+		matched = true
+		finalStr := data["final"]
+		if len(finalStr) == 1 {
+			r := strings.ToUpper(finalStr)[0]
+			final = ptr(int(r - 'A' + 1))
+		}
+		class = ptr(data["class"])
+		if data["leg"] != "" {
+			round = atoiPtr(data["leg"])
+		} else {
+			round = ptr(1)
+		}
+	}
+	return
+}
+
+// findHeaderRow searches table rows to find the row containing a target column identifier.
+func findHeaderRow(rows *goquery.Selection, target string) (*goquery.Selection, int, bool) {
+	var headerRow *goquery.Selection
+	headerIdx := -1
+	rows.Each(func(i int, r *goquery.Selection) {
+		if headerRow != nil {
+			return
+		}
+		r.Children().Each(func(_ int, c *goquery.Selection) {
+			if strings.TrimSpace(c.Text()) == target {
+				headerRow = r
+				headerIdx = i
+			}
+		})
+	})
+	return headerRow, headerIdx, headerRow != nil
+}
+
+// mapColumnHeaders maps column indices based on matches for expected headers.
+func mapColumnHeaders(headerRow *goquery.Selection, mapping map[string][]string) map[string]int {
+	idx := make(map[string]int)
+	headerRow.Children().Each(func(i int, s *goquery.Selection) {
+		text := strings.TrimSpace(s.Text())
+		for key, matches := range mapping {
+			if slices.Contains(matches, text) {
+				idx[key] = i
+			}
+		}
+	})
+	return idx
 }

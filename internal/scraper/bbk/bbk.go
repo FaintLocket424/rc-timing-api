@@ -150,3 +150,20 @@ func (s *Scraper) GetRaceResultsIndex() (res *models.RaceResultsIndexScrape, err
 
 	return parseRaceResultsIndexHTML(body)
 }
+
+// GetRaceSchedule calls the scraper to fetch the `liveschedule.htm` page from the
+// target and run the parser on it to create a *models.RaceScheduleScrape of the
+// current race schedule.
+func (s *Scraper) GetRaceSchedule() (res *models.RaceScheduleScrape, err error) {
+	body, fetchErr := s.fetchPage(s.target + "/liveschedule.htm")
+	if fetchErr != nil {
+		return nil, fetchErr
+	}
+	defer func() {
+		if closeErr := body.Close(); closeErr != nil {
+			err = errors.Join(err, closeErr)
+		}
+	}()
+
+	return parseRaceScheduleHTML(body)
+}

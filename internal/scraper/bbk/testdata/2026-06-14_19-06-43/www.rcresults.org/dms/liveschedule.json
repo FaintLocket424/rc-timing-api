@@ -1,0 +1,16 @@
+{
+  "Title": "DMS MCC night meeting 18 June 2026",
+  "Timestamp": "0000-01-01T12:12:00Z",
+  "Practice": [
+    {
+      "HeatRound": { "Heat": 1, "Round": 1 },
+      "ClassName": "Buggies (Mixed)",
+      "StartTime": "0000-01-01T12:10:00Z"
+    },
+    {
+      "HeatRound": { "Heat": 1, "Round": 2 },
+      "ClassName": "Buggies (Mixed)",
+      "StartTime": "0000-01-01T12:14:00Z"
+    }
+  ]
+}

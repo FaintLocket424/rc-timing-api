@@ -14,4 +14,5 @@ type Scraper interface {
 	GetQualiRaceResult(models.HeatRound) (*models.RaceResultScrape, error)
 	GetFinalRaceResult(models.HeatRound) (*models.RaceResultScrape, error)
 	GetRaceResultsIndex() (*models.RaceResultsIndexScrape, error)
+	GetRaceSchedule() (*models.RaceScheduleScrape, error)
 }

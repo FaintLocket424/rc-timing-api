@@ -53,6 +53,20 @@ func (h *Handler) GetLiveTiming(c *gin.Context) {
 	}
 }
 
+// GetRaceSchedule handles HTTP requests to fetch the race schedule.
+// It checks the cache to see if a value is available, and returns what it finds,
+// or an error if it finds nothing.
+func (h *Handler) GetRaceSchedule(c *gin.Context) {
+	url := getTargetURL(c)
+
+	if model, err := h.store.GetRaceSchedule(url); err == nil {
+		responses.RespondSuccess(c, dto.ToRaceScheduleDTO(model), "")
+	} else {
+		slog.Error("error getting race schedule", "error", err)
+		responses.RespondError(c, http.StatusInternalServerError, err.Error())
+	}
+}
+
 // GetPracticeRaceResult handles HTTP requests to fetch practice results.
 // It checks the cache to see if a value is available, and returns what it finds,
 // or an error if it finds nothing.

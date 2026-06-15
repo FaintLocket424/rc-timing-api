@@ -27,21 +27,24 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion string) *g
 
 	api := r.Group("/api")
 	{
-		api.GET("/ping", func(c *gin.Context) {
-			c.String(http.StatusOK, "pong")
-		})
-
-		api.GET("/info", func(c *gin.Context) {
-			responses.RespondSuccess(c, nil,
-				fmt.Sprintf("API powered by OpenGrid Timing Bridge %s, licensed under the AGPL-3.0 license. Source available at https://codeberg.org/OpenGrid-RC/bridge", programVersion),
-			)
-		})
-
 		v1 := api.Group("/v1")
 		{
+			v1.GET("/ping", func(c *gin.Context) {
+				c.String(http.StatusOK, "pong")
+			})
+
+			v1.GET("/info", func(c *gin.Context) {
+				responses.RespondSuccess(
+					c, nil,
+					fmt.Sprintf("API v1 powered by OpenGrid Timing Bridge %s, licensed under the AGPL-3.0 license. Source available at https://codeberg.org/OpenGrid-RC/bridge", programVersion),
+				)
+			})
+
 			v1.Use(ExtractTargetURL(handler))
 
 			v1.GET("/live", handler.GetLiveTiming)
+
+			v1.GET("/schedule", handler.GetRaceSchedule)
 
 			results := v1.Group("/results")
 			{

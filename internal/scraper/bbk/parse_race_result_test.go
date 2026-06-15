@@ -55,7 +55,8 @@ func TestParseRaceResult_Golden(t *testing.T) {
 			err = decoder.Decode(&expectedData)
 			require.NoError(t, err, "Golden JSON is invalid or contains unknown fields")
 
-			if actualData.FinishTime != nil {
+			// Normalise scrape finish time safely
+			if expectedData.FinishTime != nil && actualData.FinishTime != nil {
 				assert.Equal(t, expectedData.FinishTime.Hour(), actualData.FinishTime.Hour(), "Hour mismatch")
 				assert.Equal(t, expectedData.FinishTime.Minute(), actualData.FinishTime.Minute(), "Minute mismatch")
 				actualData.FinishTime = expectedData.FinishTime

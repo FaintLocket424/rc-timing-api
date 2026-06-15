@@ -52,9 +52,12 @@ func TestParseRaceResultsIndex_Golden(t *testing.T) {
 			err = decoder.Decode(&expectedData)
 			require.NoError(t, err, "Golden JSON is invalid or contains unknown fields")
 
-			assert.Equal(t, expectedData.Timestamp.Hour(), actualData.Timestamp.Hour(), "Hour mismatch")
-			assert.Equal(t, expectedData.Timestamp.Minute(), actualData.Timestamp.Minute(), "Minute mismatch")
-			actualData.Timestamp = expectedData.Timestamp
+			// Normalise scrape timestamp safely
+			if expectedData.Timestamp != nil && actualData.Timestamp != nil {
+				assert.Equal(t, expectedData.Timestamp.Hour(), actualData.Timestamp.Hour(), "Hour mismatch")
+				assert.Equal(t, expectedData.Timestamp.Minute(), actualData.Timestamp.Minute(), "Minute mismatch")
+				actualData.Timestamp = expectedData.Timestamp
+			}
 
 			assert.Equal(t, &expectedData, actualData, "Parsed data does not match manually verified golden file")
 		})

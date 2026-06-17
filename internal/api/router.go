@@ -6,6 +6,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/FaintLocket424/opengrid-bridge/internal/api/responses"
 	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
@@ -25,6 +26,15 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion, programCo
 
 	handler := NewHandler(store, tracker)
 
+	displayVersion := programVersion
+	if programCommit != "" && programCommit != "unknown" && programCommit != "dev" {
+		if baseVersion, ok := strings.CutSuffix(programVersion, "-debug"); ok {
+			displayVersion = fmt.Sprintf("%s-%s-debug", baseVersion, programCommit)
+		} else {
+			displayVersion = fmt.Sprintf("%s-%s", programVersion, programCommit)
+		}
+	}
+
 	api := r.Group("/api")
 	{
 		v1 := api.Group("/v1")
@@ -36,14 +46,13 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion, programCo
 			v1.GET("/info", func(c *gin.Context) {
 				sourceURL := "https://codeberg.org/OpenGrid-RC/bridge"
 
-				// If a valid commit is present, direct users to the exact commit page
 				if programCommit != "" && programCommit != "unknown" && programCommit != "dev" {
 					sourceURL = fmt.Sprintf("https://codeberg.org/OpenGrid-RC/bridge/commit/%s", programCommit)
 				}
 
 				responses.RespondSuccess(
 					c, nil,
-					fmt.Sprintf("API v1 powered by OpenGrid Timing Bridge %s, licensed under the AGPL-3.0 license. Source available at %s", programVersion, sourceURL),
+					fmt.Sprintf("API v1 powered by OpenGrid Timing Bridge %s, licensed under the AGPL-3.0 license. Source available at %s", displayVersion, sourceURL),
 				)
 			})
 

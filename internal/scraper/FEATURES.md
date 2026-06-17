@@ -18,7 +18,7 @@
 | Driver race time | ✅ |
 | Driver best lap time | ✅ |
 | Driver best lap number | ✅ |
-| Driver started the race? | ❌ |
+| Driver started the race? | ✅ |
 | Driver warm up laps completed | ✅ |
 | Best lap of race (Driver/Speed/Lap) | ✅ |
 | Class fastest time (Driver/Laps/RaceTime) | ✅ |
@@ -41,7 +41,7 @@
 
 | Feature | BBK Scraper |
 | :--- | :---: |
-| Races scheduled and timing | ❌ |
+| Races scheduled and timing | ✅ |
 
 ## `/livecompets.htm`
 

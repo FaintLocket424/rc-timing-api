@@ -47,7 +47,7 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion, programCo
 				sourceURL := "https://codeberg.org/OpenGrid-RC/bridge"
 
 				if programCommit != "" && programCommit != "unknown" && programCommit != "dev" {
-					sourceURL = fmt.Sprintf("https://codeberg.org/OpenGrid-RC/bridge/commit/%s", programCommit)
+					sourceURL = fmt.Sprintf("https://codeberg.org/OpenGrid-RC/bridge/src/commit/%s", programCommit)
 				}
 
 				responses.RespondSuccess(

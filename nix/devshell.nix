@@ -57,6 +57,48 @@ let
     '';
   };
 
+  checkGoldenFilesScript = pkgs.writeShellApplication {
+    name = "check-golden-files";
+    runtimeInputs = [ pkgs.findutils pkgs.coreutils pkgs.git ];
+    text = ''
+      # Attempt to dynamically locate the repository/project root
+      if [ -d "internal/scraper/bbk" ]; then
+        PROJECT_ROOT="."
+      elif git rev-parse --show-toplevel >/dev/null 2>&1; then
+        PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+      else
+        echo "Error: Could not locate the project root directory. Please run this script from within the repository." >&2
+        exit 1
+      fi
+
+      TARGET_DIR="$PROJECT_ROOT/internal/scraper/bbk/testdata"
+
+      if [ ! -d "$TARGET_DIR" ]; then
+        echo "Error: Directory '$TARGET_DIR' does not exist." >&2
+        exit 1
+      fi
+
+      echo "Scanning '$TARGET_DIR' for .htm files missing corresponding .json files..."
+      missing_count=0
+
+      # Find all .htm files, sort them alphabetically using NUL delimiters, and check them
+      while IFS= read -r -d "" htm_file; do
+        json_file="''${htm_file%.htm}.json"
+
+        if [ ! -f "$json_file" ]; then
+          echo "Missing golden file: $htm_file"
+          missing_count=$((missing_count + 1))
+        fi
+      done < <(find "$TARGET_DIR" -type f -name "*.htm" -print0 | sort -z)
+
+      if [ "$missing_count" -eq 0 ]; then
+        echo "Scan complete. All .htm files have an accompanying .json file."
+      else
+        echo "Scan complete. Found $missing_count .htm file(s) missing a matching .json file."
+      fi
+    '';
+  };
+
   lineCounterScript = pkgs.writeShellApplication {
     name = "line-count";
     runtimeInputs = [ pkgs.findutils pkgs.coreutils ];
@@ -96,6 +138,7 @@ let
   commandBinaries = [
     runDevServerScript
     downloadBBKTestDataScript
+    checkGoldenFilesScript
     lineCounterScript
     listFunctions
   ];

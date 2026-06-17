@@ -15,7 +15,7 @@ import (
 // SetupRouter creates the Gin router with a rate limiter middleware from
 // [internal/api/middleware]. It also initialises the Handler struct which
 // contains the methods to process the incoming requests.
-func SetupRouter(store storage.Store, tracker Tracker, programVersion string) *gin.Engine {
+func SetupRouter(store storage.Store, tracker Tracker, programVersion, programCommit string) *gin.Engine {
 	r := gin.Default()
 	if err := r.SetTrustedProxies(nil); err != nil {
 		panic(err)
@@ -34,9 +34,16 @@ func SetupRouter(store storage.Store, tracker Tracker, programVersion string) *g
 			})
 
 			v1.GET("/info", func(c *gin.Context) {
+				sourceURL := "https://codeberg.org/OpenGrid-RC/bridge"
+
+				// If a valid commit is present, direct users to the exact commit page
+				if programCommit != "" && programCommit != "unknown" && programCommit != "dev" {
+					sourceURL = fmt.Sprintf("https://codeberg.org/OpenGrid-RC/bridge/commit/%s", programCommit)
+				}
+
 				responses.RespondSuccess(
 					c, nil,
-					fmt.Sprintf("API v1 powered by OpenGrid Timing Bridge %s, licensed under the AGPL-3.0 license. Source available at https://codeberg.org/OpenGrid-RC/bridge", programVersion),
+					fmt.Sprintf("API v1 powered by OpenGrid Timing Bridge %s, licensed under the AGPL-3.0 license. Source available at %s", programVersion, sourceURL),
 				)
 			})
 

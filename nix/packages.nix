@@ -8,7 +8,8 @@ rec {
     ldflags = [
       "-s"
       "-w"
-      "-X main.Version=${commonArgs.version}-${gitRev}"
+      "-X main.Version=${commonArgs.version}"
+      "-X main.Commit=${gitRev}"
     ];
 
     tags = [ "release" ];
@@ -19,7 +20,8 @@ rec {
     dontStrip = true;
     buildFlags = [ "-gcflags=all=-N -l" ];
     ldflags = [
-      "-X main.Version=${commonArgs.version}-${gitRev}-debug"
+      "-X main.Version=${commonArgs.version}-debug"
+      "-X main.Commit=${gitRev}"
     ];
     tags = [ "debug" ];
   });

@@ -142,7 +142,7 @@ func (suite *HandlerTestSuite) SetupTest() {
 	suite.mockStore = new(MockStore)
 	suite.mockTracker = new(MockTracker)
 
-	suite.router = SetupRouter(suite.mockStore, suite.mockTracker, "test")
+	suite.router = SetupRouter(suite.mockStore, suite.mockTracker, "test", "commit")
 }
 
 // TearDownTest asserts that the mock store and tracker returned all

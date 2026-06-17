@@ -38,6 +38,7 @@ import (
 
 var (
 	Version  = "dev"
+	Commit   = "unknown"
 	LogLevel = new(slog.LevelVar)
 )
 
@@ -72,12 +73,12 @@ func main() {
 
 	listenAddr := fmt.Sprintf("%s:%d", *host, *port)
 
-	slog.Info("Starting OpenGrid Timing Bridge", "version", Version, "address", listenAddr)
+	slog.Info("Starting OpenGrid Timing Bridge", "version", Version, "commit", Commit, "address", listenAddr)
 
 	cache := cache.NewCache()
-	scraperFactory := scraper.NewFactory(Version)
+	scraperFactory := scraper.NewFactory(Version, Commit)
 	tracker := tracking.NewSupervisor(cache, scraperFactory)
-	router := api.SetupRouter(cache, tracker, Version)
+	router := api.SetupRouter(cache, tracker, Version, Commit)
 
 	if err := router.Run(listenAddr); err != nil {
 		slog.Error("An error occurred", "err", err)

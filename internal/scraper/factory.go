@@ -18,9 +18,9 @@ type Factory struct {
 
 // NewFactory creates a Scraper Factory with the program version injected
 // into the singleton HTTP Client used for all networking requests.
-func NewFactory(programVersion string) *Factory {
+func NewFactory(programVersion, programCommit string) *Factory {
 	return &Factory{
-		client: NewClient(programVersion),
+		client: NewClient(programVersion, programCommit),
 	}
 }
 

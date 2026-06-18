@@ -19,10 +19,12 @@ func ptr[T any](v T) *T {
 
 type SupervisorTestSuite struct {
 	suite.Suite
-	originalWorkerLifespan      time.Duration
-	originalReaperInterval      time.Duration
-	originalWorkerInterval      time.Duration
-	originalResultFetchInterval time.Duration
+	originalWorkerLifespan       time.Duration
+	originalReaperInterval       time.Duration
+	originalLiveTimingInterval   time.Duration
+	originalScheduleInterval     time.Duration
+	originalResultsIndexInterval time.Duration
+	originalResultFetchInterval  time.Duration
 
 	mockStore   *MockStore
 	mockFactory *MockScraperFactory
@@ -31,27 +33,33 @@ type SupervisorTestSuite struct {
 
 func (suite *SupervisorTestSuite) SetupSuite() {
 	// Back up original package configurations
-	suite.originalWorkerLifespan = workerLifespan
-	suite.originalReaperInterval = reaperInterval
-	suite.originalWorkerInterval = workerInterval
-	suite.originalResultFetchInterval = resultFetchInterval
+	suite.originalWorkerLifespan = WorkerLifespan
+	suite.originalReaperInterval = ReaperInterval
+	suite.originalLiveTimingInterval = LiveTimingInterval
+	suite.originalScheduleInterval = ScheduleInterval
+	suite.originalResultsIndexInterval = ResultsIndexInterval
+	suite.originalResultFetchInterval = ResultFetchInterval
 }
 
 func (suite *SupervisorTestSuite) TearDownSuite() {
 	// Restore original package configurations
-	workerLifespan = suite.originalWorkerLifespan
-	reaperInterval = suite.originalReaperInterval
-	workerInterval = suite.originalWorkerInterval
-	resultFetchInterval = suite.originalResultFetchInterval
+	WorkerLifespan = suite.originalWorkerLifespan
+	ReaperInterval = suite.originalReaperInterval
+	LiveTimingInterval = suite.originalLiveTimingInterval
+	ScheduleInterval = suite.originalScheduleInterval
+	ResultsIndexInterval = suite.originalResultsIndexInterval
+	ResultFetchInterval = suite.originalResultFetchInterval
 }
 
 func (suite *SupervisorTestSuite) SetupTest() {
 	// Use large/safe values by default to prevent the background reaper
 	// daemon from prematurely killing active workers during standard tests.
-	workerLifespan = 1 * time.Hour
-	reaperInterval = 1 * time.Hour
-	workerInterval = 1 * time.Second
-	resultFetchInterval = 1 * time.Millisecond
+	WorkerLifespan = 1 * time.Hour
+	ReaperInterval = 1 * time.Hour
+	LiveTimingInterval = 1 * time.Second
+	ScheduleInterval = 1 * time.Second
+	ResultsIndexInterval = 1 * time.Second
+	ResultFetchInterval = 1 * time.Millisecond
 
 	suite.mockStore = new(MockStore)
 	suite.mockFactory = new(MockScraperFactory)
@@ -129,8 +137,8 @@ func (suite *SupervisorTestSuite) TestReaper_StopsIdleWorkers() {
 	url := "http://idle.url"
 
 	// Configure short durations specifically for this test
-	workerLifespan = 10 * time.Millisecond
-	reaperInterval = 5 * time.Millisecond
+	WorkerLifespan = 10 * time.Millisecond
+	ReaperInterval = 5 * time.Millisecond
 
 	suite.mockFactory.On("Create", url).Return(suite.mockScraper, nil)
 	suite.mockScraper.On("GetLiveTiming").Return(&models.RaceResultScrape{}, nil)

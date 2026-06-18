@@ -1,0 +1,71 @@
+{
+  "HeatNumber": 5,
+  "Round": 1,
+  "ClassName": "4 Wheel Drive",
+  "RaceStatus": "Finished",
+  "FinishTime": "0000-01-01T20:08:00Z",
+  "Drivers": [
+    {
+      "CarNumber": 2,
+      "Name": "David Armstrong",
+      "Laps": 22,
+      "Time": 301226000000,
+      "BestLapDuration": 11771000000,
+      "BestLapNumber": 14
+    },
+    {
+      "CarNumber": 1,
+      "Name": "Dave Mackins",
+      "Laps": 22,
+      "Time": 301348000000,
+      "BestLapDuration": 12523000000,
+      "BestLapNumber": 15
+    },
+    {
+      "CarNumber": 3,
+      "Name": "Paul Rose",
+      "Laps": 21,
+      "Time": 300511000000,
+      "BestLapDuration": 12708000000,
+      "BestLapNumber": 18
+    },
+    {
+      "CarNumber": 4,
+      "Name": "John Anderson",
+      "Laps": 21,
+      "Time": 304677000000,
+      "BestLapDuration": 12278000000,
+      "BestLapNumber": 16
+    },
+    {
+      "CarNumber": 5,
+      "Name": "George Procter",
+      "Laps": 21,
+      "Time": 312766000000,
+      "BestLapDuration": 12392000000,
+      "BestLapNumber": 7
+    },
+    {
+      "CarNumber": 6,
+      "Name": "Shannon Mcmahan",
+      "Laps": 18,
+      "Time": 305604000000,
+      "BestLapDuration": 12458000000,
+      "BestLapNumber": 14
+    }
+  ],
+  "BestLap": {
+    "DriverName": "David Armstrong",
+    "Time": 11771000000,
+    "LapNumber": 14
+  },
+  "ClassFT": {
+    "DriverName": "David Armstrong",
+    "Laps": 22,
+    "Time": 301226000000
+  },
+  "ClassBestLap": {
+    "DriverName": "David Armstrong",
+    "Time": 11771000000
+  }
+}

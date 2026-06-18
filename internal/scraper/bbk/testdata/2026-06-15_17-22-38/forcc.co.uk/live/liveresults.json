@@ -1,0 +1,28 @@
+{
+  "Title": "Week 6",
+  "Timestamp": "0000-01-01T21:38:00Z",
+  "Qualifying": {
+    "Results": [
+      { "Heat": 1, "Round": 1 },
+      { "Heat": 2, "Round": 1 },
+      { "Heat": 3, "Round": 1 },
+      { "Heat": 4, "Round": 1 },
+      { "Heat": 5, "Round": 1 },
+      { "Heat": 6, "Round": 1 },
+      { "Heat": 1, "Round": 2 },
+      { "Heat": 2, "Round": 2 },
+      { "Heat": 3, "Round": 2 },
+      { "Heat": 4, "Round": 2 },
+      { "Heat": 5, "Round": 2 },
+      { "Heat": 6, "Round": 2 },
+      { "Heat": 1, "Round": 3 },
+      { "Heat": 2, "Round": 3 },
+      { "Heat": 3, "Round": 3 },
+      { "Heat": 4, "Round": 3 },
+      { "Heat": 5, "Round": 3 },
+      { "Heat": 6, "Round": 3 }
+    ],
+    "RoundOveralls": [1, 2, 3],
+    "Overall": true
+  }
+}

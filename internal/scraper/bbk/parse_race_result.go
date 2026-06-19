@@ -65,6 +65,46 @@ func parseRaceResultHTML(body io.Reader) (*models.RaceResultScrape, error) {
 		parseMeta(metaTable, scrape)
 	}
 
+	const tolerance = 100 * time.Millisecond
+
+	// 1. Individual Driver Data Integrity Check
+	for _, dr := range scrape.Drivers {
+		if dr.AvgLapDuration != nil && dr.Time != nil && dr.Laps != nil && *dr.Laps > 0 {
+			expectedAvg := *dr.Time / time.Duration(*dr.Laps)
+			diff := expectedAvg - *dr.AvgLapDuration
+			if diff < 0 {
+				diff = -diff
+			}
+
+			if diff > tolerance {
+				driverName := "unknown"
+				if dr.Name != nil {
+					driverName = *dr.Name
+				}
+				return nil, fmt.Errorf("data integrity check failed for driver %q: reported average lap %s, calculated average lap %s (diff %s exceeds tolerance of %s)",
+					driverName, dr.AvgLapDuration, expectedAvg, diff, tolerance)
+			}
+		}
+	}
+
+	// 2. Class FT Data Integrity Check
+	if scrape.ClassFT != nil && scrape.ClassFT.AvgLapDuration != nil && scrape.ClassFT.Time != nil && scrape.ClassFT.Laps != nil && *scrape.ClassFT.Laps > 0 {
+		expectedAvg := *scrape.ClassFT.Time / time.Duration(*scrape.ClassFT.Laps)
+		diff := expectedAvg - *scrape.ClassFT.AvgLapDuration
+		if diff < 0 {
+			diff = -diff
+		}
+
+		if diff > tolerance {
+			driverName := "unknown"
+			if scrape.ClassFT.DriverName != nil {
+				driverName = *scrape.ClassFT.DriverName
+			}
+			return nil, fmt.Errorf("data integrity check failed for Class FT (%s): reported average lap %s, calculated average lap %s (diff %s exceeds tolerance of %s)",
+				driverName, scrape.ClassFT.AvgLapDuration, expectedAvg, diff, tolerance)
+		}
+	}
+
 	return scrape, nil
 }
 

@@ -118,7 +118,7 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 	}
 
 	idx := mapColumnHeaders(headerRow, map[string][]string{
-		"car":  {"C", "B"}, // Supports 'C' (Car) or 'B' (Box/Transponder) headers
+		"car":  {"C", "B"},
 		"name": {driverColName},
 		"res":  {"Result"},
 		"best": {"B-Lap", "B-Lp"},

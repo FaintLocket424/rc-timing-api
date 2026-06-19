@@ -20,7 +20,6 @@
       "Name": "Chris Goldsmith",
       "Laps": 22,
       "Time": 267041000000,
-      "Improvement": false,
       "BestLapDuration": 10945000000,
       "AvgLapDuration": 12138000000
     },
@@ -47,7 +46,6 @@
       "Name": "Mark Mummery",
       "Laps": 19,
       "Time": 276804000000,
-      "Improvement": false,
       "BestLapDuration": 11471000000,
       "AvgLapDuration": 14568000000
     },
@@ -56,14 +54,12 @@
       "Name": "Graeme Wood",
       "Laps": 17,
       "Time": 265767000000,
-      "Improvement": false,
       "BestLapDuration": 12457000000,
       "AvgLapDuration": 15633000000
     },
     {
       "CarNumber": 4,
-      "Name": "Dave Mackins",
-      "Improvement": false
+      "Name": "Dave Mackins"
     }
   ],
   "BestLap": {

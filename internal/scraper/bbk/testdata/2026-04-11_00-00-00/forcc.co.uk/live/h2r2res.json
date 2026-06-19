@@ -50,7 +50,6 @@
       "Name": "Keith Clifford",
       "Laps": 21,
       "Time": 312234000000,
-      "Improvement": false,
       "BestLapDuration": 12909000000,
       "BestLapNumber": 12,
       "AvgLapDuration": 14868000000
@@ -60,7 +59,6 @@
       "Name": "George Procter",
       "Laps": 19,
       "Time": 302640000000,
-      "Improvement": false,
       "BestLapDuration": 12578000000,
       "BestLapNumber": 18,
       "AvgLapDuration": 15928000000

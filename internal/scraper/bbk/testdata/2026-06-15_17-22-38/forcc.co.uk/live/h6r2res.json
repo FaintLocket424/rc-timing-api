@@ -40,7 +40,6 @@
       "Name": "Jon Peters",
       "Laps": 23,
       "Time": 303334000000,
-      "Improvement": false,
       "BestLapDuration": 11706000000,
       "BestLapNumber": 2,
       "AvgLapDuration": 13188000000
@@ -60,7 +59,6 @@
       "Name": "Dave Andrews",
       "Laps": 3,
       "Time": 56071000000,
-      "Improvement": false,
       "BestLapDuration": 11084000000,
       "BestLapNumber": 2,
       "AvgLapDuration": 18690000000
@@ -68,8 +66,6 @@
     {
       "CarNumber": 1,
       "Name": "Verner Vonk",
-
-      "Improvement": false,
       "DNS": true
     }
   ],

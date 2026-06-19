@@ -40,7 +40,6 @@
       "Name": "John Anderson",
       "Laps": 22,
       "Time": 309670000000,
-      "Improvement": false,
       "BestLapDuration": 11583000000,
       "BestLapNumber": 9,
       "AvgLapDuration": 14075000000
@@ -60,7 +59,6 @@
       "Name": "Shannon Mcmahan",
       "Laps": 6,
       "Time": 112156000000,
-      "Improvement": false,
       "BestLapDuration": 12301000000,
       "BestLapNumber": 4,
       "AvgLapDuration": 18692000000

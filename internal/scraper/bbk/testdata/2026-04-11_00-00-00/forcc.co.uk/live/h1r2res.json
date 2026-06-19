@@ -60,7 +60,6 @@
       "Name": "Jon Welch",
       "Laps": 14,
       "Time": 316157000000,
-      "Improvement": false,
       "BestLapDuration": 16462000000,
       "BestLapNumber": 13,
       "AvgLapDuration": 22582000000
@@ -70,7 +69,6 @@
       "Name": "Daisy Mcmahan",
       "Laps": 8,
       "Time": 285005000000,
-      "Improvement": false,
       "BestLapDuration": 25981000000,
       "BestLapNumber": 4,
       "AvgLapDuration": 35625000000

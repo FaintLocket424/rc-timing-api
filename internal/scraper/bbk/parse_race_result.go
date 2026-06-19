@@ -223,7 +223,9 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 			resText := strings.TrimSpace(resTd.Text())
 
 			// Determine if the driver has achieved a personal/race improvement
-			dr.Improvement = ptr(resTd.HasClass("livehtml-racebettertime"))
+			if resTd.HasClass("livehtml-racebettertime") {
+				dr.Improvement = ptr(true)
+			}
 
 			if laps, dur, err := parseRaceResultStr(resText); err == nil {
 				dr.Laps = laps

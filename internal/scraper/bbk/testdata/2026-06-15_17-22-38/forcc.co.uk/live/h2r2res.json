@@ -10,7 +10,6 @@
       "Name": "Big Ben Bitcheno",
       "Laps": 21,
       "Time": 301682000000,
-      "Improvement": false,
       "BestLapDuration": 12638000000,
       "BestLapNumber": 10,
       "AvgLapDuration": 14365000000
@@ -20,7 +19,6 @@
       "Name": "Jack Coveney",
       "Laps": 21,
       "Time": 303883000000,
-      "Improvement": false,
       "BestLapDuration": 11889000000,
       "BestLapNumber": 12,
       "AvgLapDuration": 14470000000
@@ -30,7 +28,6 @@
       "Name": "David Armstrong",
       "Laps": 20,
       "Time": 300201000000,
-      "Improvement": false,
       "BestLapDuration": 11930000000,
       "BestLapNumber": 13,
       "AvgLapDuration": 15010000000
@@ -40,7 +37,6 @@
       "Name": "Keith Clifford",
       "Laps": 20,
       "Time": 308998000000,
-      "Improvement": false,
       "BestLapDuration": 12958000000,
       "BestLapNumber": 20,
       "AvgLapDuration": 15449000000
@@ -50,7 +46,6 @@
       "Name": "Paul Rose",
       "Laps": 20,
       "Time": 317965000000,
-      "Improvement": false,
       "BestLapDuration": 12626000000,
       "BestLapNumber": 15,
       "AvgLapDuration": 15898000000
@@ -60,7 +55,6 @@
       "Name": "Kevin Angus",
       "Laps": 18,
       "Time": 300587000000,
-      "Improvement": false,
       "BestLapDuration": 12882000000,
       "BestLapNumber": 7,
       "AvgLapDuration": 16699000000

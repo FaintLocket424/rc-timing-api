@@ -20,7 +20,6 @@
       "Name": "Lloyd Procter",
       "Laps": 23,
       "Time": 306962000000,
-      "Improvement": false,
       "BestLapDuration": 11827000000,
       "BestLapNumber": 7,
       "AvgLapDuration": 13346000000
@@ -30,7 +29,6 @@
       "Name": "Stuart Clifford",
       "Laps": 23,
       "Time": 310198000000,
-      "Improvement": false,
       "BestLapDuration": 11573000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 13486000000
@@ -40,7 +38,6 @@
       "Name": "Jodie Moon",
       "Laps": 23,
       "Time": 311658000000,
-      "Improvement": false,
       "BestLapDuration": 12021000000,
       "BestLapNumber": 15,
       "AvgLapDuration": 13550000000
@@ -50,7 +47,6 @@
       "Name": "Dave Mackins",
       "Laps": 22,
       "Time": 312452000000,
-      "Improvement": false,
       "BestLapDuration": 11594000000,
       "BestLapNumber": 7,
       "AvgLapDuration": 14202000000
@@ -60,7 +56,6 @@
       "Name": "Lochlain Wheeler",
       "Laps": 22,
       "Time": 316019000000,
-      "Improvement": false,
       "BestLapDuration": 11868000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 14364000000
@@ -70,7 +65,6 @@
       "Name": "Lee Barrett",
       "Laps": 19,
       "Time": 301639000000,
-      "Improvement": false,
       "BestLapDuration": 12305000000,
       "BestLapNumber": 10,
       "AvgLapDuration": 15875000000

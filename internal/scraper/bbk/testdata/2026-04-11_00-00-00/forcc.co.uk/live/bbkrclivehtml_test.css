@@ -1,0 +1,320 @@
+BODY { background-color: white; /*font-family: Verdana, sans-serif; font-size: 10pt; */ color: black; text-align: justify;
+       font: 0.8em/1.25 Verdana, sans-serif;
+       border: 0; padding: 0; border-collapse: 0;
+       font-size: 10pt;  } 
+td {font: 0.8em/1.25;
+    font-size: 10pt; };
+
+
+a, a:link, a:visited, a:active, a:hover {
+ text-decoration: none; font-weight: bold; color: white;
+ }
+
+
+.livehtml-heading-link { color: white; font-weight: bold; text-decoration: none; background-color: grey; padding: 2px; border-color: black; border-width : 1px;}
+.livehtml-heading-link a:link { text-decoration: none; font-weight: bold;  color: white; }
+.livehtml-heading-link a:visited { text-decoration: none; font-weight: bold;  color: white; }
+.livehtml-heading-link a:active { text-decoration: none; font-weight: bold;  color: white; }
+.livehtml-heading-link a:hover { color: red; }
+
+
+
+
+.statichtml-heading-link {color: white; font-weight: bold; background-color: red; padding: 2px; }
+
+.statichtml-heading-link a:link {text-decoration: none; font-weight: bold;  color: white; }
+
+.statichtml-heading-link a:visited {text-decoration: none; font-weight: bold;  color: white; }
+
+.statichtml-heading-link a:hover {text-decoration: none; font-weight: bold;  color: lime; }
+
+.statichtml-heading-link a:active {text-decoration: none; font-weight: bold;  color: white; }
+
+
+
+/*
+
+.livehtml-link { font-size: 10pt; color: lime; font-weight: bold; padding: 2px; background-color: gray; border-color: white; border-width : 1px; }
+
+*/
+
+.livehtml-link {color: red; font-weight: bold; padding: 2px; background-color: white; }
+
+.livehtml-link a:link {text-decoration: none; font-weight: bold; color: red;}
+
+.livehtml-link a:hover {text-decoration: none; font-weight: bold;  color: grey; }
+
+.livehtml-link a:active {text-decoration: none; font-weight: bold;  color: #00CC00;}
+
+.livehtml-link a:visited {text-decoration: none; font-weight: bold;  color: #00CC00;}
+
+
+
+.livehtml-urllink {color: White; font-weight: bold; background-color: Lime; padding: 2px; }
+
+
+
+.LHH { font-size: 8pt; color: black; font-weight: bold;  background-color: lightgrey; padding: 2px; }
+.WLHH { font-size: 8pt; color: black; font-weight: bold;  background-color: lightgrey; padding: 2px; }  
+.LHLH { font-size: 8pt; color: white; padding: 0 10 0 0; text-align: right; font-weight: bold;  background-color: black; }
+.LPP { font-size: 16pt; color: red; font-weight: bold;  background-color: white; padding: 2px; }
+
+
+
+/*
+
+.livehtml-text { font-size: 10pt; font-weight: bold; color: white; background-color: grey}
+
+*/
+
+.livehtml-text {font-size : 11pt;}
+.wide-livehtml-text {font-size : 11pt;}
+
+
+
+/*
+
+.livehtml-raceblackresult { font-size: 10pt; color: #000000; font-weight: bold; background-color: Yellow;  }
+
+*/
+
+/*
+
+.livehtml-raceblackresult { font-size: 10pt; color: black; background-color: Yellow; padding : 0 10 0 0; }
+
+*/
+
+.livehtml-raceblackresult {color: magenta; }
+
+
+
+/*
+
+.livehtml-racebettertime { font-family: Verdana, sans-serif; font-size: 10pt; color: black; font-weight: bold; background-color: Silver;  }
+
+*/
+
+.livehtml-racebettertime {color: #00CC00; }
+
+.livehtml-racestarted { color: red; }
+.livehtml-racemissing {  color: gray; }
+
+
+
+.livehtml-racenumber { color: black; font-size: 10pt; }
+
+.fastest-lap { color: magenta; font-size: 10pt; font-weight: bold; }
+
+.cyan { color: blue}
+
+.yellow { color: black}
+
+.green {color:lime}
+
+.magenta {color: magenta}
+
+.gray {color:gray}
+
+
+
+/*
+
+.livehtml-racefinished { font-size: 10pt; color: red; font-weight: bold; background-color: Black;  }
+
+*/
+
+.livehtml-racefinished {color: red; font-weight: bold; }
+
+
+
+.livehtml-racenormal {color: black; }
+.wide-livehtml-racenormal {color: blue;}
+.wide-livehtml-racebettertime {color: #00CC00;}
+.wide-livehtml-racebesttime {color: Magenta;}
+
+.LLN {color: Yellow; padding: 0 10 0 0; text-align: right;}
+.LLH {color: cyan; padding: 0 10 0 0; text-align: right;}
+
+
+
+.livehtml-racenotstarted {color: #008000;   }
+
+
+
+.eor-results-even {background-color: #e6e6e6; color: black; border-collapse: collapse; border-bottom-color: #e6e6e6;}
+
+.eor-results-odd {background-color: white; color: black; border-collapse: collapse; border-color: white;}
+
+
+
+.race-results-even {background-color: #e6e6e6; color: black; border-collapse: collapse;}
+
+.race-results-odd {background-color: white; color: black; border-collapse: collapse;}
+
+
+
+.LpRE {background-color: #e6e6e6; color: black; border-collapse: collapse;}
+
+.LpRO {background-color: white; color: black; border-collapse: collapse;}
+
+
+
+.compet-list-even {background-color: #e6e6e6; color: black; border-collapse: collapse;}
+
+.compet-list-odd {background-color: white; color: black; border-collapse: collapse;}
+
+
+
+.race-schedule-even {background-color: #e6e6e6; color: black; border-collapse: collapse;}
+
+.race-schedule-odd {background-color: white; color: black; border-collapse: collapse;}
+
+
+
+.live-race-even {background-color: #e6e6e6; color: black; border-collapse: collapse;}
+
+.live-race-odd {background-color: white; color: black; border-collapse: collapse;}
+
+
+
+
+
+/* Internet Explorer can not understand @media command */
+
+
+
+.NBT { width: 100%; border: 0; padding: 0;  border-collapse: collapse; }
+
+.BT { width: 100%; border: 1; padding: 0; }
+
+
+
+
+
+
+
+/*
+
+this will get back borders for buttons but messes up with IE
+
+td {border-width : inherit; border-color: inherit; border-style: solid; border-collapse: collapse; 
+
+
+
+safe to use inside @media}    
+
+*/
+
+
+
+
+
+
+
+@media all and (min-device-width: 1000px) {
+
+  /* rules that only apply for canvases narrower than 1000px */
+
+.NBT { width: 100%; border: 0;  border-collapse: collapse;}
+
+.BT { width: 100%; border: 1;}
+
+td {border-width : inherit; border-color: inherit; border-style: solid; border-collapse: collapse; }    
+
+}
+
+
+
+
+
+@media only screen and (min-device-width: 240px)) {
+
+  /* 
+
+  older PDAs 
+
+  */
+
+.NBT {width: 240;  }
+
+.BT {width: 240;  }
+
+.livehtml-heading-link {color: white; font-weight: bold; background-color: Blue; padding: 2px; border-color: white; border-width : 2px;}
+
+.livehtml-link {color: lime; font-weight: bold;    padding: 2px; background-color: gray; border-color: white; border-width : 1px; }
+
+.buttonicon {border-width :5; border-color: transparent; }
+.icon {border-width :5; border-color: transparent; }
+
+
+
+td {border-width : inherit; border-color: inherit; border-style: solid; border-collapse: collapse; }    
+
+}
+
+
+
+
+
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+
+  /* 
+
+  iPhone, Android rules here 
+
+  */
+
+
+
+    html {
+
+        -webkit-text-size-adjust: none;
+
+        }
+
+  
+
+  
+
+.NBT {width: 100%; border: 0;  border-collapse: collapse; }
+.BT {width: 100%; border: 1;   }
+
+.livehtml-heading-link { font-size: 15pt; color: white; font-weight: bold; background-color: Blue; padding: 2px; border-color: white; border-width : 2px;}
+
+.livehtml-heading { font-size: 12pt;}
+
+/*
+
+.livehtml-link { font-size: 15pt; color: lime; font-weight: bold;    padding: 2px; background-color: gray; border-color: white; border-width : 1px; }
+
+*/
+
+.livehtml-link { font-size: 15pt; }
+
+.buttonicon {width:25; height:25; border-width :8; border-color: transparent; }
+
+td {border-width : inherit; border-color: inherit; border-style: solid; border-collapse: collapse; }    
+
+}
+
+@media only screen and (max-width: 320px) {
+/* iPhone, Android in portrait rules here
+   narrow screen 320 
+*/
+ 
+ .WLHH {visibility: hidden; display: none;} 
+ .wide-livehtml-racenormal {visibility: hidden; display: none;} 
+ .wide-livehtml-racebettertime {visibility: hidden; display: none;} 
+ .wide-livehtml-racebesttime {visibility: hidden; display: none;} 
+ .wide-livehtml-text {visibility: hidden; display: none;}
+ .LHH { font-size: 10pt;}
+} 
+
+
+
+
+
+
+
+
+

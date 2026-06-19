@@ -11,7 +11,8 @@
       "Laps": 22,
       "Time": 306075000000,
       "BestLapDuration": 11724000000,
-      "BestLapNumber": 11
+      "BestLapNumber": 11,
+      "AvgLapDuration": 13912000000
     },
     {
       "CarNumber": 1,
@@ -19,7 +20,8 @@
       "Laps": 22,
       "Time": 308997000000,
       "BestLapDuration": 12593000000,
-      "BestLapNumber": 21
+      "BestLapNumber": 21,
+      "AvgLapDuration": 14045000000
     },
     {
       "CarNumber": 5,
@@ -27,7 +29,8 @@
       "Laps": 20,
       "Time": 308625000000,
       "BestLapDuration": 12679000000,
-      "BestLapNumber": 10
+      "BestLapNumber": 10,
+      "AvgLapDuration": 15431000000
     },
     {
       "CarNumber": 2,
@@ -35,7 +38,8 @@
       "Laps": 19,
       "Time": 301767000000,
       "BestLapDuration": 13401000000,
-      "BestLapNumber": 5
+      "BestLapNumber": 5,
+      "AvgLapDuration": 15882000000
     },
     {
       "CarNumber": 3,
@@ -43,7 +47,8 @@
       "Laps": 19,
       "Time": 303138000000,
       "BestLapDuration": 11216000000,
-      "BestLapNumber": 14
+      "BestLapNumber": 14,
+      "AvgLapDuration": 15954000000
     }
   ],
   "BestLap": {

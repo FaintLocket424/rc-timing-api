@@ -11,42 +11,48 @@
       "Name": "Stuart Clifford",
       "Laps": 23,
       "Time": 277088000000,
-      "BestLapDuration": 10936000000
+      "BestLapDuration": 10936000000,
+      "AvgLapDuration": 12047000000
     },
     {
       "CarNumber": 1,
       "Name": "Chris Goldsmith",
       "Laps": 22,
       "Time": 267041000000,
-      "BestLapDuration": 10945000000
+      "BestLapDuration": 10945000000,
+      "AvgLapDuration": 12138000000
     },
     {
       "CarNumber": 5,
       "Name": "David Armstrong",
       "Laps": 20,
       "Time": 266546000000,
-      "BestLapDuration": 11653000000
+      "BestLapDuration": 11653000000,
+      "AvgLapDuration": 13327000000
     },
     {
       "CarNumber": 3,
       "Name": "Jodie Moon",
       "Laps": 20,
       "Time": 269788000000,
-      "BestLapDuration": 11723000000
+      "BestLapDuration": 11723000000,
+      "AvgLapDuration": 13489000000
     },
     {
       "CarNumber": 6,
       "Name": "Mark Mummery",
       "Laps": 19,
       "Time": 276804000000,
-      "BestLapDuration": 11471000000
+      "BestLapDuration": 11471000000,
+      "AvgLapDuration": 14568000000
     },
     {
       "CarNumber": 7,
       "Name": "Graeme Wood",
       "Laps": 17,
       "Time": 265767000000,
-      "BestLapDuration": 12457000000
+      "BestLapDuration": 12457000000,
+      "AvgLapDuration": 15633000000
     },
     {
       "CarNumber": 4,

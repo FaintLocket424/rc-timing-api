@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/api/responses"
+	"codeberg.org/OpenGrid-RC/bridge/internal/api/responses"
 	"github.com/gin-gonic/gin"
 )
 

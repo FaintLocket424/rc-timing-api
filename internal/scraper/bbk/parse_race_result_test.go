@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

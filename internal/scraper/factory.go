@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper/bbk"
+	"codeberg.org/OpenGrid-RC/bridge/internal/scraper/bbk"
 	"github.com/PuerkitoBio/goquery"
 )
 

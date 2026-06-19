@@ -30,10 +30,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/api"
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper"
-	"github.com/FaintLocket424/opengrid-bridge/internal/storage/cache"
-	"github.com/FaintLocket424/opengrid-bridge/internal/tracking"
+	"codeberg.org/OpenGrid-RC/bridge/internal/api"
+	"codeberg.org/OpenGrid-RC/bridge/internal/scraper"
+	"codeberg.org/OpenGrid-RC/bridge/internal/storage/cache"
+	"codeberg.org/OpenGrid-RC/bridge/internal/tracking"
 )
 
 var (

@@ -5,7 +5,7 @@ package dto
 import (
 	"time"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
 )
 
 // durationToMs safely converts a pointer of time.Duration to a pointer of int64 milliseconds.

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
 	"github.com/PuerkitoBio/goquery"
 )
 

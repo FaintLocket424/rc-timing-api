@@ -4,7 +4,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
 	"github.com/stretchr/testify/suite"
 )
 

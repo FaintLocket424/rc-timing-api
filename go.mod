@@ -1,4 +1,4 @@
-module github.com/FaintLocket424/opengrid-bridge
+module codeberg.org/OpenGrid-RC/bridge
 
 go 1.25.8
 

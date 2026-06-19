@@ -4,7 +4,7 @@
 package scraper
 
 import (
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
 )
 
 // Scraper defines the capabilities that any timing scraper must have to be valid.

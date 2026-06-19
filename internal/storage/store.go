@@ -2,7 +2,7 @@
 // fetched data for quick retrieval later.
 package storage
 
-import "github.com/FaintLocket424/opengrid-bridge/internal/models"
+import "codeberg.org/OpenGrid-RC/bridge/internal/models"
 
 // Store represents a data cache with methods to save and retrieve timing data.
 type Store interface {

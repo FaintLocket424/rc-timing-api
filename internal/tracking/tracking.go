@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper"
-	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/scraper"
+	"codeberg.org/OpenGrid-RC/bridge/internal/storage"
 )
 
 // ScraperFactory represents a struct that can create the correct scraper

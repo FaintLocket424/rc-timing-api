@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/api/dto"
-	"github.com/FaintLocket424/opengrid-bridge/internal/api/responses"
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
-	"github.com/FaintLocket424/opengrid-bridge/internal/storage"
+	"codeberg.org/OpenGrid-RC/bridge/internal/api/dto"
+	"codeberg.org/OpenGrid-RC/bridge/internal/api/responses"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/storage"
 	"github.com/gin-gonic/gin"
 )
 

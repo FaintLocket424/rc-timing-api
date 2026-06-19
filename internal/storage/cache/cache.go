@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
 )
 
 var errNotFound = errors.New("event data not found")

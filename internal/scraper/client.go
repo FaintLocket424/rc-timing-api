@@ -39,7 +39,7 @@ func NewClient(programVersion, programCommit string) *http.Client {
 		"AppleWebKit/537.36 (KHTML, like Gecko)",
 		"Chrome/148.0.7778.98",
 		"Safari/537.36",
-		fmt.Sprintf("OpenGridBridge/%s (+https://github.com/FaintLocket424/opengrid-bridge)", fullVersion),
+		fmt.Sprintf("OpenGridBridge/%s (+https://codeberg.org/OpenGrid-RC/bridge)", fullVersion),
 	}, " ")
 
 	return &http.Client{

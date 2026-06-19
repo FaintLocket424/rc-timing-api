@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/FaintLocket424/opengrid-bridge/internal/models"
-	"github.com/FaintLocket424/opengrid-bridge/internal/scraper"
+	"codeberg.org/OpenGrid-RC/bridge/internal/models"
+	"codeberg.org/OpenGrid-RC/bridge/internal/scraper"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )

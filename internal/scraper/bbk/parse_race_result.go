@@ -123,6 +123,7 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 		"res":  {"Result"},
 		"best": {"B-Lap", "B-Lp"},
 		"last": {"L-Lap", "L-Lp"},
+		"avg":  {"A-Lap", "A-Lp"},
 	})
 
 	// Process rows
@@ -179,6 +180,14 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 			if dur, ln, err := parseLapStr(bestText); err == nil {
 				dr.BestLapDuration = dur
 				dr.BestLapNumber = ln
+			}
+		}
+
+		// Average Lap duration
+		if avgIdx, ok := idx["avg"]; ok && avgIdx < cols.Length() {
+			bestText := strings.TrimSpace(cols.Eq(avgIdx).Text())
+			if dur, _, err := parseLapStr(bestText); err == nil {
+				dr.AvgLapDuration = dur
 			}
 		}
 

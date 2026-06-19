@@ -12,6 +12,7 @@ type DriverRaceResult struct {
 	BestLapDuration *time.Duration
 	BestLapNumber   *int
 	LastLapDuration *time.Duration
+	AvgLapDuration  *time.Duration
 	WarmupLaps      *int
 	DNS             *bool
 }

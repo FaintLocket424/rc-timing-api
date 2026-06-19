@@ -77,7 +77,8 @@
   "ClassFT": {
     "DriverName": "Big Ben Bitcheno",
     "Laps": 21,
-    "Time": 304581000000
+    "Time": 304581000000,
+    "AvgLapDuration": 14503000000
   },
   "ClassBestLap": {
     "DriverName": "George Procter",

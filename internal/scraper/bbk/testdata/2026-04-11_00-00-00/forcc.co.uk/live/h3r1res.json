@@ -86,7 +86,8 @@
   "ClassFT": {
     "DriverName": "Callum Barrett",
     "Laps": 23,
-    "Time": 304528000000
+    "Time": 304528000000,
+    "AvgLapDuration": 13240000000
   },
   "ClassBestLap": {
     "DriverName": "Callum Barrett",

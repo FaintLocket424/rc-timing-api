@@ -59,7 +59,8 @@
   "ClassFT": {
     "DriverName": "Lochlain Wheeler",
     "Laps": 24,
-    "Time": 302095000000
+    "Time": 302095000000,
+    "AvgLapDuration": 12587000000
   },
   "ClassBestLap": {
     "DriverName": "Lee Barrett",

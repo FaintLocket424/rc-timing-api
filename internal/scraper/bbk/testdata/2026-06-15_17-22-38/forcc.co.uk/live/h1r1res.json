@@ -64,7 +64,8 @@
   "ClassFT": {
     "DriverName": "Anthony Collins",
     "Laps": 20,
-    "Time": 304199000000
+    "Time": 304199000000,
+    "AvgLapDuration": 15209000000
   },
   "ClassBestLap": {
     "DriverName": "Anthony Collins",

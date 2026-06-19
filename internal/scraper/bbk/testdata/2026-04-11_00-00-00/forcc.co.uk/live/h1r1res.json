@@ -77,7 +77,8 @@
   "ClassFT": {
     "DriverName": "Kevin Angus",
     "Laps": 18,
-    "Time": 302640000000
+    "Time": 302640000000,
+    "AvgLapDuration": 16813000000
   },
   "ClassBestLap": {
     "DriverName": "Kevin Angus",

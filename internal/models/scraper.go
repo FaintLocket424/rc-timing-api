@@ -26,10 +26,11 @@ type RaceBestLap struct {
 
 // ClassFT represents the fastest result in the class so far.
 type ClassFT struct {
-	DriverName *string
-	Laps       *int
-	Time       *time.Duration
-	Round      *int
+	DriverName     *string
+	Laps           *int
+	Time           *time.Duration
+	Round          *int
+	AvgLapDuration *time.Duration
 }
 
 // ClassBestLap represents the fastest lap in the class so far.

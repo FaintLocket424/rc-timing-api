@@ -176,8 +176,8 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 
 		// Best Lap duration
 		if bestIdx, ok := idx["best"]; ok && bestIdx < cols.Length() {
-			bestText := strings.TrimSpace(cols.Eq(bestIdx).Text())
-			if dur, ln, err := parseLapStr(bestText); err == nil {
+			text := strings.TrimSpace(cols.Eq(bestIdx).Text())
+			if dur, ln, err := parseLapStr(text); err == nil {
 				dr.BestLapDuration = dur
 				dr.BestLapNumber = ln
 			}
@@ -185,16 +185,16 @@ func parseDrivers(drivers *goquery.Selection, lt *models.RaceResultScrape) {
 
 		// Average Lap duration
 		if avgIdx, ok := idx["avg"]; ok && avgIdx < cols.Length() {
-			bestText := strings.TrimSpace(cols.Eq(avgIdx).Text())
-			if dur, _, err := parseLapStr(bestText); err == nil {
+			text := strings.TrimSpace(cols.Eq(avgIdx).Text())
+			if dur, _, err := parseLapStr(text); err == nil {
 				dr.AvgLapDuration = dur
 			}
 		}
 
 		// Last Lap duration
 		if lastIdx, ok := idx["last"]; ok && lastIdx < cols.Length() {
-			lastText := strings.TrimSpace(cols.Eq(lastIdx).Text())
-			if dur, _, err := parseLapStr(lastText); err == nil {
+			text := strings.TrimSpace(cols.Eq(lastIdx).Text())
+			if dur, _, err := parseLapStr(text); err == nil {
 				dr.LastLapDuration = dur
 			}
 		}
@@ -223,6 +223,10 @@ func parseMeta(meta *goquery.Selection, lt *models.RaceResultScrape) {
 				lt.ClassFT.Laps, lt.ClassFT.Time = laps, dur
 				if r := atoiPtr(data["round"]); r != nil {
 					lt.ClassFT.Round = r
+				}
+
+				if dur, _, err := parseLapStr(data["avg"]); err == nil {
+					lt.ClassFT.AvgLapDuration = dur
 				}
 			} else {
 				slog.Warn("failed to parse Class FT meta", "raw", text)

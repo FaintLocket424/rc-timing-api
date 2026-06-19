@@ -68,7 +68,8 @@
   "ClassFT": {
     "DriverName": "David Armstrong",
     "Laps": 22,
-    "Time": 301226000000
+    "Time": 301226000000,
+    "AvgLapDuration": 13692000000
   },
   "ClassBestLap": {
     "DriverName": "David Armstrong",

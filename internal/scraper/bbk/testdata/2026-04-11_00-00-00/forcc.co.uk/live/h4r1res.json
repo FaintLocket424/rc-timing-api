@@ -77,7 +77,8 @@
   "ClassFT": {
     "DriverName": "Chris Goldsmith",
     "Laps": 26,
-    "Time": 309589000000
+    "Time": 309589000000,
+    "AvgLapDuration": 11907000000
   },
   "ClassBestLap": {
     "DriverName": "Chris Goldsmith",

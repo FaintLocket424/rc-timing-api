@@ -77,7 +77,8 @@
   "ClassFT": {
     "DriverName": "Kyle Moon",
     "Laps": 26,
-    "Time": 305512000000
+    "Time": 305512000000,
+    "AvgLapDuration": 11750000000
   },
   "ClassBestLap": {
     "DriverName": "Matthew Peters",

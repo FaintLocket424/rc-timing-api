@@ -68,7 +68,8 @@
   "ClassFT": {
     "DriverName": "Hattie Tames",
     "Laps": 26,
-    "Time": 307891000000
+    "Time": 307891000000,
+    "AvgLapDuration": 11841000000
   },
   "ClassBestLap": {
     "DriverName": "Evie Tames",

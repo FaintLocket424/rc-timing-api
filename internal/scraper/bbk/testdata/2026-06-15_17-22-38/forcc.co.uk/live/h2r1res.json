@@ -68,7 +68,8 @@
   "ClassFT": {
     "DriverName": "Big Ben Bitcheno",
     "Laps": 22,
-    "Time": 309775000000
+    "Time": 309775000000,
+    "AvgLapDuration": 14080000000
   },
   "ClassBestLap": {
     "DriverName": "David Armstrong",

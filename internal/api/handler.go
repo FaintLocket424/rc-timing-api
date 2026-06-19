@@ -15,7 +15,7 @@ import (
 // Tracker represents a struct that can track a URL and populate a store
 // with the data.
 type Tracker interface {
-	EnsureTracking(url string) bool
+	EnsureTracking(url string) (bool, error)
 }
 
 // Handler holds references to the current store and tracker.

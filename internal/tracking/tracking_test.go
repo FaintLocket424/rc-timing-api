@@ -83,7 +83,8 @@ func (suite *SupervisorTestSuite) TestEnsureTracking_Lifecycle() {
 	supervisor := NewSupervisor(suite.mockStore, suite.mockFactory)
 
 	// Ensure tracking for the first time starts the worker loop
-	started := supervisor.EnsureTracking(url)
+	started, err := supervisor.EnsureTracking(url)
+	suite.Require().NoError(err)
 	suite.Require().True(started)
 
 	supervisor.mu.Lock()
@@ -96,7 +97,8 @@ func (suite *SupervisorTestSuite) TestEnsureTracking_Lifecycle() {
 
 	// Second invocation should not spawn a new worker, but rather refresh the existing worker's access time
 	time.Sleep(5 * time.Millisecond)
-	startedAgain := supervisor.EnsureTracking(url)
+	startedAgain, err := supervisor.EnsureTracking(url)
+	suite.Require().NoError(err)
 	suite.Require().False(startedAgain)
 
 	supervisor.mu.Lock()
@@ -111,8 +113,8 @@ func (suite *SupervisorTestSuite) TestEnsureTracking_Lifecycle() {
 	supervisor.mu.Unlock()
 }
 
-// TestEnsureTracking_ScraperInitFailure asserts that the supervisor stops and cleans up
-// the worker if the scraper interface fails to create.
+// TestEnsureTracking_ScraperInitFailure asserts that the supervisor registers the scraper initialization
+// failure on the worker state, allowing subsequent EnsureTracking calls to retrieve the cached error.
 func (suite *SupervisorTestSuite) TestEnsureTracking_ScraperInitFailure() {
 	url := "http://failure.url"
 
@@ -120,15 +122,23 @@ func (suite *SupervisorTestSuite) TestEnsureTracking_ScraperInitFailure() {
 
 	supervisor := NewSupervisor(suite.mockStore, suite.mockFactory)
 
-	started := supervisor.EnsureTracking(url)
+	started, err := supervisor.EnsureTracking(url)
+	suite.Require().NoError(err)
 	suite.Require().True(started)
 
+	// Wait asynchronously for the background worker to fail and write the error to the state
 	suite.Require().Eventually(func() bool {
 		supervisor.mu.Lock()
 		defer supervisor.mu.Unlock()
-		_, ok := supervisor.activeWorkers[url]
-		return !ok
-	}, 200*time.Millisecond, 10*time.Millisecond, "Worker should be automatically cleaned up on initialization failure")
+		state, ok := supervisor.activeWorkers[url]
+		return ok && state.err != nil
+	}, 200*time.Millisecond, 10*time.Millisecond, "Worker state should transition to capture the scraper initialization failure")
+
+	// Ensure that subsequent requests retrieve the cached error
+	startedAgain, errAgain := supervisor.EnsureTracking(url)
+	suite.Require().False(startedAgain)
+	suite.Require().Error(errAgain)
+	suite.Require().Contains(errAgain.Error(), "cannot create scraper")
 }
 
 // TestReaper_StopsIdleWorkers checks that the automated background reaper shuts down workers
@@ -151,7 +161,8 @@ func (suite *SupervisorTestSuite) TestReaper_StopsIdleWorkers() {
 
 	supervisor := NewSupervisor(suite.mockStore, suite.mockFactory)
 
-	started := supervisor.EnsureTracking(url)
+	started, err := supervisor.EnsureTracking(url)
+	suite.Require().NoError(err)
 	suite.Require().True(started)
 
 	suite.Require().Eventually(func() bool {
@@ -205,7 +216,8 @@ func (suite *SupervisorTestSuite) TestWorker_IncrementalResultScraping() {
 		wg.Done()
 	}).Return(nil)
 
-	supervisor.EnsureTracking(url)
+	_, err := supervisor.EnsureTracking(url)
+	suite.Require().NoError(err)
 
 	c := make(chan struct{})
 	go func() {

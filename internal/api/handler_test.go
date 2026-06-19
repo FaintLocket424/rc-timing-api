@@ -121,10 +121,10 @@ type MockTracker struct {
 	mock.Mock
 }
 
-// EnsureTracking is a mock method.
-func (m *MockTracker) EnsureTracking(url string) bool {
+// EnsureTracking is a mock method returning two parameters to conform with the updated design.
+func (m *MockTracker) EnsureTracking(url string) (bool, error) {
 	args := m.Called(url)
-	return args.Bool(0)
+	return args.Bool(0), args.Error(1)
 }
 
 // HandlerTestSuite is a testify test suite for testing the Handler struct.
@@ -174,7 +174,7 @@ func (suite *HandlerTestSuite) TestLive_MissingURL() {
 // "Starting tracking event, please poll again in a few seconds" when EnsureTracking
 // returns true and the cache returns an error.
 func (suite *HandlerTestSuite) TestLive_TrackerInitializing() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(true, nil).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/live?target_url="+targetURL, nil)
@@ -187,11 +187,43 @@ func (suite *HandlerTestSuite) TestLive_TrackerInitializing() {
 	}`, w.Body.String())
 }
 
+// TestLive_TrackerOutdatedData tests that the API returns StatusUnprocessableEntity 422
+// with a descriptive error message when outdated timing files are detected.
+func (suite *HandlerTestSuite) TestLive_TrackerOutdatedData() {
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, errors.New("timing file is outdated")).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/live?target_url="+targetURL, nil)
+	suite.router.ServeHTTP(w, req)
+
+	suite.Require().Equal(http.StatusUnprocessableEntity, w.Code)
+	suite.JSONEq(`{
+		"status": "error",
+		"message": "The target server has outdated timing data from a previous event"
+	}`, w.Body.String())
+}
+
+// TestLive_TrackerGenericInitError tests that the API returns StatusBadGateway 502
+// when a non-outdated initialization error occurs.
+func (suite *HandlerTestSuite) TestLive_TrackerGenericInitError() {
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, errors.New("dns lookup failed")).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/live?target_url="+targetURL, nil)
+	suite.router.ServeHTTP(w, req)
+
+	suite.Require().Equal(http.StatusBadGateway, w.Code)
+	suite.JSONEq(`{
+		"status": "error",
+		"message": "Failed to initialize scraper: dns lookup failed"
+	}`, w.Body.String())
+}
+
 func (suite *HandlerTestSuite) TestLive_Success() {
 	className := "2 Wheel Drive"
 	dummyData := &models.RaceResultScrape{ClassName: &className}
 
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetLiveTiming", targetURL).Return(dummyData, nil).Once()
 
 	w := httptest.NewRecorder()
@@ -224,7 +256,7 @@ func (suite *HandlerTestSuite) TestSchedule_MissingURL() {
 }
 
 func (suite *HandlerTestSuite) TestSchedule_TrackerInitializing() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(true, nil).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/schedule?target_url="+targetURL, nil)
@@ -238,7 +270,7 @@ func (suite *HandlerTestSuite) TestSchedule_TrackerInitializing() {
 }
 
 func (suite *HandlerTestSuite) TestSchedule_StoreError() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetRaceSchedule", targetURL).Return(nil, errors.New("database failure")).Once()
 
 	w := httptest.NewRecorder()
@@ -256,7 +288,7 @@ func (suite *HandlerTestSuite) TestSchedule_Success() {
 	title := "Weekend Schedule"
 	dummyData := &models.RaceScheduleScrape{Title: &title}
 
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetRaceSchedule", targetURL).Return(dummyData, nil).Once()
 
 	w := httptest.NewRecorder()
@@ -289,7 +321,7 @@ func (suite *HandlerTestSuite) TestPractice_MissingURL() {
 // "Starting tracking event, please poll again in a few seconds" when EnsureTracking
 // returns true and the cache returns an error.
 func (suite *HandlerTestSuite) TestPractice_TrackerInitializing() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(true, nil).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/practice/round/1/heat/2?target_url="+targetURL, nil)
@@ -305,7 +337,7 @@ func (suite *HandlerTestSuite) TestPractice_TrackerInitializing() {
 // TestPractice_StoreError tests that the server returns a code 500
 // StatusInternalServerError if the store fails to retrieve the data.
 func (suite *HandlerTestSuite) TestPractice_StoreError() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetPracticeRaceResult", targetURL, models.HeatRound{Heat: 2, Round: 1}).Return(nil, errors.New("db error")).Once()
 
 	w := httptest.NewRecorder()
@@ -323,7 +355,7 @@ func (suite *HandlerTestSuite) TestPractice_StoreError() {
 // in the cache.
 func (suite *HandlerTestSuite) TestPractice_Success() {
 	className := "LMP2"
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetPracticeRaceResult", targetURL, models.HeatRound{Heat: 2, Round: 1}).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()
@@ -351,7 +383,7 @@ func (suite *HandlerTestSuite) TestQuali_MissingURL() {
 }
 
 func (suite *HandlerTestSuite) TestQuali_TrackerInitializing() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(true, nil).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/qualifying/round/3/heat/4?target_url="+targetURL, nil)
@@ -365,7 +397,7 @@ func (suite *HandlerTestSuite) TestQuali_TrackerInitializing() {
 }
 
 func (suite *HandlerTestSuite) TestQuali_StoreError() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetQualiRaceResult", targetURL, models.HeatRound{Heat: 4, Round: 3}).Return(nil, errors.New("timeout")).Once()
 
 	w := httptest.NewRecorder()
@@ -381,7 +413,7 @@ func (suite *HandlerTestSuite) TestQuali_StoreError() {
 
 func (suite *HandlerTestSuite) TestQuali_Success() {
 	className := "GT4"
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetQualiRaceResult", targetURL, models.HeatRound{Heat: 4, Round: 3}).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()
@@ -409,7 +441,7 @@ func (suite *HandlerTestSuite) TestFinal_MissingURL() {
 }
 
 func (suite *HandlerTestSuite) TestFinal_TrackerInitializing() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(true).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(true, nil).Once()
 
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/results/finals/round/5/final/1?target_url="+targetURL, nil)
@@ -423,7 +455,7 @@ func (suite *HandlerTestSuite) TestFinal_TrackerInitializing() {
 }
 
 func (suite *HandlerTestSuite) TestFinal_StoreError() {
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetFinalRaceResult", targetURL, models.HeatRound{Heat: 1, Round: 5}).Return(nil, errors.New("db disconnect")).Once()
 
 	w := httptest.NewRecorder()
@@ -439,7 +471,7 @@ func (suite *HandlerTestSuite) TestFinal_StoreError() {
 
 func (suite *HandlerTestSuite) TestFinal_Success() {
 	className := "Hypercar"
-	suite.mockTracker.On("EnsureTracking", targetURL).Return(false).Once()
+	suite.mockTracker.On("EnsureTracking", targetURL).Return(false, nil).Once()
 	suite.mockStore.On("GetFinalRaceResult", targetURL, models.HeatRound{Heat: 1, Round: 5}).Return(&models.RaceResultScrape{ClassName: &className}, nil).Once()
 
 	w := httptest.NewRecorder()

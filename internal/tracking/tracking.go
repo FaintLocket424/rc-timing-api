@@ -32,6 +32,8 @@ var (
 type workerState struct {
 	lastAccessed time.Time
 	cancel       context.CancelFunc
+	err          error     // Captures initialization failures
+	failedAt     time.Time // Timestamp of the initialization failure
 }
 
 // Supervisor holds references to the active store, the scraper factory, a Mutex and a logger.
@@ -79,7 +81,10 @@ func (m *Supervisor) startWorker(ctx context.Context, url string) {
 	if err != nil {
 		logger.Error("failed to init scraper", "err", err)
 		m.mu.Lock()
-		m.reapWorker(url)
+		if state, ok := m.activeWorkers[url]; ok {
+			state.err = err
+			state.failedAt = time.Now()
+		}
 		m.mu.Unlock()
 		return
 	}
@@ -271,22 +276,37 @@ func (m *Supervisor) scrapeResultsIndex(ctx context.Context, s scraper.Scraper, 
 }
 
 // EnsureTracking creates a tracking goroutine for the input URL, if it doesn't
-// exist already. It also handles updating the last accessed time for the URL
-// so the supervisor knows to keep it alive.
-func (m *Supervisor) EnsureTracking(url string) (workerStarted bool) {
+// exist already. It handles updating the last accessed time for the URL so the
+// supervisor knows to keep it alive. If the background scraper initialization failed,
+// it returns the initialization error.
+func (m *Supervisor) EnsureTracking(url string) (workerStarted bool, err error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	if state, ok := m.activeWorkers[url]; ok {
-		state.lastAccessed = time.Now()
-		return false
+		if state.err != nil {
+			// If the error occurred more than 1 minute ago, clear the state and allow
+			// a retry. Otherwise, continue returning the cached error to prevent hammering.
+			if time.Since(state.failedAt) > 1*time.Minute {
+				delete(m.activeWorkers, url)
+			} else {
+				state.lastAccessed = time.Now()
+				return false, state.err
+			}
+		} else {
+			state.lastAccessed = time.Now()
+			return false, nil
+		}
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	m.activeWorkers[url] = &workerState{lastAccessed: time.Now(), cancel: cancel}
+	m.activeWorkers[url] = &workerState{
+		lastAccessed: time.Now(),
+		cancel:       cancel,
+	}
 	go m.startWorker(ctx, url)
 	m.logger.Info("Worker started", "url", url)
-	return true
+	return true, nil
 }
 
 // startReaper is the main function of the reaper goroutine, which runs on a

@@ -105,6 +105,35 @@ func parseRaceResultHTML(body io.Reader) (*models.RaceResultScrape, error) {
 		}
 	}
 
+	// 3. Global Best Lap Data Integrity Check
+	if scrape.BestLap != nil && scrape.BestLap.DriverName != nil && scrape.BestLap.Time != nil {
+		matched := false
+		bestLapDriverName := *scrape.BestLap.DriverName
+		bestLapTime := *scrape.BestLap.Time
+
+		for _, dr := range scrape.Drivers {
+			if dr.Name != nil && dr.BestLapDuration != nil {
+				nameMatches := strings.EqualFold(strings.TrimSpace(*dr.Name), strings.TrimSpace(bestLapDriverName))
+				timeMatches := *dr.BestLapDuration == bestLapTime
+
+				lapMatches := true
+				if scrape.BestLap.LapNumber != nil && dr.BestLapNumber != nil {
+					lapMatches = *scrape.BestLap.LapNumber == *dr.BestLapNumber
+				}
+
+				if nameMatches && timeMatches && lapMatches {
+					matched = true
+					break
+				}
+			}
+		}
+
+		if !matched {
+			return nil, fmt.Errorf("data integrity check failed: global best lap by %q (%s) does not match any driver's parsed best lap in the race",
+				bestLapDriverName, bestLapTime)
+		}
+	}
+
 	return scrape, nil
 }
 

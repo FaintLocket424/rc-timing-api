@@ -10,6 +10,7 @@
       "Name": "Callum Barrett",
       "Laps": 26,
       "Time": 305715000000,
+      "Improvement": true,
       "BestLapDuration": 10881000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 11758000000
@@ -19,6 +20,7 @@
       "Name": "Stuart Clifford",
       "Laps": 24,
       "Time": 300873000000,
+      "Improvement": true,
       "BestLapDuration": 11307000000,
       "BestLapNumber": 15,
       "AvgLapDuration": 12536000000
@@ -28,6 +30,7 @@
       "Name": "Lloyd Procter",
       "Laps": 24,
       "Time": 303602000000,
+      "Improvement": true,
       "BestLapDuration": 11650000000,
       "BestLapNumber": 9,
       "AvgLapDuration": 12650000000
@@ -37,6 +40,7 @@
       "Name": "Jodie Moon",
       "Laps": 24,
       "Time": 308382000000,
+      "Improvement": true,
       "BestLapDuration": 11604000000,
       "BestLapNumber": 16,
       "AvgLapDuration": 12849000000
@@ -46,6 +50,7 @@
       "Name": "Lee Barrett",
       "Laps": 23,
       "Time": 301267000000,
+      "Improvement": true,
       "BestLapDuration": 11547000000,
       "BestLapNumber": 19,
       "AvgLapDuration": 13098000000
@@ -55,6 +60,7 @@
       "Name": "Dave Mackins",
       "Laps": 23,
       "Time": 305555000000,
+      "Improvement": true,
       "BestLapDuration": 11927000000,
       "BestLapNumber": 19,
       "AvgLapDuration": 13285000000
@@ -62,6 +68,7 @@
     {
       "CarNumber": 4,
       "Name": "Lochlain Wheeler",
+      "Improvement": false,
       "DNS": true
     }
   ],

@@ -11,6 +11,7 @@
       "Name": "Stuart Clifford",
       "Laps": 23,
       "Time": 277088000000,
+      "Improvement": true,
       "BestLapDuration": 10936000000,
       "AvgLapDuration": 12047000000
     },
@@ -19,6 +20,7 @@
       "Name": "Chris Goldsmith",
       "Laps": 22,
       "Time": 267041000000,
+      "Improvement": false,
       "BestLapDuration": 10945000000,
       "AvgLapDuration": 12138000000
     },
@@ -27,6 +29,7 @@
       "Name": "David Armstrong",
       "Laps": 20,
       "Time": 266546000000,
+      "Improvement": true,
       "BestLapDuration": 11653000000,
       "AvgLapDuration": 13327000000
     },
@@ -35,6 +38,7 @@
       "Name": "Jodie Moon",
       "Laps": 20,
       "Time": 269788000000,
+      "Improvement": true,
       "BestLapDuration": 11723000000,
       "AvgLapDuration": 13489000000
     },
@@ -43,6 +47,7 @@
       "Name": "Mark Mummery",
       "Laps": 19,
       "Time": 276804000000,
+      "Improvement": false,
       "BestLapDuration": 11471000000,
       "AvgLapDuration": 14568000000
     },
@@ -51,12 +56,14 @@
       "Name": "Graeme Wood",
       "Laps": 17,
       "Time": 265767000000,
+      "Improvement": false,
       "BestLapDuration": 12457000000,
       "AvgLapDuration": 15633000000
     },
     {
       "CarNumber": 4,
-      "Name": "Dave Mackins"
+      "Name": "Dave Mackins",
+      "Improvement": false
     }
   ],
   "BestLap": {

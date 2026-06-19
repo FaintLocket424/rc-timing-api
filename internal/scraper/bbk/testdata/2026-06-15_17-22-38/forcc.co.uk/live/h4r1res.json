@@ -10,6 +10,7 @@
       "Name": "Kyle Moon",
       "Laps": 26,
       "Time": 305512000000,
+      "Improvement": true,
       "BestLapDuration": 10943000000,
       "BestLapNumber": 25,
       "AvgLapDuration": 11750000000
@@ -19,6 +20,7 @@
       "Name": "Matthew Peters",
       "Laps": 26,
       "Time": 308689000000,
+      "Improvement": true,
       "BestLapDuration": 10886000000,
       "BestLapNumber": 26,
       "AvgLapDuration": 11872000000
@@ -28,6 +30,7 @@
       "Name": "James Clifford",
       "Laps": 25,
       "Time": 305068000000,
+      "Improvement": true,
       "BestLapDuration": 11307000000,
       "BestLapNumber": 12,
       "AvgLapDuration": 12202000000
@@ -37,6 +40,7 @@
       "Name": "Shane Baker",
       "Laps": 25,
       "Time": 311298000000,
+      "Improvement": true,
       "BestLapDuration": 11227000000,
       "BestLapNumber": 13,
       "AvgLapDuration": 12451000000
@@ -46,6 +50,7 @@
       "Name": "Neil Gavin",
       "Laps": 24,
       "Time": 310988000000,
+      "Improvement": true,
       "BestLapDuration": 11270000000,
       "BestLapNumber": 19,
       "AvgLapDuration": 12957000000
@@ -55,6 +60,7 @@
       "Name": "Matt Perfect",
       "Laps": 23,
       "Time": 303233000000,
+      "Improvement": true,
       "BestLapDuration": 11654000000,
       "BestLapNumber": 11,
       "AvgLapDuration": 13184000000
@@ -64,6 +70,7 @@
       "Name": "Adrian Barrett",
       "Laps": 22,
       "Time": 304664000000,
+      "Improvement": true,
       "BestLapDuration": 11604000000,
       "BestLapNumber": 16,
       "AvgLapDuration": 13848000000

@@ -10,6 +10,7 @@
       "Name": "Hattie Tames",
       "Laps": 27,
       "Time": 304126000000,
+      "Improvement": true,
       "BestLapDuration": 10215000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 11263000000
@@ -19,6 +20,7 @@
       "Name": "Evie Tames",
       "Laps": 26,
       "Time": 307071000000,
+      "Improvement": true,
       "BestLapDuration": 10389000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 11810000000
@@ -28,6 +30,7 @@
       "Name": "Dave Andrews",
       "Laps": 25,
       "Time": 307890000000,
+      "Improvement": true,
       "BestLapDuration": 10481000000,
       "BestLapNumber": 15,
       "AvgLapDuration": 12315000000
@@ -37,6 +40,7 @@
       "Name": "Graeme Wood",
       "Laps": 24,
       "Time": 302040000000,
+      "Improvement": true,
       "BestLapDuration": 11199000000,
       "BestLapNumber": 16,
       "AvgLapDuration": 12585000000
@@ -46,6 +50,7 @@
       "Name": "Verner Vonk",
       "Laps": 24,
       "Time": 302609000000,
+      "Improvement": true,
       "BestLapDuration": 10966000000,
       "BestLapNumber": 12,
       "AvgLapDuration": 12608000000
@@ -55,6 +60,7 @@
       "Name": "Jon Peters",
       "Laps": 24,
       "Time": 307292000000,
+      "Improvement": true,
       "BestLapDuration": 10946000000,
       "BestLapNumber": 23,
       "AvgLapDuration": 12803000000
@@ -62,6 +68,7 @@
     {
       "CarNumber": 5,
       "Name": "Alan Moon",
+      "Improvement": false,
       "DNS": true
     }
   ],

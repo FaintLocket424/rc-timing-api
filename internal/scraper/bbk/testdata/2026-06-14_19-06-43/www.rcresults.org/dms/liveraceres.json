@@ -6,11 +6,13 @@
     {
       "CarNumber": 1,
       "Name": "Roger Blyth",
+      "Improvement": false,
       "DNS": true
     },
     {
       "CarNumber": 2,
       "Name": "Richard Miller",
+      "Improvement": false,
       "DNS": true
     }
   ]

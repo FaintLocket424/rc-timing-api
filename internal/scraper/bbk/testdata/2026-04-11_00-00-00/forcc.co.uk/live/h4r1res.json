@@ -10,6 +10,7 @@
       "Name": "Chris Goldsmith",
       "Laps": 26,
       "Time": 309589000000,
+      "Improvement": true,
       "BestLapDuration": 10824000000,
       "BestLapNumber": 22,
       "AvgLapDuration": 11907000000
@@ -19,6 +20,7 @@
       "Name": "Stuart Clifford",
       "Laps": 24,
       "Time": 304106000000,
+      "Improvement": true,
       "BestLapDuration": 11413000000,
       "BestLapNumber": 18,
       "AvgLapDuration": 12671000000
@@ -28,6 +30,7 @@
       "Name": "Mark Mummery",
       "Laps": 24,
       "Time": 310010000000,
+      "Improvement": true,
       "BestLapDuration": 11726000000,
       "BestLapNumber": 14,
       "AvgLapDuration": 12917000000
@@ -37,6 +40,7 @@
       "Name": "Dave Mackins",
       "Laps": 22,
       "Time": 300835000000,
+      "Improvement": true,
       "BestLapDuration": 11967000000,
       "BestLapNumber": 13,
       "AvgLapDuration": 13674000000
@@ -46,6 +50,7 @@
       "Name": "Jodie Moon",
       "Laps": 22,
       "Time": 301668000000,
+      "Improvement": true,
       "BestLapDuration": 11516000000,
       "BestLapNumber": 18,
       "AvgLapDuration": 13712000000
@@ -55,6 +60,7 @@
       "Name": "Graeme Wood",
       "Laps": 22,
       "Time": 301899000000,
+      "Improvement": true,
       "BestLapDuration": 12114000000,
       "BestLapNumber": 14,
       "AvgLapDuration": 13722000000
@@ -64,6 +70,7 @@
       "Name": "David Armstrong",
       "Laps": 22,
       "Time": 303309000000,
+      "Improvement": true,
       "BestLapDuration": 11768000000,
       "BestLapNumber": 3,
       "AvgLapDuration": 13786000000

@@ -10,6 +10,7 @@
       "Name": "Evie Tames",
       "Laps": 26,
       "Time": 307891000000,
+      "Improvement": true,
       "BestLapDuration": 10491000000,
       "BestLapNumber": 22,
       "AvgLapDuration": 11841000000
@@ -19,6 +20,7 @@
       "Name": "Hattie Tames",
       "Laps": 25,
       "Time": 305665000000,
+      "Improvement": true,
       "BestLapDuration": 10917000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 12226000000
@@ -28,6 +30,7 @@
       "Name": "Dave Andrews",
       "Laps": 24,
       "Time": 309209000000,
+      "Improvement": true,
       "BestLapDuration": 10782000000,
       "BestLapNumber": 24,
       "AvgLapDuration": 12883000000
@@ -37,6 +40,7 @@
       "Name": "Jon Peters",
       "Laps": 23,
       "Time": 300912000000,
+      "Improvement": true,
       "BestLapDuration": 11397000000,
       "BestLapNumber": 20,
       "AvgLapDuration": 13083000000
@@ -46,6 +50,7 @@
       "Name": "Graeme Wood",
       "Laps": 23,
       "Time": 304234000000,
+      "Improvement": true,
       "BestLapDuration": 11692000000,
       "BestLapNumber": 22,
       "AvgLapDuration": 13227000000
@@ -55,6 +60,7 @@
       "Name": "Alan Moon",
       "Laps": 22,
       "Time": 311836000000,
+      "Improvement": true,
       "BestLapDuration": 11783000000,
       "BestLapNumber": 15,
       "AvgLapDuration": 14174000000
@@ -64,6 +70,7 @@
       "Name": "Verner Vonk",
       "Laps": 21,
       "Time": 302824000000,
+      "Improvement": true,
       "BestLapDuration": 11463000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 14420000000

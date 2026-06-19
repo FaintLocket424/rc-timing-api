@@ -10,6 +10,7 @@
       "Name": "Kevin Angus",
       "Laps": 18,
       "Time": 301831000000,
+      "Improvement": true,
       "BestLapDuration": 14009000000,
       "BestLapNumber": 9,
       "AvgLapDuration": 16768000000
@@ -19,6 +20,7 @@
       "Name": "Mark Aylwin",
       "Laps": 18,
       "Time": 311525000000,
+      "Improvement": true,
       "BestLapDuration": 14418000000,
       "BestLapNumber": 10,
       "AvgLapDuration": 17306000000
@@ -28,6 +30,7 @@
       "Name": "Leo Moxham",
       "Laps": 17,
       "Time": 310188000000,
+      "Improvement": true,
       "BestLapDuration": 15277000000,
       "BestLapNumber": 14,
       "AvgLapDuration": 18246000000
@@ -37,6 +40,7 @@
       "Name": "Millie Stride",
       "Laps": 17,
       "Time": 317504000000,
+      "Improvement": true,
       "BestLapDuration": 15032000000,
       "BestLapNumber": 12,
       "AvgLapDuration": 18676000000
@@ -46,6 +50,7 @@
       "Name": "Alyson Ward",
       "Laps": 16,
       "Time": 312208000000,
+      "Improvement": true,
       "BestLapDuration": 14292000000,
       "BestLapNumber": 7,
       "AvgLapDuration": 19513000000
@@ -55,6 +60,7 @@
       "Name": "Jon Welch",
       "Laps": 14,
       "Time": 316157000000,
+      "Improvement": false,
       "BestLapDuration": 16462000000,
       "BestLapNumber": 13,
       "AvgLapDuration": 22582000000
@@ -64,6 +70,7 @@
       "Name": "Daisy Mcmahan",
       "Laps": 8,
       "Time": 285005000000,
+      "Improvement": false,
       "BestLapDuration": 25981000000,
       "BestLapNumber": 4,
       "AvgLapDuration": 35625000000

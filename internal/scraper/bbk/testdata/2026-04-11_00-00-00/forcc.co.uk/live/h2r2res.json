@@ -10,6 +10,7 @@
       "Name": "Big Ben Bitcheno",
       "Laps": 23,
       "Time": 310903000000,
+      "Improvement": true,
       "BestLapDuration": 12018000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 13517000000
@@ -19,6 +20,7 @@
       "Name": "Paul Barnes",
       "Laps": 22,
       "Time": 310396000000,
+      "Improvement": true,
       "BestLapDuration": 12287000000,
       "BestLapNumber": 13,
       "AvgLapDuration": 14108000000
@@ -28,6 +30,7 @@
       "Name": "Anthony Collins",
       "Laps": 22,
       "Time": 314902000000,
+      "Improvement": true,
       "BestLapDuration": 12378000000,
       "BestLapNumber": 14,
       "AvgLapDuration": 14313000000
@@ -37,6 +40,7 @@
       "Name": "Roger Clifford",
       "Laps": 21,
       "Time": 311068000000,
+      "Improvement": true,
       "BestLapDuration": 12796000000,
       "BestLapNumber": 5,
       "AvgLapDuration": 14812000000
@@ -46,6 +50,7 @@
       "Name": "Keith Clifford",
       "Laps": 21,
       "Time": 312234000000,
+      "Improvement": false,
       "BestLapDuration": 12909000000,
       "BestLapNumber": 12,
       "AvgLapDuration": 14868000000
@@ -55,6 +60,7 @@
       "Name": "George Procter",
       "Laps": 19,
       "Time": 302640000000,
+      "Improvement": false,
       "BestLapDuration": 12578000000,
       "BestLapNumber": 18,
       "AvgLapDuration": 15928000000
@@ -64,6 +70,7 @@
       "Name": "Mason Jenner",
       "Laps": 19,
       "Time": 307777000000,
+      "Improvement": true,
       "BestLapDuration": 12801000000,
       "BestLapNumber": 9,
       "AvgLapDuration": 16198000000

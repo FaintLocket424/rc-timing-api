@@ -10,6 +10,7 @@
       "Name": "Anthony Collins",
       "Laps": 21,
       "Time": 310270000000,
+      "Improvement": true,
       "BestLapDuration": 12551000000,
       "BestLapNumber": 16,
       "AvgLapDuration": 14774000000
@@ -19,6 +20,7 @@
       "Name": "David Wheeler",
       "Laps": 21,
       "Time": 313160000000,
+      "Improvement": true,
       "BestLapDuration": 12949000000,
       "BestLapNumber": 10,
       "AvgLapDuration": 14912000000
@@ -28,6 +30,7 @@
       "Name": "Dan Weale",
       "Laps": 20,
       "Time": 303727000000,
+      "Improvement": true,
       "BestLapDuration": 12520000000,
       "BestLapNumber": 4,
       "AvgLapDuration": 15186000000
@@ -37,6 +40,7 @@
       "Name": "Phil Shaun",
       "Laps": 20,
       "Time": 305317000000,
+      "Improvement": true,
       "BestLapDuration": 12942000000,
       "BestLapNumber": 12,
       "AvgLapDuration": 15265000000
@@ -46,6 +50,7 @@
       "Name": "Mark Aylwin",
       "Laps": 20,
       "Time": 318118000000,
+      "Improvement": true,
       "BestLapDuration": 13025000000,
       "BestLapNumber": 17,
       "AvgLapDuration": 15905000000
@@ -55,6 +60,7 @@
       "Name": "Leo Moxham",
       "Laps": 15,
       "Time": 315275000000,
+      "Improvement": false,
       "BestLapDuration": 14461000000,
       "BestLapNumber": 8,
       "AvgLapDuration": 21018000000

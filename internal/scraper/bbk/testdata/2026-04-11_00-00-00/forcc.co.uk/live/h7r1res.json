@@ -10,6 +10,7 @@
       "Name": "Lochlain Wheeler",
       "Laps": 24,
       "Time": 302095000000,
+      "Improvement": true,
       "BestLapDuration": 11710000000,
       "BestLapNumber": 20,
       "AvgLapDuration": 12587000000
@@ -19,6 +20,7 @@
       "Name": "Graeme Wood",
       "Laps": 24,
       "Time": 303852000000,
+      "Improvement": true,
       "BestLapDuration": 11488000000,
       "BestLapNumber": 12,
       "AvgLapDuration": 12660000000
@@ -28,6 +30,7 @@
       "Name": "Dave Mackins",
       "Laps": 24,
       "Time": 308453000000,
+      "Improvement": true,
       "BestLapDuration": 11767000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 12852000000
@@ -37,6 +40,7 @@
       "Name": "Chad Jenner",
       "Laps": 24,
       "Time": 308895000000,
+      "Improvement": true,
       "BestLapDuration": 11849000000,
       "BestLapNumber": 23,
       "AvgLapDuration": 12870000000
@@ -46,6 +50,7 @@
       "Name": "Paul Rose",
       "Laps": 24,
       "Time": 314536000000,
+      "Improvement": true,
       "BestLapDuration": 11663000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 13105000000

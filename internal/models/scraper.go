@@ -9,6 +9,7 @@ type DriverRaceResult struct {
 	Name            *string
 	Laps            *int
 	Time            *time.Duration
+	Improvement     *bool
 	BestLapDuration *time.Duration
 	BestLapNumber   *int
 	LastLapDuration *time.Duration

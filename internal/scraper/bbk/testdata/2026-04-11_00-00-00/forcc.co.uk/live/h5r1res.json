@@ -10,6 +10,7 @@
       "Name": "Kyle Moon",
       "Laps": 28,
       "Time": 305566000000,
+      "Improvement": true,
       "BestLapDuration": 10368000000,
       "BestLapNumber": 13,
       "AvgLapDuration": 10913000000
@@ -19,6 +20,7 @@
       "Name": "James Clifford",
       "Laps": 26,
       "Time": 302131000000,
+      "Improvement": true,
       "BestLapDuration": 10876000000,
       "BestLapNumber": 11,
       "AvgLapDuration": 11620000000
@@ -28,6 +30,7 @@
       "Name": "Neil Gavin",
       "Laps": 26,
       "Time": 302425000000,
+      "Improvement": true,
       "BestLapDuration": 10772000000,
       "BestLapNumber": 16,
       "AvgLapDuration": 11631000000
@@ -37,6 +40,7 @@
       "Name": "Adam Hampton",
       "Laps": 26,
       "Time": 303671000000,
+      "Improvement": true,
       "BestLapDuration": 10853000000,
       "BestLapNumber": 3,
       "AvgLapDuration": 11679000000
@@ -46,6 +50,7 @@
       "Name": "Will Johnson",
       "Laps": 26,
       "Time": 304065000000,
+      "Improvement": true,
       "BestLapDuration": 10840000000,
       "BestLapNumber": 11,
       "AvgLapDuration": 11694000000
@@ -55,6 +60,7 @@
       "Name": "Lewis Dickinson",
       "Laps": 26,
       "Time": 306654000000,
+      "Improvement": true,
       "BestLapDuration": 10846000000,
       "BestLapNumber": 23,
       "AvgLapDuration": 11794000000
@@ -64,6 +70,7 @@
       "Name": "James Procter",
       "Laps": 26,
       "Time": 311555000000,
+      "Improvement": true,
       "BestLapDuration": 10192000000,
       "BestLapNumber": 19,
       "AvgLapDuration": 11982000000

@@ -10,6 +10,7 @@
       "Name": "Callum Barrett",
       "Laps": 25,
       "Time": 300969000000,
+      "Improvement": true,
       "BestLapDuration": 10744000000,
       "BestLapNumber": 2,
       "AvgLapDuration": 12038000000
@@ -19,6 +20,7 @@
       "Name": "Adrian Barrett",
       "Laps": 24,
       "Time": 305264000000,
+      "Improvement": true,
       "BestLapDuration": 11328000000,
       "BestLapNumber": 4,
       "AvgLapDuration": 12719000000
@@ -28,6 +30,7 @@
       "Name": "Andy Johnson",
       "Laps": 24,
       "Time": 308775000000,
+      "Improvement": true,
       "BestLapDuration": 11607000000,
       "BestLapNumber": 14,
       "AvgLapDuration": 12865000000
@@ -37,6 +40,7 @@
       "Name": "Jack Clifford",
       "Laps": 24,
       "Time": 309506000000,
+      "Improvement": true,
       "BestLapDuration": 11550000000,
       "BestLapNumber": 13,
       "AvgLapDuration": 12896000000
@@ -46,6 +50,7 @@
       "Name": "Lochlain Wheeler",
       "Laps": 22,
       "Time": 304717000000,
+      "Improvement": true,
       "BestLapDuration": 12156000000,
       "BestLapNumber": 11,
       "AvgLapDuration": 13850000000
@@ -55,6 +60,7 @@
       "Name": "Paul Rose",
       "Laps": 21,
       "Time": 302078000000,
+      "Improvement": true,
       "BestLapDuration": 12499000000,
       "BestLapNumber": 17,
       "AvgLapDuration": 14384000000
@@ -64,6 +70,7 @@
       "Name": "Lewis Collins",
       "Laps": 21,
       "Time": 303304000000,
+      "Improvement": true,
       "BestLapDuration": 12847000000,
       "BestLapNumber": 19,
       "AvgLapDuration": 14443000000
@@ -73,6 +80,7 @@
       "Name": "David Wheeler",
       "Laps": 5,
       "Time": 74326000000,
+      "Improvement": false,
       "BestLapDuration": 13064000000,
       "BestLapNumber": 4,
       "AvgLapDuration": 14865000000

@@ -10,6 +10,7 @@
       "Name": "Alan Moon",
       "Laps": 22,
       "Time": 306075000000,
+      "Improvement": true,
       "BestLapDuration": 11724000000,
       "BestLapNumber": 11,
       "AvgLapDuration": 13912000000
@@ -19,6 +20,7 @@
       "Name": "Paul Barnes",
       "Laps": 22,
       "Time": 308997000000,
+      "Improvement": true,
       "BestLapDuration": 12593000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 14045000000
@@ -28,6 +30,7 @@
       "Name": "Shannon Mcmahan",
       "Laps": 20,
       "Time": 308625000000,
+      "Improvement": true,
       "BestLapDuration": 12679000000,
       "BestLapNumber": 10,
       "AvgLapDuration": 15431000000
@@ -37,6 +40,7 @@
       "Name": "Mark Aylwin",
       "Laps": 19,
       "Time": 301767000000,
+      "Improvement": true,
       "BestLapDuration": 13401000000,
       "BestLapNumber": 5,
       "AvgLapDuration": 15882000000
@@ -46,6 +50,7 @@
       "Name": "Lee Barrett",
       "Laps": 19,
       "Time": 303138000000,
+      "Improvement": true,
       "BestLapDuration": 11216000000,
       "BestLapNumber": 14,
       "AvgLapDuration": 15954000000

@@ -10,6 +10,7 @@
       "Name": "David Armstrong",
       "Laps": 24,
       "Time": 306489000000,
+      "Improvement": true,
       "BestLapDuration": 11449000000,
       "BestLapNumber": 24,
       "AvgLapDuration": 12770000000
@@ -19,6 +20,7 @@
       "Name": "Dave Mackins",
       "Laps": 24,
       "Time": 311640000000,
+      "Improvement": true,
       "BestLapDuration": 11787000000,
       "BestLapNumber": 22,
       "AvgLapDuration": 12985000000
@@ -28,6 +30,7 @@
       "Name": "Paul Rose",
       "Laps": 23,
       "Time": 302428000000,
+      "Improvement": true,
       "BestLapDuration": 11765000000,
       "BestLapNumber": 10,
       "AvgLapDuration": 13149000000
@@ -37,6 +40,7 @@
       "Name": "John Anderson",
       "Laps": 22,
       "Time": 309670000000,
+      "Improvement": false,
       "BestLapDuration": 11583000000,
       "BestLapNumber": 9,
       "AvgLapDuration": 14075000000
@@ -46,6 +50,7 @@
       "Name": "George Procter",
       "Laps": 21,
       "Time": 304975000000,
+      "Improvement": true,
       "BestLapDuration": 11607000000,
       "BestLapNumber": 9,
       "AvgLapDuration": 14522000000
@@ -55,6 +60,7 @@
       "Name": "Shannon Mcmahan",
       "Laps": 6,
       "Time": 112156000000,
+      "Improvement": false,
       "BestLapDuration": 12301000000,
       "BestLapNumber": 4,
       "AvgLapDuration": 18692000000

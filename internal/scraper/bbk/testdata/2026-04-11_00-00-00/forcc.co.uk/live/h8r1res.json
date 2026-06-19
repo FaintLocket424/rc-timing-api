@@ -10,6 +10,7 @@
       "Name": "Adam Hampton",
       "Laps": 27,
       "Time": 309998000000,
+      "Improvement": true,
       "BestLapDuration": 10733000000,
       "BestLapNumber": 27,
       "AvgLapDuration": 11481000000
@@ -19,6 +20,7 @@
       "Name": "Dave Andrews",
       "Laps": 26,
       "Time": 306940000000,
+      "Improvement": true,
       "BestLapDuration": 10580000000,
       "BestLapNumber": 22,
       "AvgLapDuration": 11805000000
@@ -28,6 +30,7 @@
       "Name": "Jon Peters",
       "Laps": 25,
       "Time": 300421000000,
+      "Improvement": true,
       "BestLapDuration": 11014000000,
       "BestLapNumber": 21,
       "AvgLapDuration": 12016000000
@@ -37,6 +40,7 @@
       "Name": "Lloyd Procter",
       "Laps": 25,
       "Time": 308499000000,
+      "Improvement": true,
       "BestLapDuration": 10882000000,
       "BestLapNumber": 10,
       "AvgLapDuration": 12339000000
@@ -46,6 +50,7 @@
       "Name": "Neil Gavin",
       "Laps": 24,
       "Time": 302740000000,
+      "Improvement": true,
       "BestLapDuration": 10642000000,
       "BestLapNumber": 9,
       "AvgLapDuration": 12614000000
@@ -55,6 +60,7 @@
       "Name": "Verner Vonk",
       "Laps": 23,
       "Time": 307425000000,
+      "Improvement": true,
       "BestLapDuration": 10973000000,
       "BestLapNumber": 19,
       "AvgLapDuration": 13366000000

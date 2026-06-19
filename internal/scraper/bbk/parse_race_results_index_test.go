@@ -1,65 +1,27 @@
 package bbk
 
 import (
-	"bytes"
-	"encoding/json"
-	"io/fs"
 	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"codeberg.org/OpenGrid-RC/bridge/internal/models"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestParseRaceResultsIndex_Golden(t *testing.T) {
-	testFiles := []string{}
-
-	err := filepath.WalkDir("testdata", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.IsDir() && d.Name() == "liveresults.htm" {
-			testFiles = append(testFiles, path)
-		}
-		return nil
+	files := collectAndSortTestFiles(t, func(d os.DirEntry) bool {
+		return d.Name() == "liveresults.htm"
 	})
-	require.NoError(t, err)
 
-	for _, htmlPath := range testFiles {
-		jsonPath := strings.TrimSuffix(htmlPath, filepath.Ext(htmlPath)) + ".json"
+	normalise := func(t *testing.T, expected, actual *models.RaceResultsIndexScrape) {
+		if expected.Timestamp != nil && actual.Timestamp != nil {
+			assert.Equal(t, expected.Timestamp.Hour(), actual.Timestamp.Hour(), "Hour mismatch")
+			assert.Equal(t, expected.Timestamp.Minute(), actual.Timestamp.Minute(), "Minute mismatch")
+			actual.Timestamp = expected.Timestamp
+		}
+	}
 
-		t.Run(htmlPath, func(t *testing.T) {
-			if _, err := os.Stat(filepath.Clean(jsonPath)); os.IsNotExist(err) {
-				t.Skipf("No golden file found: %s", jsonPath)
-			}
-
-			htmlFile, err := os.Open(filepath.Clean(htmlPath))
-			require.NoError(t, err)
-			defer func() { _ = htmlFile.Close() }()
-
-			actualData, err := parseRaceResultsIndexHTML(htmlFile)
-			require.NoError(t, err)
-
-			expectedJSON, err := os.ReadFile(filepath.Clean(jsonPath))
-			require.NoError(t, err)
-
-			var expectedData models.RaceResultsIndexScrape
-			decoder := json.NewDecoder(bytes.NewReader(expectedJSON))
-			decoder.DisallowUnknownFields()
-			err = decoder.Decode(&expectedData)
-			require.NoError(t, err, "Golden JSON is invalid or contains unknown fields")
-
-			// Normalise scrape timestamp safely
-			if expectedData.Timestamp != nil && actualData.Timestamp != nil {
-				assert.Equal(t, expectedData.Timestamp.Hour(), actualData.Timestamp.Hour(), "Hour mismatch")
-				assert.Equal(t, expectedData.Timestamp.Minute(), actualData.Timestamp.Minute(), "Minute mismatch")
-				actualData.Timestamp = expectedData.Timestamp
-			}
-
-			assert.Equal(t, &expectedData, actualData, "Parsed data does not match manually verified golden file")
-		})
+	for _, htmlPath := range files {
+		runGoldenTest(t, htmlPath, parseRaceResultsIndexHTML, normalise)
 	}
 }

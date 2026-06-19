@@ -1,12 +1,7 @@
 package bbk
 
 import (
-	"bytes"
-	"encoding/json"
-	"io/fs"
 	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"codeberg.org/OpenGrid-RC/bridge/internal/models"
@@ -29,67 +24,35 @@ func normaliseStartTimes(t *testing.T, expected, actual []models.ScheduledRace, 
 }
 
 func TestParseRaceSchedule_Golden(t *testing.T) {
-	testFiles := []string{}
-
-	err := filepath.WalkDir("testdata", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.IsDir() && d.Name() == "liveschedule.htm" {
-			testFiles = append(testFiles, path)
-		}
-		return nil
+	files := collectAndSortTestFiles(t, func(d os.DirEntry) bool {
+		return d.Name() == "liveschedule.htm"
 	})
-	require.NoError(t, err)
 
-	for _, htmlPath := range testFiles {
-		jsonPath := strings.TrimSuffix(htmlPath, filepath.Ext(htmlPath)) + ".json"
+	normalise := func(t *testing.T, expected, actual *models.RaceScheduleScrape) {
+		if expected.Timestamp != nil && actual.Timestamp != nil {
+			assert.Equal(t, expected.Timestamp.Hour(), actual.Timestamp.Hour(), "Hour mismatch")
+			assert.Equal(t, expected.Timestamp.Minute(), actual.Timestamp.Minute(), "Minute mismatch")
+			actual.Timestamp = expected.Timestamp
+		}
 
-		t.Run(htmlPath, func(t *testing.T) {
-			if _, err := os.Stat(filepath.Clean(jsonPath)); os.IsNotExist(err) {
-				t.Skipf("No golden file found: %s", jsonPath)
-			}
+		// Normalise slices to empty to prevent false-mismatches with nil pointers
+		if expected.Practice == nil {
+			expected.Practice = []models.ScheduledRace{}
+		}
+		if expected.Qualifying == nil {
+			expected.Qualifying = []models.ScheduledRace{}
+		}
+		if expected.Finals == nil {
+			expected.Finals = []models.ScheduledRace{}
+		}
 
-			htmlFile, err := os.Open(filepath.Clean(htmlPath))
-			require.NoError(t, err)
-			defer func() { _ = htmlFile.Close() }()
+		// Normalise scheduled race start times
+		normaliseStartTimes(t, expected.Practice, actual.Practice, "Practice")
+		normaliseStartTimes(t, expected.Qualifying, actual.Qualifying, "Qualifying")
+		normaliseStartTimes(t, expected.Finals, actual.Finals, "Finals")
+	}
 
-			actualData, err := parseRaceScheduleHTML(htmlFile)
-			require.NoError(t, err)
-
-			expectedJSON, err := os.ReadFile(filepath.Clean(jsonPath))
-			require.NoError(t, err)
-
-			var expectedData models.RaceScheduleScrape
-			decoder := json.NewDecoder(bytes.NewReader(expectedJSON))
-			decoder.DisallowUnknownFields()
-			err = decoder.Decode(&expectedData)
-			require.NoError(t, err, "Golden JSON is invalid or contains unknown fields")
-
-			// Normalise scrape timestamp
-			if expectedData.Timestamp != nil && actualData.Timestamp != nil {
-				assert.Equal(t, expectedData.Timestamp.Hour(), actualData.Timestamp.Hour(), "Hour mismatch")
-				assert.Equal(t, expectedData.Timestamp.Minute(), actualData.Timestamp.Minute(), "Minute mismatch")
-				actualData.Timestamp = expectedData.Timestamp
-			}
-
-			// Normalise slices to empty to prevent false-mismatches with nil pointers
-			if expectedData.Practice == nil {
-				expectedData.Practice = []models.ScheduledRace{}
-			}
-			if expectedData.Qualifying == nil {
-				expectedData.Qualifying = []models.ScheduledRace{}
-			}
-			if expectedData.Finals == nil {
-				expectedData.Finals = []models.ScheduledRace{}
-			}
-
-			// Normalise scheduled race start times
-			normaliseStartTimes(t, expectedData.Practice, actualData.Practice, "Practice")
-			normaliseStartTimes(t, expectedData.Qualifying, actualData.Qualifying, "Qualifying")
-			normaliseStartTimes(t, expectedData.Finals, actualData.Finals, "Finals")
-
-			assert.Equal(t, &expectedData, actualData, "Parsed data does not match manually verified golden file")
-		})
+	for _, htmlPath := range files {
+		runGoldenTest(t, htmlPath, parseRaceScheduleHTML, normalise)
 	}
 }

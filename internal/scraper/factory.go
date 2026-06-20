@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"codeberg.org/OpenGrid-RC/bridge/internal/scraper/bbk"
 	"github.com/PuerkitoBio/goquery"
@@ -51,26 +50,26 @@ func (f *Factory) Create(url string) (scraper Scraper, err error) {
 	}
 
 	if author, exists := doc.Find("meta[name='author']").Attr("content"); exists && author == "bbkRClive" {
-		lastModifiedStr := res.Header.Get("Last-Modified")
-		if lastModifiedStr == "" {
-			return nil, errors.New("unable to determine age of the page: Last-Modified header is missing")
-		}
+		// lastModifiedStr := res.Header.Get("Last-Modified")
+		// if lastModifiedStr == "" {
+		// 	return nil, errors.New("unable to determine age of the page: Last-Modified header is missing")
+		// }
 
-		lastModified, parseErr := http.ParseTime(lastModifiedStr)
-		if parseErr != nil {
-			return nil, fmt.Errorf("failed to parse Last-Modified header: %w", parseErr)
-		}
+		// lastModified, parseErr := http.ParseTime(lastModifiedStr)
+		// if parseErr != nil {
+		// 	return nil, fmt.Errorf("failed to parse Last-Modified header: %w", parseErr)
+		// }
 
-		nowUTC := time.Now().UTC()
-		lastModifiedUTC := lastModified.UTC()
+		// nowUTC := time.Now().UTC()
+		// lastModifiedUTC := lastModified.UTC()
 
-		y1, m1, d1 := lastModifiedUTC.Date()
-		y2, m2, d2 := nowUTC.Date()
+		// y1, m1, d1 := lastModifiedUTC.Date()
+		// y2, m2, d2 := nowUTC.Date()
 
-		if y1 != y2 || m1 != m2 || d1 != d2 {
-			return nil, fmt.Errorf("timing file is outdated: last modified %s, expected current day %s (UTC)",
-				lastModifiedUTC.Format("2006-01-02"), nowUTC.Format("2006-01-02"))
-		}
+		// if y1 != y2 || m1 != m2 || d1 != d2 {
+		// 	return nil, fmt.Errorf("timing file is outdated: last modified %s, expected current day %s (UTC)",
+		// 		lastModifiedUTC.Format("2006-01-02"), nowUTC.Format("2006-01-02"))
+		// }
 
 		return bbk.NewScraper(url, client), nil
 	}

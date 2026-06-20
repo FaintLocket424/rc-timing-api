@@ -27,9 +27,7 @@ func NewFactory(programVersion, programCommit string) *Factory {
 // Create fetches the index page from the target URL and determines the
 // correct scraper for the live timing software being used.
 func (f *Factory) Create(url string) (scraper Scraper, err error) {
-	client := f.client
-
-	res, fetchErr := client.Get(url)
+	res, fetchErr := f.client.Get(url)
 	if fetchErr != nil {
 		return nil, fetchErr
 	}
@@ -71,7 +69,7 @@ func (f *Factory) Create(url string) (scraper Scraper, err error) {
 		// 		lastModifiedUTC.Format("2006-01-02"), nowUTC.Format("2006-01-02"))
 		// }
 
-		return bbk.NewScraper(url, client), nil
+		return bbk.NewScraper(url, f.client), nil
 	}
 
 	return nil, errors.New("unable to determine scraper")
